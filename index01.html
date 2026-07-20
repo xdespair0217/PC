@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法系車專業多車型保養看板 (PEUGEOT / CITROËN)</title>
+    <title>法系車專業多車型保養與零件展示看板 (PEUGEOT / CITROËN)</title>
     <!-- 使用 Tailwind CSS 打造高質感暗色風格 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -20,10 +20,10 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
-            <!-- 法系專屬圓標（採用深邃夜幕藍底色與科技綠外框） -->
-            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
+            <!-- 法系專屬圓標 -->
+            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PEUG</div>
             <div>
-                <!-- 優化後的兩欄式聯動下拉選單 -->
+                <!-- 兩欄式聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
@@ -46,9 +46,9 @@
             </div>
         </div>
         
-        <!-- 套餐切換鈕區域 -->
+        <!-- 套餐/專案 切換鈕區域 -->
         <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
-            <span class="text-sm text-gray-500">正在辨識保養套餐項目...</span>
+            <span class="text-sm text-gray-500">正在辨識項目清單...</span>
         </div>
 
         <button onclick="fetchSheetData()" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-4 py-2 rounded-lg transition-all border border-gray-700 flex items-center space-x-1.5 shrink-0">
@@ -59,7 +59,7 @@
     <!-- 主顯示區 -->
     <main class="flex-1 flex space-x-6 overflow-hidden">
         
-        <!-- 左側：保養套餐表格 -->
+        <!-- 左側：表格區 -->
         <section class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-5 overflow-hidden shadow-2xl">
             <div class="flex justify-between items-center mb-3">
                 <h2 id="current-package-title" class="text-lg font-bold text-gray-100 flex items-center">
@@ -89,47 +89,58 @@
                 </table>
             </div>
 
-            <!-- 工資、零件雙小計明細區 -->
-            <div class="border-t border-gray-800 pt-4 mt-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-400">
-                <div class="flex flex-wrap space-x-6">
-                    <div>
-                        <span>工資小計 (Labor)：</span>
-                        <span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span>
+            <!-- 底部金額統計區（當進入「專案說明/單獨零件」時會自動隱藏） -->
+            <div id="price-summary-area">
+                <!-- 工資、零件雙小計明細區 -->
+                <div class="border-t border-gray-800 pt-4 mt-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-400">
+                    <div class="flex flex-wrap space-x-6">
+                        <div>
+                            <span>工資小計 (Labor)：</span>
+                            <span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span>
+                        </div>
+                        <div class="border-l border-gray-800 pl-6">
+                            <span>零件原始總價：</span>
+                            <span id="parts-original-total" class="font-bold text-gray-200 font-mono">$ 0</span>
+                        </div>
+                        <div class="border-l border-gray-800 pl-6">
+                            <span>零件折後實計：</span>
+                            <span id="parts-subtotal" class="font-bold text-amber-500 font-mono">$ 0</span>
+                        </div>
                     </div>
-                    <div class="border-l border-gray-800 pl-6">
-                        <span>零件原始總價：</span>
-                        <span id="parts-original-total" class="font-bold text-gray-200 font-mono">$ 0</span>
-                    </div>
-                    <div class="border-l border-gray-800 pl-6">
-                        <span>零件折後實計：</span>
-                        <span id="parts-subtotal" class="font-bold text-amber-500 font-mono">$ 0</span>
+
+                    <!-- 零件折扣趴數輸入框 -->
+                    <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
+                        <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
+                        <input 
+                            type="number" 
+                            id="part-discount-input" 
+                            value="100" 
+                            min="0" 
+                            max="100" 
+                            step="5"
+                            oninput="calculateTotalsWithDiscount()"
+                            class="w-12 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#48bb78] focus:border-emerald-500 font-mono"
+                        >
+                        <span class="text-[11px] text-gray-300 font-bold">%</span>
                     </div>
                 </div>
 
-                <!-- 零件折扣趴數輸入框 -->
-                <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
-                    <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
-                    <input 
-                        type="number" 
-                        id="part-discount-input" 
-                        value="100" 
-                        min="0" 
-                        max="100" 
-                        step="5"
-                        oninput="calculateTotalsWithDiscount()"
-                        class="w-12 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#48bb78] focus:border-emerald-500 font-mono"
-                    >
-                    <span class="text-[11px] text-gray-300 font-bold">%</span>
+                <!-- 底部總計金額 -->
+                <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center">
+                    <div class="flex flex-col">
+                        <span class="text-gray-400 text-sm font-medium">套餐應付總金額 (Grand Total)</span>
+                        <span id="discount-note" class="text-[10px] text-amber-500/80 font-medium mt-0.5 hidden">＊已套用零件折扣</span>
+                    </div>
+                    <span id="package-total" class="text-3xl font-black text-green-400 font-mono tracking-tight">$ 0</span>
                 </div>
             </div>
 
-            <!-- 底部總計金額 -->
-            <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center">
-                <div class="flex flex-col">
-                    <span class="text-gray-400 text-sm font-medium">套餐應付總金額 (Grand Total)</span>
-                    <span id="discount-note" class="text-[10px] text-amber-500/80 font-medium mt-0.5 hidden">＊已套用零件折扣</span>
-                </div>
-                <span id="package-total" class="text-3xl font-black text-green-400 font-mono tracking-tight">$ 0</span>
+            <!-- 單獨零件專案模式下的溫馨提示列（預設隱藏） -->
+            <div id="non-package-notice" class="border-t border-gray-800 pt-3 mt-3 hidden flex justify-between items-center bg-[#0d1117] p-3 rounded-lg border border-blue-900/40">
+                <span class="text-xs text-blue-400 flex items-center">
+                    <span class="mr-2">ℹ️</span> 本區塊為「單獨零件/專案說明展示」，僅供料號與規格查閱，不進行套餐總金額加總。
+                </span>
+                <span class="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded">獨立展示模式</span>
             </div>
         </section>
 
@@ -137,7 +148,7 @@
         <section class="w-5/12 flex flex-col space-y-4 overflow-hidden">
             <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-5 flex flex-col overflow-hidden shadow-2xl">
                 <h3 class="text-sm font-semibold text-gray-400 mb-4 tracking-wider flex items-center">
-                    <span class="mr-2">🔧</span>套餐内含零件圖解 (點擊表格高亮，點擊圖片彈出大圖)
+                    <span class="mr-2">🔧</span>零件圖解 (點擊表格高亮，點擊圖片彈出大圖)
                 </h3>
                 <div id="image-grid" class="flex-1 grid grid-cols-2 gap-4 overflow-y-auto custom-scrollbar p-1 align-content-start">
                     <!-- 圖片卡片由 JavaScript 動態生成 -->
@@ -146,9 +157,9 @@
 
             <!-- 備註說明區 -->
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
-                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
+                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護與專案提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
-                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
+                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行安裝。點擊任何零件圖片可查閱專屬之「現場維護說明與注意事項」。
                 </p>
             </div>
         </section>
@@ -174,56 +185,43 @@
     <script>
         // ==========================================================
         // 🎯【完美網址資料庫對照表】
-        // 結構維持不變（品牌_車型），後續您增加新車型時只要依據此規則在此處增加即可
         // ==========================================================
         const CAR_MODELS_SHEETS = {
             // --- PEUGEOT 系列 ---
             "PEUGEOT_208": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
-            "PEUGEOT_2008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv", 
-            "PEUGEOT_308": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
             "PEUGEOT_3008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_408": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_508": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_5008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
             
             // --- CITROËN 系列 ---
             "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
-            "CITROËN_C5_AIRCROSS": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
             "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv"
         };
 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
-        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0]; // 預設選取第一個 (PEUGEOT_208)
+        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0];
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        // 【新增】動態更新第二層車型選單
         function updateModelOptions() {
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
 
-            // 篩選出符合當前品牌的試算表 Key 值
             const matchedModels = Object.keys(CAR_MODELS_SHEETS).filter(key => key.startsWith(currentBrand));
 
-            // 生成第二層的 Option 文字（過濾掉品牌前綴，只留車型名稱例如：208、3008）
             modelSelect.innerHTML = matchedModels.map(key => {
                 const modelDisplay = key.replace(`${currentBrand}_`, "").replace("_", " ");
                 return `<option value="${key}" ${key === selectedModel ? 'selected' : ''}>${modelDisplay}</option>`;
             }).join('');
 
-            // 如果原本選取的車型不屬於新切換的品牌，則預設切換至該品牌的第一個車型
             if (!matchedModels.includes(selectedModel) && matchedModels.length > 0) {
                 executeModelSwitch(matchedModels[0]);
             }
         }
 
-        // 執行車型切換與介面色彩微調
         function executeModelSwitch(modelName) {
             selectedModel = modelName;
             
-            // 同步變更圓標文字與風格
             const brandLogo = document.getElementById('brand-logo');
             if (modelName.startsWith("CITROËN")) {
                 brandLogo.innerText = "CITR";
@@ -259,7 +257,8 @@
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
                 if (cols.length < 3) return;
 
-                const foundPackageCell = cols.find(cell => cell && cell.includes("套餐"));
+                // 彈性辨識：只要包含「套餐」、「專案」、「單獨」、「說明」等關鍵字皆可作為分類大項
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案") || cell.includes("單獨") || cell.includes("說明") || cell.includes("雨刷")));
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
@@ -297,7 +296,7 @@
                 renderTabs(keys);
                 switchPackage(keys[0]);
             } else {
-                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁資料格式是否正確";
+                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何項目，請確認試算表格式";
                 clearDisplay();
             }
         }
@@ -330,6 +329,22 @@
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
+
+            // 判斷是否為「非保養/單獨/專案說明」類別
+            const isNonPackage = key.includes("專案") || key.includes("單獨") || key.includes("說明") || key.includes("雨刷") || key.includes("特刊");
+            
+            const priceSummaryArea = document.getElementById('price-summary-area');
+            const nonPackageNotice = document.getElementById('non-package-notice');
+
+            if (isNonPackage) {
+                // 自動隱藏總金額，顯示獨立展示提示
+                priceSummaryArea.classList.add('hidden');
+                nonPackageNotice.classList.remove('hidden');
+            } else {
+                // 保留常規保養加總
+                priceSummaryArea.classList.remove('hidden');
+                nonPackageNotice.classList.add('hidden');
+            }
 
             const isCitroen = selectedModel.startsWith("CITROËN");
             const indicatorColor = isCitroen ? "bg-[#da291c]" : "bg-[#48bb78]";
@@ -407,7 +422,9 @@
                 .active-card { border-color: ${highlightColor} !important; background-color: #21262d !important; transform: scale(1.02); }
             `;
 
-            calculateTotalsWithDiscount();
+            if (!isNonPackage) {
+                calculateTotalsWithDiscount();
+            }
         }
 
         function calculateTotalsWithDiscount() {
@@ -486,7 +503,7 @@
             if (event.key === 'Escape') closeLightbox();
         });
 
-        // 啟動排版與第一階段選單建立
+        // 啟動排版
         updateModelOptions();
     </script>
 </body>
