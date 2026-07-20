@@ -192,7 +192,7 @@
             "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
 
             // --- 罐頭專案系列 ---
-            "PROJECT_通用專案": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
+            "PROJECT_通用套餐": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
         };
 
         let allParsedPackages = {}; 
@@ -213,11 +213,11 @@
             // 生成第二層 Option 文字
             modelSelect.innerHTML = matchedModels.map(key => {
                 const modelDisplay = key.replace(`${currentBrand}_`, "").replace("_", " ");
-                return `<option value="${key}" ${key === selectedModel ? 'selected' : ''}>${modelDisplay}</option>`;
+                return `<option value="${key}">${modelDisplay}</option>`;
             }).join('');
 
-            // 若目前選取的項目不在新品牌下，則自動預設選取該品牌的第一個項目
-            if (!matchedModels.includes(selectedModel) && matchedModels.length > 0) {
+            if (matchedModels.length > 0) {
+                modelSelect.value = matchedModels[0];
                 executeModelSwitch(matchedModels[0]);
             }
         }
@@ -231,7 +231,7 @@
             if (modelName.startsWith("CITROËN")) {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
-            } else if (modelName.startsWith("CAN_PROJECT")) {
+            } else if (modelName.startsWith("PROJECT")) {
                 brandLogo.innerText = "CANN";
                 brandLogo.className = "w-12 h-12 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
             } else {
@@ -245,6 +245,8 @@
 
         async function fetchSheetData() {
             const targetUrl = CAR_MODELS_SHEETS[selectedModel];
+            if (!targetUrl) return;
+
             try {
                 const response = await fetch(targetUrl + "&cachebust=" + new Date().getTime());
                 const csvText = await response.text();
@@ -265,7 +267,8 @@
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
                 if (cols.length < 3) return;
 
-                const foundPackageCell = cols.find(cell => cell && cell.includes("套餐"));
+                // 彈性比對：只要該列含有「套餐」字樣，或直接抓第一列有寫項目的列作為分組標題
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
@@ -311,11 +314,11 @@
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const isCanProject = selectedModel.startsWith("CAN_PROJECT");
+            const isProject = selectedModel.startsWith("PROJECT");
             
             let activeBgClass = "bg-emerald-600 border-emerald-500";
             if (isCitroen) activeBgClass = "bg-[#da291c] border-[#da291c]";
-            if (isCanProject) activeBgClass = "bg-[#f59e0b] border-[#d97706]";
+            if (isProject) activeBgClass = "bg-[#f59e0b] border-[#d97706]";
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -342,11 +345,11 @@
             const pkg = allParsedPackages[key];
 
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const isCanProject = selectedModel.startsWith("CAN_PROJECT");
+            const isProject = selectedModel.startsWith("PROJECT");
             
             let indicatorColor = "bg-[#48bb78]";
             if (isCitroen) indicatorColor = "bg-[#da291c]";
-            if (isCanProject) indicatorColor = "bg-[#f59e0b]";
+            if (isProject) indicatorColor = "bg-[#f59e0b]";
 
             document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
@@ -367,7 +370,7 @@
                 let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
                 
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
-                if (!isLabor && isCanProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
+                if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -396,7 +399,7 @@
                             <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isCanProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full mt-1">
@@ -414,7 +417,7 @@
             const styleEl = document.querySelector('style');
             let highlightColor = "#48bb78";
             if (isCitroen) highlightColor = "#da291c";
-            if (isCanProject) highlightColor = "#f59e0b";
+            if (isProject) highlightColor = "#f59e0b";
 
             styleEl.innerHTML = `
                 body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
