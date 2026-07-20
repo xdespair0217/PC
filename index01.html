@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法系車專業多車型保養看板 (PEUGEOT / CITROËN)</title>
+    <title>法系車專業多車型保養看板 (PEUGEOT / CITROËN / 罐頭專案)</title>
     <!-- 使用 Tailwind CSS 打造高質感暗色風格 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -20,7 +20,7 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
-            <!-- 法系專屬圓標（採用深邃夜幕藍底色與科技綠外框） -->
+            <!-- 品牌專屬圓標 -->
             <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
             <div>
                 <!-- 優化後的兩欄式聯動下拉選單 -->
@@ -30,7 +30,7 @@
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="PEUGEOT">PEUGEOT (寶獅)</option>
                             <option value="CITROËN">CITROËN (雪鐵龍)</option>
-                            <option value="PROJECT">專案說明</option>
+                            <option value="CAN_PROJECT">罐頭專案零件</option>
                         </select>
                     </div>
                     
@@ -175,7 +175,6 @@
     <script>
         // ==========================================================
         // 🎯【完美網址資料庫對照表】
-        // 結構維持不變（品牌_車型），後續您增加新車型時只要依據此規則在此處增加即可
         // ==========================================================
         const CAR_MODELS_SHEETS = {
             // --- PEUGEOT 系列 ---
@@ -192,17 +191,17 @@
             "CITROËN_C5_AIRCROSS": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
             "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
 
-            // --- 專案說明 系列 ---
-            "PROJECT_特殊專案": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
+            // --- 罐頭專案系列 ---
+            "PROJECT_通用套餐": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
         };
 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
-        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0]; // 預設選取第一個 (PEUGEOT_208)
+        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0]; // 預設選取第一個
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        // 【新增】動態更新第二層車型選單
+        // 動態更新第二層車型選單
         function updateModelOptions() {
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
@@ -211,13 +210,13 @@
             // 篩選出符合當前品牌的試算表 Key 值
             const matchedModels = Object.keys(CAR_MODELS_SHEETS).filter(key => key.startsWith(currentBrand));
 
-            // 生成第二層的 Option 文字（過濾掉品牌前綴，只留車型名稱例如：208、3008、特殊專案）
+            // 生成第二層 Option 文字
             modelSelect.innerHTML = matchedModels.map(key => {
                 const modelDisplay = key.replace(`${currentBrand}_`, "").replace("_", " ");
                 return `<option value="${key}" ${key === selectedModel ? 'selected' : ''}>${modelDisplay}</option>`;
             }).join('');
 
-            // 如果原本選取的車型不屬於新切換的品牌，則預設切換至該品牌的第一個車型
+            // 若目前選取的項目不在新品牌下，則自動預設選取該品牌的第一個項目
             if (!matchedModels.includes(selectedModel) && matchedModels.length > 0) {
                 executeModelSwitch(matchedModels[0]);
             }
@@ -232,9 +231,9 @@
             if (modelName.startsWith("CITROËN")) {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
-            } else if (modelName.startsWith("PROJECT")) {
-                brandLogo.innerText = "PROJ";
-                brandLogo.className = "w-12 h-12 bg-[#1e1b4b] border border-[#6366f1] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-indigo-900/30 transition-all";
+            } else if (modelName.startsWith("CAN_PROJECT")) {
+                brandLogo.innerText = "CANN";
+                brandLogo.className = "w-12 h-12 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
             } else {
                 brandLogo.innerText = "PEUG";
                 brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
@@ -312,8 +311,11 @@
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
-            const activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : (isProject ? "bg-indigo-600 border-indigo-500" : "bg-emerald-600 border-emerald-500");
+            const isCanProject = selectedModel.startsWith("CAN_PROJECT");
+            
+            let activeBgClass = "bg-emerald-600 border-emerald-500";
+            if (isCitroen) activeBgClass = "bg-[#da291c] border-[#da291c]";
+            if (isCanProject) activeBgClass = "bg-[#f59e0b] border-[#d97706]";
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -340,8 +342,11 @@
             const pkg = allParsedPackages[key];
 
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
-            const indicatorColor = isCitroen ? "bg-[#da291c]" : (isProject ? "bg-indigo-500" : "bg-[#48bb78]");
+            const isCanProject = selectedModel.startsWith("CAN_PROJECT");
+            
+            let indicatorColor = "bg-[#48bb78]";
+            if (isCitroen) indicatorColor = "bg-[#da291c]";
+            if (isCanProject) indicatorColor = "bg-[#f59e0b]";
 
             document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
@@ -359,9 +364,10 @@
                 }
 
                 const isLabor = item.attr === "工資";
-                const attrBadgeClass = isLabor 
-                    ? "bg-slate-800 text-slate-300 border border-slate-700"
-                    : (isCitroen ? "bg-red-950/60 text-red-400 border border-red-900/50" : (isProject ? "bg-indigo-950/60 text-indigo-400 border border-indigo-900/50" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50"));
+                let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
+                
+                if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
+                if (!isLabor && isCanProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -390,7 +396,7 @@
                             <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-indigo-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isCanProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full mt-1">
@@ -406,7 +412,10 @@
             document.getElementById('image-grid').innerHTML = gridHTML;
 
             const styleEl = document.querySelector('style');
-            const highlightColor = isCitroen ? "#da291c" : (isProject ? "#6366f1" : "#48bb78");
+            let highlightColor = "#48bb78";
+            if (isCitroen) highlightColor = "#da291c";
+            if (isCanProject) highlightColor = "#f59e0b";
+
             styleEl.innerHTML = `
                 body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
