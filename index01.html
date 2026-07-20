@@ -267,7 +267,6 @@
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
                 if (cols.length < 3) return;
 
-                // 彈性比對：只要該列含有「套餐」字樣，或直接抓第一列有寫項目的列作為分組標題
                 const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
                 
                 if (foundPackageCell) {
@@ -390,14 +389,16 @@
                 `;
 
                 if (item.attr !== "工資" && item.partId) {
-                    const imgUrl = `${item.partId}.jpg`;
+                    // 自動判定 .png 與 .jpg 機制
+                    const imgUrlPng = `${item.partId}.png`;
+                    const imgUrlJpg = `${item.partId}.jpg`;
                     const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
                     const safeDesc = encodeURIComponent(item.description || "");
 
                     gridHTML += `
                         <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-3 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
-                            <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
-                                <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                            <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                                <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
                                     <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
