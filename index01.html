@@ -20,24 +20,24 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
-            <!-- 法系專屬圓標 -->
-            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PROJ</div>
+            <!-- 品牌專屬圓標 -->
+            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PEUG</div>
             <div>
                 <!-- 兩欄式聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
-                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌/類別：</label>
+                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="PEUGEOT">PEUGEOT (寶獅)</option>
                             <option value="CITROËN">CITROËN (雪鐵龍)</option>
-                            <option value="PROJ">專案與單獨零件說明</option>
+                            <option value="PROJECT">專案品牌</option>
                         </select>
                     </div>
                     
                     <div class="h-5 border-l border-gray-700"></div>
 
                     <div class="flex items-center space-x-1">
-                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">項目選單：</label>
+                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
                         <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
                             <!-- 由 JavaScript 根據品牌動態帶入 -->
                         </select>
@@ -47,9 +47,9 @@
             </div>
         </div>
         
-        <!-- 套餐/專案 切換鈕區域 -->
+        <!-- 套餐切換鈕區域 -->
         <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
-            <span class="text-sm text-gray-500">正在辨識項目清單...</span>
+            <span class="text-sm text-gray-500">正在辨識保養套餐項目...</span>
         </div>
 
         <button onclick="fetchSheetData()" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-4 py-2 rounded-lg transition-all border border-gray-700 flex items-center space-x-1.5 shrink-0">
@@ -90,7 +90,7 @@
                 </table>
             </div>
 
-            <!-- 底部金額統計區（當進入「專案說明/單獨零件」時會自動隱藏） -->
+            <!-- 常規保養套餐：金額統計區 (專案模式下會自動隱藏) -->
             <div id="price-summary-area">
                 <div class="border-t border-gray-800 pt-4 mt-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-400">
                     <div class="flex flex-wrap space-x-6">
@@ -133,12 +133,12 @@
                 </div>
             </div>
 
-            <!-- 單獨零件專案模式下的提示列 -->
-            <div id="non-package-notice" class="border-t border-gray-800 pt-3 mt-3 hidden flex justify-between items-center bg-[#0d1117] p-3 rounded-lg border border-blue-900/40">
-                <span class="text-xs text-blue-400 flex items-center">
-                    <span class="mr-2">ℹ️</span> 本區塊為「單獨零件/專案說明展示」，僅供料號與規格查閱，不進行套餐總金額加總。
+            <!-- 專案/單獨零件展示模式：提示列 -->
+            <div id="non-package-notice" class="border-t border-gray-800 pt-3 mt-3 hidden flex justify-between items-center bg-[#0d1117] p-3 rounded-lg border border-purple-900/40">
+                <span class="text-xs text-purple-400 flex items-center">
+                    <span class="mr-2">ℹ️</span> 本頁面為「專案/單獨零件展示」，僅提供規格與料號對照，不執行套餐總金額加總。
                 </span>
-                <span class="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded">獨立展示模式</span>
+                <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-800 px-2 py-0.5 rounded">獨立專案模式</span>
             </div>
         </section>
 
@@ -154,9 +154,9 @@
             </div>
 
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
-                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護與專案提示</h4>
+                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
-                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行安裝。點擊任何零件圖片可查閱專屬之「現場維護說明與注意事項」。
+                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
                 </p>
             </div>
         </section>
@@ -181,19 +181,23 @@
 
     <script>
         // ==========================================================
-        // 🎯【完美網址資料庫對照表】
-        // 請確保這裡的 CSV 網址為您發布的試算表分頁連結
+        // 🎯【資料庫對照表】
+        // 已設定專案品牌下的預設項目，網址部分等待您日後提供更換
         // ==========================================================
         const CAR_MODELS_SHEETS = {
-            // --- 專案與單獨零件說明 ---
-            "PROJ_扣子貼紙": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
-            
             // --- PEUGEOT 系列 ---
             "PEUGEOT_208": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
             "PEUGEOT_3008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
             
             // --- CITROËN 系列 ---
-            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv"
+            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
+            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
+
+            // --- 專案品牌 系列 (預留區，等您提供網址) ---
+            "PROJECT_扣子貼紙": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv",
+            "PROJECT_雨刷類": "",
+            "PROJECT_特殊零件": "",
+            "PROJECT_精品零件": ""
         };
 
         let allParsedPackages = {}; 
@@ -229,9 +233,9 @@
             } else if (modelName.startsWith("PEUGEOT")) {
                 brandLogo.innerText = "PEUG";
                 brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
-            } else {
+            } else if (modelName.startsWith("PROJECT")) {
                 brandLogo.innerText = "PROJ";
-                brandLogo.className = "w-12 h-12 bg-[#1e1b4b] border border-[#6366f1] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-indigo-900/30 transition-all";
+                brandLogo.className = "w-12 h-12 bg-[#2e1065] border border-[#a855f7] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-purple-900/30 transition-all";
             }
 
             document.getElementById('package-tabs').innerHTML = '<span class="text-sm text-gray-500">正在讀取雲端資料...</span>';
@@ -240,6 +244,12 @@
 
         async function fetchSheetData() {
             const targetUrl = CAR_MODELS_SHEETS[selectedModel];
+            if (!targetUrl) {
+                document.getElementById('current-package-title').innerText = "⚠️ 尚未設定此項目的 Google 試算表網址";
+                clearDisplay();
+                return;
+            }
+
             try {
                 const response = await fetch(targetUrl + "&cachebust=" + new Date().getTime());
                 const csvText = await response.text();
@@ -251,7 +261,6 @@
             }
         }
 
-        // 🎯 核心修復：精準解析 CSV，防止誤抓「說明」標頭
         function parseExcelCSV(csvText) {
             const lines = csvText.split(/\r?\n/);
             const packages = {};
@@ -259,19 +268,12 @@
 
             lines.forEach((line) => {
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
-                if (cols.length < 2) return;
+                if (cols.length < 3) return;
 
-                const attr = cols[0] || "";
-                const partId = cols[1] || "";
-
-                // 跳過藍色標頭列
-                if (attr === "屬性" || partId === "料號" || cols.includes("層架")) return;
-
-                // 精準比對大項標題：只抓包含「套餐」、「專案」、「單獨」、「扣子」、「貼紙」且沒有料號的文字列
-                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("[專案") || cell.includes("單獨")) && !cell.includes("說明"));
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案") || cell.includes("單獨") || cell.includes("說明") || cell.includes("雨刷") || cell.includes("扣子") || cell.includes("貼紙") || cell.includes("特殊") || cell.includes("精品")));
                 
-                if (foundPackageCell && !partId) {
-                    currentPackageName = foundPackageCell.replace(/^\[|\]$/g, '').trim();
+                if (foundPackageCell) {
+                    currentPackageName = foundPackageCell;
                     packages[currentPackageName] = {
                         name: currentPackageName,
                         items: []
@@ -279,21 +281,17 @@
                     return;
                 }
 
-                // 若試算表沒有寫大項標題，自動給予預設名稱
-                if (!currentPackageName) {
-                    currentPackageName = "單獨零件專案清單";
-                    packages[currentPackageName] = { name: currentPackageName, items: [] };
-                }
+                const attr = cols[0] || "";
+                const partId = cols[1] || "";
+                const name = cols[2] || "";
 
-                // 抓取真實零件資料列
-                if (partId && partId !== "料號") {
-                    const name = cols[2] || "";
+                if (currentPackageName && partId && partId !== "料號" && attr !== "屬性") {
                     const price = cols[3] || "";
                     const qty = cols[4] || "";
                     const discount = cols[5] || "";
                     const subtotal = cols[6] || "";
                     const location = cols[7] || ""; 
-                    const description = cols[9] || cols[8] || ""; // J 欄注意事項說明
+                    const description = cols[9] || ""; 
 
                     const cleanSubtotal = parseFloat(subtotal.replace(/[^0-9.-]+/g, "")) || 0;
 
@@ -317,7 +315,13 @@
 
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
-            const activeBgClass = selectedModel.startsWith("CITROËN") ? "bg-[#da291c] border-[#da291c]" : (selectedModel.startsWith("PEUGEOT") ? "bg-emerald-600 border-emerald-500" : "bg-indigo-600 border-indigo-500");
+            let activeBgClass = "bg-emerald-600 border-emerald-500";
+
+            if (selectedModel.startsWith("CITROËN")) {
+                activeBgClass = "bg-[#da291c] border-[#da291c]";
+            } else if (selectedModel.startsWith("PROJECT")) {
+                activeBgClass = "bg-purple-600 border-purple-500";
+            }
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -336,14 +340,15 @@
             
             const activeTab = document.getElementById(`tab-${key}`);
             if (activeTab) {
-                const targetBg = activeTab.getAttribute('data-active-class') || "bg-indigo-600 border-indigo-500";
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 border-emerald-500";
                 activeTab.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
 
-            const isNonPackage = selectedModel.startsWith("PROJ") || key.includes("專案") || key.includes("單獨") || key.includes("貼紙") || key.includes("扣子");
+            // 判斷是否為「專案品牌」或非常規保養，決定是否隱藏底部加總
+            const isNonPackage = selectedModel.startsWith("PROJECT") || key.includes("專案") || key.includes("單獨") || key.includes("說明") || key.includes("雨刷") || key.includes("貼紙") || key.includes("特殊") || key.includes("精品");
             
             const priceSummaryArea = document.getElementById('price-summary-area');
             const nonPackageNotice = document.getElementById('non-package-notice');
@@ -356,7 +361,12 @@
                 nonPackageNotice.classList.add('hidden');
             }
 
-            const indicatorColor = selectedModel.startsWith("CITROËN") ? "bg-[#da291c]" : (selectedModel.startsWith("PEUGEOT") ? "bg-[#48bb78]" : "bg-[#6366f1]");
+            let indicatorColor = "bg-[#48bb78]";
+            if (selectedModel.startsWith("CITROËN")) {
+                indicatorColor = "bg-[#da291c]";
+            } else if (selectedModel.startsWith("PROJECT")) {
+                indicatorColor = "bg-[#a855f7]";
+            }
 
             document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
@@ -374,9 +384,15 @@
                 }
 
                 const isLabor = item.attr === "工資";
-                const attrBadgeClass = isLabor 
-                    ? "bg-slate-800 text-slate-300 border border-slate-700"
-                    : "bg-indigo-950/60 text-indigo-400 border border-indigo-900/50";
+                let attrBadgeClass = "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
+                
+                if (isLabor) {
+                    attrBadgeClass = "bg-slate-800 text-slate-300 border border-slate-700";
+                } else if (selectedModel.startsWith("CITROËN")) {
+                    attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
+                } else if (selectedModel.startsWith("PROJECT")) {
+                    attrBadgeClass = "bg-purple-950/60 text-purple-400 border border-purple-900/50";
+                }
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -395,7 +411,7 @@
                     </tr>
                 `;
 
-                if (item.partId) {
+                if (item.attr !== "工資" && item.partId) {
                     const imgUrl = `${item.partId}.jpg`;
                     const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
                     const safeDesc = encodeURIComponent(item.description || "");
@@ -405,7 +421,7 @@
                             <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-xs text-white bg-indigo-600/90 px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                    <span class="text-xs text-white ${selectedModel.startsWith("CITROËN") ? 'bg-red-600/90' : (selectedModel.startsWith("PROJECT") ? 'bg-purple-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full mt-1">
@@ -419,6 +435,23 @@
 
             document.getElementById('table-rows').innerHTML = tableHTML;
             document.getElementById('image-grid').innerHTML = gridHTML;
+
+            let highlightColor = "#48bb78";
+            if (selectedModel.startsWith("CITROËN")) {
+                highlightColor = "#da291c";
+            } else if (selectedModel.startsWith("PROJECT")) {
+                highlightColor = "#a855f7";
+            }
+
+            const styleEl = document.querySelector('style');
+            styleEl.innerHTML = `
+                body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+                .active-row { background-color: #1f242c !important; border-left: 4px solid ${highlightColor} !important; }
+                .active-card { border-color: ${highlightColor} !important; background-color: #21262d !important; transform: scale(1.02); }
+            `;
 
             if (!isNonPackage) {
                 calculateTotalsWithDiscount();
