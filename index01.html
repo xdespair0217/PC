@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法系車專業多車型保養看板 (PEUGEOT / CITROËN)</title>
+    <!-- 使用 Tailwind CSS 打造高質感暗色風格 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+        .active-row { background-color: #1f242c !important; border-left: 4px solid #48bb78 !important; }
+        .active-card { border-color: #48bb78 !important; background-color: #21262d !important; transform: scale(1.02); }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col p-6 relative">
+
+    <!-- 頂部標頭列 -->
+    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
+        <div class="flex items-center space-x-4 shrink-0">
+            <!-- 法系專屬圓標（採用深邃夜幕藍底色與科技綠外框） -->
+            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
+            <div>
+                <!-- 優化後的兩欄式聯動下拉選單 -->
+                <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
+                    <div class="flex items-center space-x-1">
+                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
+                        <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
+                            <option value="PEUGEOT">PEUGEOT (寶獅)</option>
+                            <option value="CITROËN">CITROËN (雪鐵龍)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="h-5 border-l border-gray-700"></div>
+
+                    <div class="flex items-center space-x-1">
+                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
+                            <!-- 由 JavaScript 根據品牌動態帶入 -->
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端同步試算表（獨立分頁精準連線）</p>
+            </div>
+        </div>
+        
+        <!-- 套餐切換鈕區域 -->
+        <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
+            <span class="text-sm text-gray-500">正在辨識保養套餐項目...</span>
+        </div>
+
+        <button onclick="fetchSheetData()" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-4 py-2 rounded-lg transition-all border border-gray-700 flex items-center space-x-1.5 shrink-0">
+            <span>🔄</span> <span>手動重新整理</span>
+        </button>
+    </header>
+
+    <!-- 主顯示區 -->
+    <main class="flex-1 flex space-x-6 overflow-hidden">
+        
+        <!-- 左側：保養套餐表格 -->
+        <section class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-5 overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-3">
+                <h2 id="current-package-title" class="text-lg font-bold text-gray-100 flex items-center">
+                    <span class="w-2 h-5 bg-[#48bb78] inline-block mr-2 rounded-sm"></span>連線成功，正在排版中...
+                </h2>
+                <span class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2.5 py-0.5 rounded-full font-semibold">連線正常</span>
+            </div>
+
+            <!-- 表格主體 -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700 text-gray-400 text-xs bg-[#0d1117]">
+                            <th class="p-3 rounded-l-md">屬性</th>
+                            <th class="p-3">料號</th>
+                            <th class="p-3">項目名稱</th>
+                            <th class="p-3 text-right">單價</th>
+                            <th class="p-3 text-right">數量</th>
+                            <th class="p-3 text-right">打折</th>
+                            <th class="p-3 text-right">加總</th>
+                            <th class="p-3 text-center rounded-r-md">層架</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rows">
+                        <!-- 資料由 JavaScript 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 工資、零件雙小計明細區 -->
+            <div class="border-t border-gray-800 pt-4 mt-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-400">
+                <div class="flex flex-wrap space-x-6">
+                    <div>
+                        <span>工資小計 (Labor)：</span>
+                        <span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span>
+                    </div>
+                    <div class="border-l border-gray-800 pl-6">
+                        <span>零件原始總價：</span>
+                        <span id="parts-original-total" class="font-bold text-gray-200 font-mono">$ 0</span>
+                    </div>
+                    <div class="border-l border-gray-800 pl-6">
+                        <span>零件折後實計：</span>
+                        <span id="parts-subtotal" class="font-bold text-amber-500 font-mono">$ 0</span>
+                    </div>
+                </div>
+
+                <!-- 零件折扣趴數輸入框 -->
+                <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
+                    <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
+                    <input 
+                        type="number" 
+                        id="part-discount-input" 
+                        value="100" 
+                        min="0" 
+                        max="100" 
+                        step="5"
+                        oninput="calculateTotalsWithDiscount()"
+                        class="w-12 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#48bb78] focus:border-emerald-500 font-mono"
+                    >
+                    <span class="text-[11px] text-gray-300 font-bold">%</span>
+                </div>
+            </div>
+
+            <!-- 底部總計金額 -->
+            <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="text-gray-400 text-sm font-medium">套餐應付總金額 (Grand Total)</span>
+                    <span id="discount-note" class="text-[10px] text-amber-500/80 font-medium mt-0.5 hidden">＊已套用零件折扣</span>
+                </div>
+                <span id="package-total" class="text-3xl font-black text-green-400 font-mono tracking-tight">$ 0</span>
+            </div>
+        </section>
+
+        <!-- 右側：零件圖片展示牆 -->
+        <section class="w-5/12 flex flex-col space-y-4 overflow-hidden">
+            <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-5 flex flex-col overflow-hidden shadow-2xl">
+                <h3 class="text-sm font-semibold text-gray-400 mb-4 tracking-wider flex items-center">
+                    <span class="mr-2">🔧</span>套餐内含零件圖解 (點擊表格高亮，點擊圖片彈出大圖)
+                </h3>
+                <div id="image-grid" class="flex-1 grid grid-cols-2 gap-4 overflow-y-auto custom-scrollbar p-1 align-content-start">
+                    <!-- 圖片卡片由 JavaScript 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 備註說明區 -->
+            <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
+                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 高質感點擊燈箱彈出視窗 -->
+    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
+        <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-4xl font-light focus:outline-none">&times;</button>
+        <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[75vh] object-contain rounded">
+        </div>
+        <div class="mt-4 text-center max-w-xl" onclick="event.stopPropagation()">
+            <p id="lightbox-part-id" class="text-xs text-gray-500 font-mono tracking-widest"></p>
+            <h3 id="lightbox-title" class="text-lg font-bold text-white mt-1"></h3>
+            <div id="lightbox-desc-container" class="mt-3 px-4 py-2 bg-amber-950/40 border border-amber-900/50 rounded-lg text-amber-400 text-xs hidden leading-relaxed">
+                <span class="font-bold block text-amber-500 text-[10px] tracking-wider uppercase mb-0.5">⚠️ 現場維護說明 NOTE</span>
+                <span id="lightbox-desc-text"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================
+        // 🎯【完美網址資料庫對照表】
+        // 結構維持不變（品牌_車型），後續您增加新車型時只要依據此規則在此處增加即可
+        // ==========================================================
+        const CAR_MODELS_SHEETS = {
+            // --- PEUGEOT 系列 ---
+            "PEUGEOT_208": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
+            "PEUGEOT_2008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv", 
+            "PEUGEOT_308": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
+            "PEUGEOT_3008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
+            "PEUGEOT_408": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
+            "PEUGEOT_508": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
+            "PEUGEOT_5008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
+            
+            // --- CITROËN 系列 ---
+            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
+            "CITROËN_C5_AIRCROSS": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
+            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv"
+        };
+
+        let allParsedPackages = {}; 
+        let currentPackageKey = "";
+        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0]; // 預設選取第一個 (PEUGEOT_208)
+        let rawLaborSum = 0;
+        let rawPartsSum = 0;
+
+        // 【新增】動態更新第二層車型選單
+        function updateModelOptions() {
+            const brandSelect = document.getElementById('brand-select');
+            const modelSelect = document.getElementById('car-model-select');
+            const currentBrand = brandSelect.value;
+
+            // 篩選出符合當前品牌的試算表 Key 值
+            const matchedModels = Object.keys(CAR_MODELS_SHEETS).filter(key => key.startsWith(currentBrand));
+
+            // 生成第二層的 Option 文字（過濾掉品牌前綴，只留車型名稱例如：208、3008）
+            modelSelect.innerHTML = matchedModels.map(key => {
+                const modelDisplay = key.replace(`${currentBrand}_`, "").replace("_", " ");
+                return `<option value="${key}" ${key === selectedModel ? 'selected' : ''}>${modelDisplay}</option>`;
+            }).join('');
+
+            // 如果原本選取的車型不屬於新切換的品牌，則預設切換至該品牌的第一個車型
+            if (!matchedModels.includes(selectedModel) && matchedModels.length > 0) {
+                executeModelSwitch(matchedModels[0]);
+            }
+        }
+
+        // 執行車型切換與介面色彩微調
+        function executeModelSwitch(modelName) {
+            selectedModel = modelName;
+            
+            // 同步變更圓標文字與風格
+            const brandLogo = document.getElementById('brand-logo');
+            if (modelName.startsWith("CITROËN")) {
+                brandLogo.innerText = "CITR";
+                brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
+            } else {
+                brandLogo.innerText = "PEUG";
+                brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
+            }
+
+            document.getElementById('package-tabs').innerHTML = '<span class="text-sm text-gray-500">正在讀取雲端資料...</span>';
+            fetchSheetData();
+        }
+
+        async function fetchSheetData() {
+            const targetUrl = CAR_MODELS_SHEETS[selectedModel];
+            try {
+                const response = await fetch(targetUrl + "&cachebust=" + new Date().getTime());
+                const csvText = await response.text();
+                parseExcelCSV(csvText);
+            } catch (error) {
+                console.error("抓取雲端資料失敗:", error);
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料加載失敗，請檢查網路連線";
+                clearDisplay();
+            }
+        }
+
+        function parseExcelCSV(csvText) {
+            const lines = csvText.split(/\r?\n/);
+            const packages = {};
+            let currentPackageName = ""; 
+
+            lines.forEach((line) => {
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
+                if (cols.length < 3) return;
+
+                const foundPackageCell = cols.find(cell => cell && cell.includes("套餐"));
+                
+                if (foundPackageCell) {
+                    currentPackageName = foundPackageCell;
+                    packages[currentPackageName] = {
+                        name: currentPackageName,
+                        items: []
+                    };
+                    return;
+                }
+
+                const attr = cols[0] || "";
+                const partId = cols[1] || "";
+                const name = cols[2] || "";
+
+                if (currentPackageName && partId && partId !== "料號" && attr !== "屬性") {
+                    const price = cols[3] || "";
+                    const qty = cols[4] || "";
+                    const discount = cols[5] || "";
+                    const subtotal = cols[6] || "";
+                    const location = cols[7] || ""; 
+                    const description = cols[9] || ""; 
+
+                    const cleanSubtotal = parseFloat(subtotal.replace(/[^0-9.-]+/g, "")) || 0;
+
+                    packages[currentPackageName].items.push({
+                        attr, partId, name, price, qty, discount, subtotal, cleanSubtotal, location, description
+                    });
+                }
+            });
+
+            allParsedPackages = packages;
+
+            const keys = Object.keys(allParsedPackages);
+            if (keys.length > 0) {
+                renderTabs(keys);
+                switchPackage(keys[0]);
+            } else {
+                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁資料格式是否正確";
+                clearDisplay();
+            }
+        }
+
+        function renderTabs(keys) {
+            const tabsContainer = document.getElementById('package-tabs');
+            const isCitroen = selectedModel.startsWith("CITROËN");
+            const activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : "bg-emerald-600 border-emerald-500";
+
+            tabsContainer.innerHTML = keys.map(key => `
+                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
+                    ${key}
+                </button>
+            `).join('');
+        }
+
+        function switchPackage(key) {
+            if (!allParsedPackages[key]) return;
+
+            if (currentPackageKey) {
+                const prevTab = document.getElementById(`tab-${currentPackageKey}`);
+                if (prevTab) prevTab.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap";
+            }
+            
+            const activeTab = document.getElementById(`tab-${key}`);
+            if (activeTab) {
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 border-emerald-500";
+                activeTab.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
+            }
+
+            currentPackageKey = key;
+            const pkg = allParsedPackages[key];
+
+            const isCitroen = selectedModel.startsWith("CITROËN");
+            const indicatorColor = isCitroen ? "bg-[#da291c]" : "bg-[#48bb78]";
+
+            document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
+            
+            let tableHTML = '';
+            let gridHTML = '';
+            
+            rawLaborSum = 0;
+            rawPartsSum = 0;
+
+            pkg.items.forEach(item => {
+                if (item.attr === "工資") {
+                    rawLaborSum += item.cleanSubtotal;
+                } else {
+                    rawPartsSum += item.cleanSubtotal;
+                }
+
+                const isLabor = item.attr === "工資";
+                const attrBadgeClass = isLabor 
+                    ? "bg-slate-800 text-slate-300 border border-slate-700"
+                    : (isCitroen ? "bg-red-950/60 text-red-400 border border-red-900/50" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50");
+
+                tableHTML += `
+                    <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">
+                                ${item.attr}
+                            </span>
+                        </td>
+                        <td class="p-3 font-mono text-gray-300">${item.partId}</td>
+                        <td class="p-3 text-white font-medium">${item.name}</td>
+                        <td class="p-3 text-right font-mono text-gray-300">${item.price}</td>
+                        <td class="p-3 text-right font-mono text-gray-300">${item.qty}</td>
+                        <td class="p-3 text-right font-mono text-gray-400">${item.discount}</td>
+                        <td class="p-3 text-right font-mono font-bold text-green-400">${item.subtotal}</td>
+                        <td class="p-3 text-center font-mono text-amber-500 font-semibold">${item.location || '-'}</td>
+                    </tr>
+                `;
+
+                if (item.attr !== "工資" && item.partId) {
+                    const imgUrl = `${item.partId}.jpg`;
+                    const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
+                    const safeDesc = encodeURIComponent(item.description || "");
+
+                    gridHTML += `
+                        <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-3 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
+                            <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                                <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
+                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : 'bg-emerald-600/90'} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                </div>
+                            </div>
+                            <div class="text-center w-full mt-1">
+                                <p class="text-[10px] text-gray-500 font-mono">${item.partId}</p>
+                                <p class="text-xs text-white font-medium truncate">${item.name}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('table-rows').innerHTML = tableHTML;
+            document.getElementById('image-grid').innerHTML = gridHTML;
+
+            const styleEl = document.querySelector('style');
+            const highlightColor = isCitroen ? "#da291c" : "#48bb78";
+            styleEl.innerHTML = `
+                body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+                .active-row { background-color: #1f242c !important; border-left: 4px solid ${highlightColor} !important; }
+                .active-card { border-color: ${highlightColor} !important; background-color: #21262d !important; transform: scale(1.02); }
+            `;
+
+            calculateTotalsWithDiscount();
+        }
+
+        function calculateTotalsWithDiscount() {
+            const discountInput = document.getElementById('part-discount-input');
+            let discountRate = parseFloat(discountInput.value);
+
+            if (isNaN(discountRate) || discountRate < 0) discountRate = 100;
+
+            const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
+            const grandTotal = rawLaborSum + discountedPartsSum;
+
+            document.getElementById('labor-subtotal').innerText = `$ ${rawLaborSum.toLocaleString()}`;
+            document.getElementById('parts-original-total').innerText = `$ ${rawPartsSum.toLocaleString()}`;
+            document.getElementById('parts-subtotal').innerText = `$ ${discountedPartsSum.toLocaleString()}`;
+            document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
+
+            const discountNote = document.getElementById('discount-note');
+            if (discountRate < 100) {
+                discountNote.innerText = `＊已套用 ${discountRate}% 零件折扣`;
+                discountNote.classList.remove('hidden');
+            } else {
+                discountNote.classList.add('hidden');
+            }
+        }
+
+        function syncHighlight(partId) {
+            document.querySelectorAll('tr').forEach(el => el.classList.remove('active-row'));
+            document.querySelectorAll('#image-grid > div').forEach(el => el.classList.remove('active-card'));
+
+            const row = document.getElementById(`row-${partId}`);
+            const card = document.getElementById(`card-${partId}`);
+            if (row) row.classList.add('active-row');
+            if (card) card.classList.add('active-card');
+        }
+
+        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxPartId = document.getElementById('lightbox-part-id');
+            const lightboxTitle = document.getElementById('lightbox-title');
+            
+            const description = decodeURIComponent(encodedDesc).trim();
+            const descContainer = document.getElementById('lightbox-desc-container');
+            const descText = document.getElementById('lightbox-desc-text');
+
+            lightboxImg.src = imgSrc;
+            lightboxImg.onerror = function() { this.src = defaultImg; };
+
+            lightboxPartId.innerText = partId;
+            lightboxTitle.innerText = title;
+
+            if (description) {
+                descText.innerText = description;
+                descContainer.classList.remove('hidden');
+            } else {
+                descContainer.classList.add('hidden');
+            }
+
+            lightbox.classList.remove('hidden');
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => { lightbox.classList.add('hidden'); }, 300);
+        }
+
+        function clearDisplay() {
+            document.getElementById('table-rows').innerHTML = '';
+            document.getElementById('image-grid').innerHTML = '';
+            document.getElementById('package-total').innerText = '$ 0';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeLightbox();
+        });
+
+        // 啟動排版與第一階段選單建立
+        updateModelOptions();
+    </script>
+</body>
+</html>
