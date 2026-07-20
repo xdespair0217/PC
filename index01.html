@@ -21,7 +21,7 @@
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
             <!-- 法系專屬圓標 -->
-            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PEUG</div>
+            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PROJ</div>
             <div>
                 <!-- 兩欄式聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
@@ -30,7 +30,7 @@
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="PEUGEOT">PEUGEOT (寶獅)</option>
                             <option value="CITROËN">CITROËN (雪鐵龍)</option>
-                            <option value="PROJECT">專案與單獨零件說明</option>
+                            <option value="PROJ">專案與單獨零件說明</option>
                         </select>
                     </div>
                     
@@ -38,7 +38,7 @@
 
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">項目選單：</label>
-                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[160px]">
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
                             <!-- 由 JavaScript 根據品牌動態帶入 -->
                         </select>
                     </div>
@@ -163,7 +163,7 @@
 
     </main>
 
-    <!-- 高質感燈箱彈出視窗 -->
+    <!-- 燈箱彈出視窗 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-4xl font-light focus:outline-none">&times;</button>
         <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
@@ -181,20 +181,19 @@
 
     <script>
         // ==========================================================
-        // 🎯【完整網址資料庫對照表】
-        // 已加入「扣子貼紙」之專案 CSV 雲端連線
+        // 🎯【完美網址資料庫對照表】
+        // 請確保這裡的 CSV 網址為您發布的試算表分頁連結
         // ==========================================================
         const CAR_MODELS_SHEETS = {
+            // --- 專案與單獨零件說明 ---
+            "PROJ_扣子貼紙": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
+            
             // --- PEUGEOT 系列 ---
             "PEUGEOT_208": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
             "PEUGEOT_3008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
             
             // --- CITROËN 系列 ---
-            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
-            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
-
-            // --- 專案與單獨零件說明 ---
-            "PROJECT_扣子貼紙": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
+            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv"
         };
 
         let allParsedPackages = {}; 
@@ -227,12 +226,12 @@
             if (modelName.startsWith("CITROËN")) {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
-            } else if (modelName.startsWith("PROJECT")) {
-                brandLogo.innerText = "PROJ";
-                brandLogo.className = "w-12 h-12 bg-[#1c1917] border border-blue-500 rounded-full flex items-center justify-center font-black text-blue-400 text-[10px] tracking-wider shadow-md shadow-blue-900/30 transition-all";
-            } else {
+            } else if (modelName.startsWith("PEUGEOT")) {
                 brandLogo.innerText = "PEUG";
                 brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
+            } else {
+                brandLogo.innerText = "PROJ";
+                brandLogo.className = "w-12 h-12 bg-[#1e1b4b] border border-[#6366f1] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-indigo-900/30 transition-all";
             }
 
             document.getElementById('package-tabs').innerHTML = '<span class="text-sm text-gray-500">正在讀取雲端資料...</span>';
@@ -252,6 +251,7 @@
             }
         }
 
+        // 🎯 核心修復：精準解析 CSV，防止誤抓「說明」標頭
         function parseExcelCSV(csvText) {
             const lines = csvText.split(/\r?\n/);
             const packages = {};
@@ -259,12 +259,19 @@
 
             lines.forEach((line) => {
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
-                if (cols.length < 3) return;
+                if (cols.length < 2) return;
 
-                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案") || cell.includes("單獨") || cell.includes("說明") || cell.includes("扣子") || cell.includes("貼紙")));
+                const attr = cols[0] || "";
+                const partId = cols[1] || "";
+
+                // 跳過藍色標頭列
+                if (attr === "屬性" || partId === "料號" || cols.includes("層架")) return;
+
+                // 精準比對大項標題：只抓包含「套餐」、「專案」、「單獨」、「扣子」、「貼紙」且沒有料號的文字列
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("[專案") || cell.includes("單獨")) && !cell.includes("說明"));
                 
-                if (foundPackageCell) {
-                    currentPackageName = foundPackageCell;
+                if (foundPackageCell && !partId) {
+                    currentPackageName = foundPackageCell.replace(/^\[|\]$/g, '').trim();
                     packages[currentPackageName] = {
                         name: currentPackageName,
                         items: []
@@ -272,17 +279,21 @@
                     return;
                 }
 
-                const attr = cols[0] || "";
-                const partId = cols[1] || "";
-                const name = cols[2] || "";
+                // 若試算表沒有寫大項標題，自動給予預設名稱
+                if (!currentPackageName) {
+                    currentPackageName = "單獨零件專案清單";
+                    packages[currentPackageName] = { name: currentPackageName, items: [] };
+                }
 
-                if (currentPackageName && partId && partId !== "料號" && attr !== "屬性") {
+                // 抓取真實零件資料列
+                if (partId && partId !== "料號") {
+                    const name = cols[2] || "";
                     const price = cols[3] || "";
                     const qty = cols[4] || "";
                     const discount = cols[5] || "";
                     const subtotal = cols[6] || "";
                     const location = cols[7] || ""; 
-                    const description = cols[9] || ""; 
+                    const description = cols[9] || cols[8] || ""; // J 欄注意事項說明
 
                     const cleanSubtotal = parseFloat(subtotal.replace(/[^0-9.-]+/g, "")) || 0;
 
@@ -306,12 +317,7 @@
 
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
-            const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
-            
-            let activeBgClass = "bg-emerald-600 border-emerald-500";
-            if (isCitroen) activeBgClass = "bg-[#da291c] border-[#da291c]";
-            if (isProject) activeBgClass = "bg-blue-600 border-blue-500";
+            const activeBgClass = selectedModel.startsWith("CITROËN") ? "bg-[#da291c] border-[#da291c]" : (selectedModel.startsWith("PEUGEOT") ? "bg-emerald-600 border-emerald-500" : "bg-indigo-600 border-indigo-500");
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -330,14 +336,14 @@
             
             const activeTab = document.getElementById(`tab-${key}`);
             if (activeTab) {
-                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 border-emerald-500";
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-indigo-600 border-indigo-500";
                 activeTab.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
 
-            const isNonPackage = key.includes("專案") || key.includes("單獨") || key.includes("說明") || key.includes("扣子") || key.includes("貼紙") || selectedModel.startsWith("PROJECT");
+            const isNonPackage = selectedModel.startsWith("PROJ") || key.includes("專案") || key.includes("單獨") || key.includes("貼紙") || key.includes("扣子");
             
             const priceSummaryArea = document.getElementById('price-summary-area');
             const nonPackageNotice = document.getElementById('non-package-notice');
@@ -350,12 +356,7 @@
                 nonPackageNotice.classList.add('hidden');
             }
 
-            const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
-            
-            let indicatorColor = "bg-[#48bb78]";
-            if (isCitroen) indicatorColor = "bg-[#da291c]";
-            if (isProject) indicatorColor = "bg-blue-500";
+            const indicatorColor = selectedModel.startsWith("CITROËN") ? "bg-[#da291c]" : (selectedModel.startsWith("PEUGEOT") ? "bg-[#48bb78]" : "bg-[#6366f1]");
 
             document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
@@ -373,11 +374,9 @@
                 }
 
                 const isLabor = item.attr === "工資";
-                let attrBadgeClass = isLabor 
+                const attrBadgeClass = isLabor 
                     ? "bg-slate-800 text-slate-300 border border-slate-700"
-                    : (isCitroen ? "bg-red-950/60 text-red-400 border border-red-900/50" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50");
-
-                if (isProject) attrBadgeClass = "bg-blue-950/60 text-blue-400 border border-blue-900/50";
+                    : "bg-indigo-950/60 text-indigo-400 border border-indigo-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -396,7 +395,7 @@
                     </tr>
                 `;
 
-                if (item.attr !== "工資" && item.partId) {
+                if (item.partId) {
                     const imgUrl = `${item.partId}.jpg`;
                     const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
                     const safeDesc = encodeURIComponent(item.description || "");
@@ -406,7 +405,7 @@
                             <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-blue-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                    <span class="text-xs text-white bg-indigo-600/90 px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full mt-1">
@@ -420,20 +419,6 @@
 
             document.getElementById('table-rows').innerHTML = tableHTML;
             document.getElementById('image-grid').innerHTML = gridHTML;
-
-            const styleEl = document.querySelector('style');
-            let highlightColor = "#48bb78";
-            if (isCitroen) highlightColor = "#da291c";
-            if (isProject) highlightColor = "#3b82f6";
-
-            styleEl.innerHTML = `
-                body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-                .active-row { background-color: #1f242c !important; border-left: 4px solid ${highlightColor} !important; }
-                .active-card { border-color: ${highlightColor} !important; background-color: #21262d !important; transform: scale(1.02); }
-            `;
 
             if (!isNonPackage) {
                 calculateTotalsWithDiscount();
