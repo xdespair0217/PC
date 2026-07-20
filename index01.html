@@ -26,18 +26,19 @@
                 <!-- 兩欄式聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
-                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
+                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌/類別：</label>
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
                             <option value="PEUGEOT">PEUGEOT (寶獅)</option>
                             <option value="CITROËN">CITROËN (雪鐵龍)</option>
+                            <option value="PROJECT">專案與單獨零件說明</option>
                         </select>
                     </div>
                     
                     <div class="h-5 border-l border-gray-700"></div>
 
                     <div class="flex items-center space-x-1">
-                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
-                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
+                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">項目選單：</label>
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[160px]">
                             <!-- 由 JavaScript 根據品牌動態帶入 -->
                         </select>
                     </div>
@@ -91,7 +92,6 @@
 
             <!-- 底部金額統計區（當進入「專案說明/單獨零件」時會自動隱藏） -->
             <div id="price-summary-area">
-                <!-- 工資、零件雙小計明細區 -->
                 <div class="border-t border-gray-800 pt-4 mt-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-gray-400">
                     <div class="flex flex-wrap space-x-6">
                         <div>
@@ -108,7 +108,6 @@
                         </div>
                     </div>
 
-                    <!-- 零件折扣趴數輸入框 -->
                     <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
                         <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
                         <input 
@@ -125,7 +124,6 @@
                     </div>
                 </div>
 
-                <!-- 底部總計金額 -->
                 <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center">
                     <div class="flex flex-col">
                         <span class="text-gray-400 text-sm font-medium">套餐應付總金額 (Grand Total)</span>
@@ -135,7 +133,7 @@
                 </div>
             </div>
 
-            <!-- 單獨零件專案模式下的溫馨提示列（預設隱藏） -->
+            <!-- 單獨零件專案模式下的提示列 -->
             <div id="non-package-notice" class="border-t border-gray-800 pt-3 mt-3 hidden flex justify-between items-center bg-[#0d1117] p-3 rounded-lg border border-blue-900/40">
                 <span class="text-xs text-blue-400 flex items-center">
                     <span class="mr-2">ℹ️</span> 本區塊為「單獨零件/專案說明展示」，僅供料號與規格查閱，不進行套餐總金額加總。
@@ -155,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- 備註說明區 -->
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
                 <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護與專案提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
@@ -166,7 +163,7 @@
 
     </main>
 
-    <!-- 高質感點擊燈箱彈出視窗 -->
+    <!-- 高質感燈箱彈出視窗 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-4xl font-light focus:outline-none">&times;</button>
         <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
@@ -184,7 +181,8 @@
 
     <script>
         // ==========================================================
-        // 🎯【完美網址資料庫對照表】
+        // 🎯【完整網址資料庫對照表】
+        // 已加入「扣子貼紙」之專案 CSV 雲端連線
         // ==========================================================
         const CAR_MODELS_SHEETS = {
             // --- PEUGEOT 系列 ---
@@ -193,7 +191,10 @@
             
             // --- CITROËN 系列 ---
             "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
-            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv"
+            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
+
+            // --- 專案與單獨零件說明 ---
+            "PROJECT_扣子貼紙": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
         };
 
         let allParsedPackages = {}; 
@@ -226,6 +227,9 @@
             if (modelName.startsWith("CITROËN")) {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
+            } else if (modelName.startsWith("PROJECT")) {
+                brandLogo.innerText = "PROJ";
+                brandLogo.className = "w-12 h-12 bg-[#1c1917] border border-blue-500 rounded-full flex items-center justify-center font-black text-blue-400 text-[10px] tracking-wider shadow-md shadow-blue-900/30 transition-all";
             } else {
                 brandLogo.innerText = "PEUG";
                 brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
@@ -257,8 +261,7 @@
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
                 if (cols.length < 3) return;
 
-                // 彈性辨識：只要包含「套餐」、「專案」、「單獨」、「說明」等關鍵字皆可作為分類大項
-                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案") || cell.includes("單獨") || cell.includes("說明") || cell.includes("雨刷")));
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案") || cell.includes("單獨") || cell.includes("說明") || cell.includes("扣子") || cell.includes("貼紙")));
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
@@ -304,7 +307,11 @@
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : "bg-emerald-600 border-emerald-500";
+            const isProject = selectedModel.startsWith("PROJECT");
+            
+            let activeBgClass = "bg-emerald-600 border-emerald-500";
+            if (isCitroen) activeBgClass = "bg-[#da291c] border-[#da291c]";
+            if (isProject) activeBgClass = "bg-blue-600 border-blue-500";
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -330,24 +337,25 @@
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
 
-            // 判斷是否為「非保養/單獨/專案說明」類別
-            const isNonPackage = key.includes("專案") || key.includes("單獨") || key.includes("說明") || key.includes("雨刷") || key.includes("特刊");
+            const isNonPackage = key.includes("專案") || key.includes("單獨") || key.includes("說明") || key.includes("扣子") || key.includes("貼紙") || selectedModel.startsWith("PROJECT");
             
             const priceSummaryArea = document.getElementById('price-summary-area');
             const nonPackageNotice = document.getElementById('non-package-notice');
 
             if (isNonPackage) {
-                // 自動隱藏總金額，顯示獨立展示提示
                 priceSummaryArea.classList.add('hidden');
                 nonPackageNotice.classList.remove('hidden');
             } else {
-                // 保留常規保養加總
                 priceSummaryArea.classList.remove('hidden');
                 nonPackageNotice.classList.add('hidden');
             }
 
             const isCitroen = selectedModel.startsWith("CITROËN");
-            const indicatorColor = isCitroen ? "bg-[#da291c]" : "bg-[#48bb78]";
+            const isProject = selectedModel.startsWith("PROJECT");
+            
+            let indicatorColor = "bg-[#48bb78]";
+            if (isCitroen) indicatorColor = "bg-[#da291c]";
+            if (isProject) indicatorColor = "bg-blue-500";
 
             document.getElementById('current-package-title').innerHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
@@ -365,9 +373,11 @@
                 }
 
                 const isLabor = item.attr === "工資";
-                const attrBadgeClass = isLabor 
+                let attrBadgeClass = isLabor 
                     ? "bg-slate-800 text-slate-300 border border-slate-700"
                     : (isCitroen ? "bg-red-950/60 text-red-400 border border-red-900/50" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50");
+
+                if (isProject) attrBadgeClass = "bg-blue-950/60 text-blue-400 border border-blue-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -396,7 +406,7 @@
                             <div class="w-full h-28 bg-[#0d1117] rounded mb-2 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox('${imgUrl}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrl}" alt="${item.name}" onerror="this.src='${defaultImg}'" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : 'bg-emerald-600/90'} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
+                                    <span class="text-xs text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-blue-600/90' : 'bg-emerald-600/90')} px-2 py-1 rounded shadow">🔍 點擊看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full mt-1">
@@ -412,7 +422,10 @@
             document.getElementById('image-grid').innerHTML = gridHTML;
 
             const styleEl = document.querySelector('style');
-            const highlightColor = isCitroen ? "#da291c" : "#48bb78";
+            let highlightColor = "#48bb78";
+            if (isCitroen) highlightColor = "#da291c";
+            if (isProject) highlightColor = "#3b82f6";
+
             styleEl.innerHTML = `
                 body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
