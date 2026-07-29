@@ -271,16 +271,26 @@
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
-                    // 指定抓取 Column L (第 12 欄，索引為 cols[11])
-                    const rawLCol = cols[11] || "";
-                    const pdfUrl = rawLCol.startsWith("http") ? rawLCol : "";
-
                     packages[currentPackageName] = {
                         name: currentPackageName,
-                        pdfUrl: pdfUrl,
+                        pdfUrl: "",
                         items: []
                     };
+                    
+                    // 如果標題列的 Column L (cols[11]) 有網址就記錄
+                    const rawLCol = cols[11] || "";
+                    if (rawLCol.startsWith("http")) {
+                        packages[currentPackageName].pdfUrl = rawLCol;
+                    }
                     return;
+                }
+
+                // 如果在套餐內容行（零件或工資列）的 Column L 發現網址，也自動記錄下來
+                if (currentPackageName) {
+                    const rawLCol = cols[11] || "";
+                    if (rawLCol.startsWith("http") && !packages[currentPackageName].pdfUrl) {
+                        packages[currentPackageName].pdfUrl = rawLCol;
+                    }
                 }
 
                 const attr = cols[0] || "";
@@ -358,7 +368,7 @@
             // 動態產生標題 HTML
             let titleHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
-            // 只要 Column L 有網址，即刻生成按鈕
+            // 只要掃描到該套餐範圍內的 Column L 有網址，即刻生成按鈕
             if (pkg.pdfUrl) {
                 titleHTML += `
                     <a href="${pkg.pdfUrl}" target="_blank" rel="noopener noreferrer" class="ml-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded-md hover:bg-amber-900/80 hover:text-white hover:border-amber-600 transition-all shadow-sm">
