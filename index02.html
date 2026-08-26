@@ -68,6 +68,7 @@
         }
         .btn-add { background: #4caf50; color: #fff; }
         .btn-del { background: #f44336; color: #fff; padding: 4px 8px; font-size: 0.8rem; }
+        .btn-clear { background: #e53935; color: #fff; }
         .btn-export { background: #ff9800; color: #fff; }
         .btn-import { background: #607d8b; color: #fff; }
         .btn-print { background: #2b5797; color: #fff; font-size: 1rem; margin-left: auto; }
@@ -183,6 +184,7 @@
 
         <div class="btn-group">
             <button class="btn-add" onclick="addRow()">+ 新增工作行</button>
+            <button class="btn-clear" onclick="clearAllData()">🧹 一鍵清空</button>
             <button class="btn-export" onclick="exportData()">💾 匯出存檔 (JSON)</button>
             <label class="file-label-btn btn-import">
                 📂 匯入檔案
@@ -194,7 +196,7 @@
 
     <!-- 列印預覽輸出區域 -->
     <div class="print-preview">
-        <div class="doc-title" id="outDocTitle">打卡記錄 - B260700436</div>
+        <div class="doc-title" id="outDocTitle">打卡記錄 - </div>
         
         <div class="meta-grid">
             <div class="meta-col">
@@ -273,13 +275,36 @@
     }
 
     function addRow() {
-        records.push({ date: '26-07-28', start: '09:00', end: '10:00', reason: '開工', code: '', name: '', stdHours: '1.0', tech: '張智榮' });
+        records.push({ date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' });
         renderInputs();
         render();
     }
 
     function deleteRow(idx) {
         records.splice(idx, 1);
+        renderInputs();
+        render();
+    }
+
+    // 一鍵清空功能
+    function clearAllData() {
+        if (!confirm('確定要清空所有填寫內容嗎？（服務廠名稱將會保留）')) return;
+
+        formFields.forEach(id => {
+            if (id === 'servicePlant') {
+                document.getElementById(id).value = '尚鵬汽車-內湖保養廠';
+            } else if (id === 'pageIndex') {
+                document.getElementById(id).value = '1 / 1';
+            } else {
+                document.getElementById(id).value = '';
+            }
+        });
+
+        // 重置為一筆空的工時紀錄
+        records = [
+            { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
+        ];
+
         renderInputs();
         render();
     }
@@ -332,21 +357,27 @@
         let cumulative = 0;
 
         records.forEach((row, i) => {
-            const workHours = calculateHours(row.start, row.end);
+            const hasTime = row.start && row.end;
+            const workHours = hasTime ? calculateHours(row.start, row.end) : 0;
             cumulative += workHours;
+            
+            const stdVal = row.stdHours ? parseFloat(row.stdHours).toFixed(1) : '';
+            const workVal = hasTime ? workHours.toFixed(1) : '';
+            const cumVal = hasTime ? cumulative.toFixed(1) : '';
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="width: 4%;">${i + 1}</td>
-                <td style="width: 11%;">${row.date}</td>
-                <td style="width: 7%;">${row.start}</td>
-                <td style="width: 7%;">${row.end}</td>
-                <td style="width: 9%;">${row.reason}</td>
-                <td style="width: 13%;">${row.code}</td>
-                <td style="width: 27%;">${row.name}</td>
-                <td class="text-right" style="width: 6%;">${parseFloat(row.stdHours || 0).toFixed(1)}</td>
-                <td class="text-center" style="width: 6%;">${row.tech}</td>
-                <td class="text-right" style="width: 5%;">${workHours.toFixed(1)}</td>
-                <td class="text-right" style="width: 5%;">${cumulative.toFixed(1)}</td>
+                <td style="width: 11%;">${row.date || ''}</td>
+                <td style="width: 7%;">${row.start || ''}</td>
+                <td style="width: 7%;">${row.end || ''}</td>
+                <td style="width: 9%;">${row.reason || ''}</td>
+                <td style="width: 13%;">${row.code || ''}</td>
+                <td style="width: 27%;">${row.name || ''}</td>
+                <td class="text-right" style="width: 6%;">${stdVal}</td>
+                <td class="text-center" style="width: 6%;">${row.tech || ''}</td>
+                <td class="text-right" style="width: 5%;">${workVal}</td>
+                <td class="text-right" style="width: 5%;">${cumVal}</td>
             `;
             outTbody.appendChild(tr);
         });
@@ -401,7 +432,7 @@
             }
         };
         reader.readAsText(file);
-        event.target.value = ''; // 重置 input 讓同檔名可重複觸發
+        event.target.value = '';
     }
 
     // 初始化渲染
