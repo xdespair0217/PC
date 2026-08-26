@@ -49,17 +49,28 @@
         .table-input th { background: #f8f9fa; }
         .table-input input { width: 100%; border: none; padding: 4px; font-size: 0.85rem; }
         
-        .btn-group { display: flex; gap: 10px; }
-        button {
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button, .file-label-btn {
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-add { background: #4caf50; color: #fff; }
-        .btn-del { background: #f44336; color: #fff; padding: 4px 8px; }
-        .btn-print { background: #2b5797; color: #fff; font-size: 1rem; }
+        .btn-del { background: #f44336; color: #fff; padding: 4px 8px; font-size: 0.8rem; }
+        .btn-export { background: #ff9800; color: #fff; }
+        .btn-import { background: #607d8b; color: #fff; }
+        .btn-print { background: #2b5797; color: #fff; font-size: 1rem; margin-left: auto; }
 
         /* 列印預覽區域 (原廠單據排版) */
         .print-preview {
@@ -120,7 +131,7 @@
             }
             @page { 
                 size: auto;
-                margin: 0; /* 消除瀏覽器預設頁首頁尾空間 */
+                margin: 0; 
             }
         }
     </style>
@@ -171,7 +182,12 @@
         </table>
 
         <div class="btn-group">
-            <button class="btn-add" onclick="addRow()">+ 新增工作工時行</button>
+            <button class="btn-add" onclick="addRow()">+ 新增工作行</button>
+            <button class="btn-export" onclick="exportData()">💾 匯出存檔 (JSON)</button>
+            <label class="file-label-btn btn-import">
+                📂 匯入檔案
+                <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importData(event)">
+            </label>
             <button class="btn-print" onclick="window.print()">🖨️ 列印打卡單</button>
         </div>
     </div>
@@ -235,6 +251,13 @@
 </div>
 
 <script>
+    const formFields = [
+        'docNo', 'servicePlant', 'workType', 'mileage', 'openTime', 
+        'finishTime', 'warrantyDate', 'carPlate', 'carModel', 'carYear', 
+        'vin', 'engineNo', 'bodyNo', 'owner', 'driver', 'mechanic', 
+        'advisor', 'printTime', 'pageIndex'
+    ];
+
     let records = [
         { date: '26-07-28', start: '13:55', end: '14:25', reason: '開工', code: '23020501', name: '前保險桿護罩 Rubicon/古基奇拆裝', stdHours: '0.5', tech: '張智榮' },
         { date: '26-07-28', start: '15:07', end: '16:08', reason: '開工', code: '97756555', name: '水箱護罩烤漆', stdHours: '1.0', tech: '張智榮' }
@@ -267,14 +290,14 @@
         records.forEach((row, i) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" value="${row.date}" oninput="records[${i}].date=this.value; render();"></td>
-                <td><input type="text" value="${row.start}" oninput="records[${i}].start=this.value; render();"></td>
-                <td><input type="text" value="${row.end}" oninput="records[${i}].end=this.value; render();"></td>
-                <td><input type="text" value="${row.reason}" oninput="records[${i}].reason=this.value; render();"></td>
-                <td><input type="text" value="${row.code}" oninput="records[${i}].code=this.value; render();"></td>
-                <td><input type="text" value="${row.name}" oninput="records[${i}].name=this.value; render();"></td>
-                <td><input type="text" value="${row.stdHours}" oninput="records[${i}].stdHours=this.value; render();"></td>
-                <td><input type="text" value="${row.tech}" oninput="records[${i}].tech=this.value; render();"></td>
+                <td><input type="text" value="${row.date || ''}" oninput="records[${i}].date=this.value; render();"></td>
+                <td><input type="text" value="${row.start || ''}" oninput="records[${i}].start=this.value; render();"></td>
+                <td><input type="text" value="${row.end || ''}" oninput="records[${i}].end=this.value; render();"></td>
+                <td><input type="text" value="${row.reason || ''}" oninput="records[${i}].reason=this.value; render();"></td>
+                <td><input type="text" value="${row.code || ''}" oninput="records[${i}].code=this.value; render();"></td>
+                <td><input type="text" value="${row.name || ''}" oninput="records[${i}].name=this.value; render();"></td>
+                <td><input type="text" value="${row.stdHours || ''}" oninput="records[${i}].stdHours=this.value; render();"></td>
+                <td><input type="text" value="${row.tech || ''}" oninput="records[${i}].tech=this.value; render();"></td>
                 <td style="text-align: center;"><button class="btn-del" onclick="deleteRow(${i})">刪除</button></td>
             `;
             tbody.appendChild(tr);
@@ -329,6 +352,59 @@
         });
     }
 
+    // 匯出 JSON 存檔
+    function exportData() {
+        const data = {
+            fields: {},
+            records: records
+        };
+        formFields.forEach(id => {
+            data.fields[id] = document.getElementById(id).value;
+        });
+
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        const filename = `${data.fields.docNo || '工時記錄'}_${data.fields.carPlate || ''}.json`;
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // 匯入 JSON 檔案並還原
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.fields) {
+                    formFields.forEach(id => {
+                        if (data.fields[id] !== undefined) {
+                            document.getElementById(id).value = data.fields[id];
+                        }
+                    });
+                }
+                if (Array.isArray(data.records)) {
+                    records = data.records;
+                }
+                renderInputs();
+                render();
+                alert('資料匯入成功！');
+            } catch (err) {
+                alert('檔案格式錯誤，無法解析 JSON！');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; // 重置 input 讓同檔名可重複觸發
+    }
+
+    // 初始化渲染
     renderInputs();
     render();
 </script>
