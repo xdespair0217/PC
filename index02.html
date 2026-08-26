@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: #eef2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        /* 控制面板樣式 */
+        .controls {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid #2b5797; padding-bottom: 8px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
+        .form-group input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        
+        .table-input {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .table-input th, .table-input td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        .table-input th { background: #f8f9fa; }
+        .table-input input { width: 100%; border: none; padding: 4px; font-size: 0.85rem; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-add { background: #4caf50; color: #fff; }
+        .btn-del { background: #f44336; color: #fff; padding: 4px 8px; }
+        .btn-print { background: #2b5797; color: #fff; font-size: 1rem; }
+
+        /* 列印預覽區域 (原廠單據排版) */
+        .print-preview {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: "Courier New", "Consolas", monospace, "Microsoft JhengHei";
+            color: #000;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.5fr 1.1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .meta-col { display: flex; flex-direction: column; }
+        .separator {
+            border: none;
+            border-top: 1px dashed #000;
+            margin: 12px 0 6px 0;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            table-layout: fixed;
+        }
+        .report-table th, .report-table td {
+            padding: 4px 2px;
+            text-align: left;
+            word-break: break-word;
+        }
+        .report-table th { font-weight: bold; }
+        .text-right { text-align: right !important; }
+        .text-center { text-align: center !important; }
+
+        /* 列印模式特定設定 */
+        @media print {
+            body { 
+                background: #fff; 
+                padding: 1.5cm 1cm; 
+            }
+            .controls { display: none !important; }
+            .print-preview { 
+                box-shadow: none; 
+                padding: 0; 
+                margin: 0; 
+                width: 100%;
+            }
+            @page { 
+                size: auto;
+                margin: 0; /* 消除瀏覽器預設頁首頁尾空間 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 編輯面板 -->
+    <div class="controls">
+        <h2>工時資料編輯面板</h2>
+        <div class="form-grid">
+            <div class="form-group"><label>單號編號</label><input type="text" id="docNo" value="B260700436" oninput="render()"></div>
+            <div class="form-group"><label>服務廠</label><input type="text" id="servicePlant" value="尚鵬汽車-內湖保養廠" oninput="render()"></div>
+            <div class="form-group"><label>工單類別</label><input type="text" id="workType" value="索賠" oninput="render()"></div>
+            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" value="29" oninput="render()"></div>
+            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" value="2026-07-23 15:49" oninput="render()"></div>
+            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" value="2026-07-28 16:08" oninput="render()"></div>
+            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" value="2029-07-23" oninput="render()"></div>
+            <div class="form-group"><label>車牌</label><input type="text" id="carPlate" value="BKL-8888" oninput="render()"></div>
+            <div class="form-group"><label>車型</label><input type="text" id="carModel" value="WRANGLER RUBICON" oninput="render()"></div>
+            <div class="form-group"><label>年式</label><input type="text" id="carYear" value="2026" oninput="render()"></div>
+            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" value="1C4PJXFN4RW123456" oninput="render()"></div>
+            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" value="1C4PJXFN4RW" oninput="render()"></div>
+            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" value="1C4PJXFN4" oninput="render()"></div>
+            <div class="form-group"><label>車主</label><input type="text" id="owner" value="台灣客車股份有限公司" oninput="render()"></div>
+            <div class="form-group"><label>駕駛</label><input type="text" id="driver" value="王大明" oninput="render()"></div>
+            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" value="張智榮" oninput="render()"></div>
+            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" value="李專員" oninput="render()"></div>
+            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" value="2026-07-28 16:08:46" oninput="render()"></div>
+            <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" oninput="render()"></div>
+        </div>
+
+        <table class="table-input" id="itemsTable">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">打卡日期</th>
+                    <th style="width: 70px;">起始</th>
+                    <th style="width: 70px;">結束</th>
+                    <th style="width: 80px;">打卡原因</th>
+                    <th style="width: 100px;">工作代號</th>
+                    <th>工作項目</th>
+                    <th style="width: 70px;">標準工時</th>
+                    <th style="width: 70px;">技師</th>
+                    <th style="width: 50px;">操作</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+        </table>
+
+        <div class="btn-group">
+            <button class="btn-add" onclick="addRow()">+ 新增工作工時行</button>
+            <button class="btn-print" onclick="window.print()">🖨️ 列印打卡單</button>
+        </div>
+    </div>
+
+    <!-- 列印預覽輸出區域 -->
+    <div class="print-preview">
+        <div class="doc-title" id="outDocTitle">打卡記錄 - B260700436</div>
+        
+        <div class="meta-grid">
+            <div class="meta-col">
+                <div>服務廠: <span id="outServicePlant"></span></div>
+                <div>工單類別: <span id="outWorkType"></span></div>
+                <div>進廠里程: <span id="outMileage"></span></div>
+                <div>開單時間: <span id="outOpenTime"></span></div>
+                <div>完工日期: <span id="outFinishTime"></span></div>
+                <div>保固到期: <span id="outWarrantyDate"></span></div>
+            </div>
+            <div class="meta-col">
+                <div>車牌: <span id="outCarPlate"></span></div>
+                <div>車型: <span id="outCarModel"></span></div>
+                <div>年式: <span id="outCarYear"></span></div>
+                <div>VIN#: <span id="outVin"></span></div>
+                <div>引擎#: <span id="outEngineNo"></span></div>
+                <div>車身#: <span id="outBodyNo"></span></div>
+            </div>
+            <div class="meta-col">
+                <div>車主: <span id="outOwner"></span></div>
+                <div>駕駛: <span id="outDriver"></span></div>
+                <div>承修技師: <span id="outMechanic"></span></div>
+                <div>服務專員: <span id="outAdvisor"></span></div>
+                <div>列印時間: <span id="outPrintTime"></span></div>
+                <div>頁次: <span id="outPageIndex"></span></div>
+            </div>
+        </div>
+
+        <hr class="separator">
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 4%;">序</th>
+                    <th style="width: 11%;">打卡日期</th>
+                    <th style="width: 7%;">起始<br>時間</th>
+                    <th style="width: 7%;">結束<br>時間</th>
+                    <th style="width: 9%;">打卡原因</th>
+                    <th style="width: 13%;">工作代號</th>
+                    <th style="width: 27%;">工作項目</th>
+                    <th class="text-right" style="width: 6%;">標準<br>工時</th>
+                    <th class="text-center" style="width: 6%;">技師</th>
+                    <th class="text-right" style="width: 5%;">打卡<br>工時</th>
+                    <th class="text-right" style="width: 5%;">累計<br>工時</th>
+                </tr>
+            </thead>
+        </table>
+        <hr class="separator" style="margin: 4px 0 8px 0;">
+        
+        <table class="report-table" id="outItemsTable">
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let records = [
+        { date: '26-07-28', start: '13:55', end: '14:25', reason: '開工', code: '23020501', name: '前保險桿護罩 Rubicon/古基奇拆裝', stdHours: '0.5', tech: '張智榮' },
+        { date: '26-07-28', start: '15:07', end: '16:08', reason: '開工', code: '97756555', name: '水箱護罩烤漆', stdHours: '1.0', tech: '張智榮' }
+    ];
+
+    function calculateHours(start, end) {
+        if (!start || !end) return 0;
+        const [h1, m1] = start.split(':').map(Number);
+        const [h2, m2] = end.split(':').map(Number);
+        let diffMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
+        if (diffMinutes < 0) diffMinutes += 24 * 60;
+        return Math.round((diffMinutes / 60) * 10) / 10;
+    }
+
+    function addRow() {
+        records.push({ date: '26-07-28', start: '09:00', end: '10:00', reason: '開工', code: '', name: '', stdHours: '1.0', tech: '張智榮' });
+        renderInputs();
+        render();
+    }
+
+    function deleteRow(idx) {
+        records.splice(idx, 1);
+        renderInputs();
+        render();
+    }
+
+    function renderInputs() {
+        const tbody = document.getElementById('itemsBody');
+        tbody.innerHTML = '';
+        records.forEach((row, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" value="${row.date}" oninput="records[${i}].date=this.value; render();"></td>
+                <td><input type="text" value="${row.start}" oninput="records[${i}].start=this.value; render();"></td>
+                <td><input type="text" value="${row.end}" oninput="records[${i}].end=this.value; render();"></td>
+                <td><input type="text" value="${row.reason}" oninput="records[${i}].reason=this.value; render();"></td>
+                <td><input type="text" value="${row.code}" oninput="records[${i}].code=this.value; render();"></td>
+                <td><input type="text" value="${row.name}" oninput="records[${i}].name=this.value; render();"></td>
+                <td><input type="text" value="${row.stdHours}" oninput="records[${i}].stdHours=this.value; render();"></td>
+                <td><input type="text" value="${row.tech}" oninput="records[${i}].tech=this.value; render();"></td>
+                <td style="text-align: center;"><button class="btn-del" onclick="deleteRow(${i})">刪除</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function render() {
+        document.getElementById('outDocTitle').innerText = '打卡記錄 - ' + document.getElementById('docNo').value;
+        document.getElementById('outServicePlant').innerText = document.getElementById('servicePlant').value;
+        document.getElementById('outWorkType').innerText = document.getElementById('workType').value;
+        document.getElementById('outMileage').innerText = document.getElementById('mileage').value;
+        document.getElementById('outOpenTime').innerText = document.getElementById('openTime').value;
+        document.getElementById('outFinishTime').innerText = document.getElementById('finishTime').value;
+        document.getElementById('outWarrantyDate').innerText = document.getElementById('warrantyDate').value;
+        
+        document.getElementById('outCarPlate').innerText = document.getElementById('carPlate').value;
+        document.getElementById('outCarModel').innerText = document.getElementById('carModel').value;
+        document.getElementById('outCarYear').innerText = document.getElementById('carYear').value;
+        document.getElementById('outVin').innerText = document.getElementById('vin').value;
+        document.getElementById('outEngineNo').innerText = document.getElementById('engineNo').value;
+        document.getElementById('outBodyNo').innerText = document.getElementById('bodyNo').value;
+
+        document.getElementById('outOwner').innerText = document.getElementById('owner').value;
+        document.getElementById('outDriver').innerText = document.getElementById('driver').value;
+        document.getElementById('outMechanic').innerText = document.getElementById('mechanic').value;
+        document.getElementById('outAdvisor').innerText = document.getElementById('advisor').value;
+        document.getElementById('outPrintTime').innerText = document.getElementById('printTime').value;
+        document.getElementById('outPageIndex').innerText = document.getElementById('pageIndex').value;
+
+        const outTbody = document.querySelector('#outItemsTable tbody');
+        outTbody.innerHTML = '';
+        let cumulative = 0;
+
+        records.forEach((row, i) => {
+            const workHours = calculateHours(row.start, row.end);
+            cumulative += workHours;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="width: 4%;">${i + 1}</td>
+                <td style="width: 11%;">${row.date}</td>
+                <td style="width: 7%;">${row.start}</td>
+                <td style="width: 7%;">${row.end}</td>
+                <td style="width: 9%;">${row.reason}</td>
+                <td style="width: 13%;">${row.code}</td>
+                <td style="width: 27%;">${row.name}</td>
+                <td class="text-right" style="width: 6%;">${parseFloat(row.stdHours || 0).toFixed(1)}</td>
+                <td class="text-center" style="width: 6%;">${row.tech}</td>
+                <td class="text-right" style="width: 5%;">${workHours.toFixed(1)}</td>
+                <td class="text-right" style="width: 5%;">${cumulative.toFixed(1)}</td>
+            `;
+            outTbody.appendChild(tr);
+        });
+    }
+
+    renderInputs();
+    render();
+</script>
+
+</body>
+</html>
