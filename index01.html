@@ -17,7 +17,6 @@
 </head>
 <body class="h-screen overflow-hidden flex flex-col p-6 relative">
 
-    <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
             <!-- 品牌專屬圓標 -->
@@ -40,7 +39,7 @@
                         </select>
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（極速雙軌並行載入）</p>
+                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（0.1秒極速直連架構）</p>
             </div>
         </div>
         
@@ -54,7 +53,6 @@
         </button>
     </header>
 
-    <!-- 主顯示區 -->
     <main class="flex-1 flex space-x-6 overflow-hidden">
         
         <!-- 左側：保養套餐表格 -->
@@ -130,7 +128,6 @@
             </div>
         </section>
 
-        <!-- 右側：零件圖片展示牆 -->
         <section class="w-5/12 flex flex-col space-y-4 overflow-hidden">
             <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-5 flex flex-col overflow-hidden shadow-2xl">
                 <h3 class="text-sm font-semibold text-gray-400 mb-4 tracking-wider flex items-center">
@@ -150,7 +147,6 @@
 
     </main>
 
-    <!-- 點擊燈箱彈出視窗 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-4xl font-light focus:outline-none">&times;</button>
         <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
@@ -168,74 +164,18 @@
 
     <script>
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
-        const INVENTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQe7p6Eh_TNUQMJjwaerFPf-V3ihBDJ2UKrzdPehSlXYi5CjQCCiWeTQ6co0QQR2pkMpPPYN7Fw9cjO/pub?gid=453721344&single=true&output=csv";
 
         let dynamicModelsData = []; 
-        let inventoryMap = {}; 
-        let isInventoryReady = false;
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        function cleanKey(val) {
-            if (!val) return "";
-            let s = val.toString().trim();
-            if (/^[0-9]+(\.[0-9]+)?[eE][+-]?[0-9]+$/.test(s)) {
-                try { s = Number(s).toFixed(0); } catch(e) {}
-            }
-            s = s.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            return s.replace(/^0+/, ''); // 雙向消除前導 0
-        }
-
-        // 前端本地極速解析庫存表
-        async function fetchInventoryLocal() {
-            try {
-                const res = await fetch(INVENTORY_CSV_URL);
-                const text = await res.text();
-                const lines = text.split(/\r?\n/);
-                const map = {};
-
-                for (let i = 19; i < lines.length; i++) {
-                    const line = lines[i];
-                    if (!line) continue;
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                    if (cols.length < 10) continue;
-
-                    const rawPartNo = cols[3]; // D 欄：零件代號
-                    if (!rawPartNo) continue;
-
-                    const key = cleanKey(rawPartNo);
-                    const rawKey = rawPartNo.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                    const loc = cols[6] || "";                            // G 欄：儲位#
-                    const stock = parseFloat(cols[9]) || 0;               // J 欄：庫存
-                    const price = cols[22] ? (parseFloat(cols[22]) || 0) : 0; // W 欄：訂價
-
-                    const data = { stock, price, location: loc };
-                    if (key) map[key] = data;
-                    if (rawKey) map[rawKey] = data;
-                }
-
-                inventoryMap = map;
-                isInventoryReady = true;
-
-                // 若保養架構已完成渲染，庫存與價格立即無感注入
-                if (currentPackageKey && allParsedPackages[currentPackageKey]) {
-                    renderCurrentView();
-                }
-            } catch (err) {
-                console.error("本地加載庫存失敗:", err);
-            }
-        }
-
         async function initializeDynamicSheets() {
             const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
             
-            // 雙軌並行：背景抓取外部庫存
-            fetchInventoryLocal();
-
             try {
                 tabsContainer.innerHTML = '<span class="text-sm text-gray-500">正在同步試算表分頁...</span>';
                 
@@ -273,7 +213,7 @@
                 return `<option value="${brand}">${brand}</option>`;
             }).join('');
 
-            // 預設鎖定在 PROJECT 品牌
+            // 預設鎖定 PROJECT 品牌
             if (availableBrands.includes("PROJECT")) {
                 brandSelect.value = "PROJECT";
             }
@@ -337,6 +277,7 @@
             if (!selectedModelObj) return;
 
             try {
+                // 原生直讀單一分頁 (0.1 秒極速)
                 const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(selectedModelObj.sheetName) + "&t=" + Date.now();
                 const response = await fetch(targetUrl);
                 const csvText = await response.text();
@@ -391,10 +332,12 @@
                     const discount = cols[5] || "1";
                     const subtotal = cols[6] || "0";
                     const location = cols[7] || ""; 
+                    // I 欄為即時庫存 (索引 8)，J 欄為說明 (索引 9)
+                    const stock = cols[8] || ""; 
                     const description = cols[9] || ""; 
 
                     packages[currentPackageName].items.push({
-                        attr, partId, name, price, qty, discount, subtotal, location, description
+                        attr, partId, name, price, qty, discount, subtotal, location, stock, description
                     });
                 }
             });
@@ -443,12 +386,7 @@
             }
 
             currentPackageKey = key;
-            renderCurrentView();
-        }
-
-        function renderCurrentView() {
-            const pkg = allParsedPackages[currentPackageKey];
-            if (!pkg) return;
+            const pkg = allParsedPackages[key];
 
             const brand = selectedModelObj ? selectedModelObj.brand : "";
             const isCitroen = brand === "CITROËN";
@@ -478,47 +416,28 @@
 
             pkg.items.forEach(item => {
                 const isLabor = item.attr === "工資";
-                let displayPrice = parseFloat(item.price) || 0;
-                let displayQty = parseFloat(item.qty) || 1;
-                let displayDiscount = parseFloat(item.discount) || 1;
-                let displayLocation = item.location || '-';
-                let stockBadge = '<span class="text-gray-600">-</span>';
-
-                // 前端對碰庫存與價格 (極速零延遲)
-                if (!isLabor && item.partId) {
-                    const cKey = cleanKey(item.partId);
-                    const rKey = item.partId.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                    const matchedStock = inventoryMap[cKey] || inventoryMap[rKey];
-
-                    if (matchedStock) {
-                        // 1. 訂價優先覆蓋 (W 欄大於 0 則以庫存表為主)
-                        if (matchedStock.price && matchedStock.price > 0) {
-                            displayPrice = matchedStock.price;
-                        }
-                        // 2. 儲位補入 (G 欄)
-                        if ((!displayLocation || displayLocation === '-') && matchedStock.location) {
-                            displayLocation = matchedStock.location;
-                        }
-                        // 3. J 欄庫存徽章判定
-                        const num = matchedStock.stock;
-                        if (num <= 0) {
-                            stockBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900 animate-pulse">缺料 (0)</span>';
-                        } else if (num <= 2) {
-                            stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950/80 text-amber-400 border border-amber-900">${num} (告急)</span>`;
-                        } else {
-                            stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-900">${num}</span>`;
-                        }
-                    } else if (isInventoryReady) {
-                        stockBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900">缺料 (0)</span>';
-                    }
-                }
-
+                const displayPrice = parseFloat(item.price) || 0;
+                const displayQty = parseFloat(item.qty) || 1;
+                const displayDiscount = parseFloat(item.discount) || 1;
                 const lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
 
                 if (isLabor) {
                     rawLaborSum += lineSubtotal;
                 } else {
                     rawPartsSum += lineSubtotal;
+                }
+
+                // 庫存燈號渲染 (直接讀取試算表 I 欄算好的庫存)
+                let stockBadge = '<span class="text-gray-600">-</span>';
+                if (!isLabor && item.stock !== "") {
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900 animate-pulse">缺料 (0)</span>';
+                    } else if (num <= 2) {
+                        stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950/80 text-amber-400 border border-amber-900">${num} (告急)</span>`;
+                    } else {
+                        stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-900">${num}</span>`;
+                    }
                 }
 
                 let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
@@ -538,7 +457,7 @@
                         <td class="p-3 text-right font-mono text-gray-300">${displayQty}</td>
                         <td class="p-3 text-right font-mono text-gray-400">${item.discount}</td>
                         <td class="p-3 text-right font-mono font-bold text-green-400">${lineSubtotal}</td>
-                        <td class="p-3 text-center font-mono text-amber-500 font-semibold">${displayLocation}</td>
+                        <td class="p-3 text-center font-mono text-amber-500 font-semibold">${item.location || '-'}</td>
                         <td class="p-3 text-center font-mono">${stockBadge}</td>
                     </tr>
                 `;
