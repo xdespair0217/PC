@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法系車專業多車型保養看板 (PEUGEOT / CITROËN / 罐頭專案)</title>
-    <!-- 使用 Tailwind CSS 打造高質感暗色風格 -->
+    <title>法系車專業多車型保養看板</title>
+    <!-- Tailwind CSS 暗色風格 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -20,10 +20,8 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
-            <!-- 品牌專屬圓標 -->
             <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
             <div>
-                <!-- 兩欄式動態聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
@@ -37,15 +35,13 @@
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
                         <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
-                            <!-- 由 JavaScript 根據試算表分頁動態生成 -->
                         </select>
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（動態分頁即時讀取）</p>
+                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（動態庫存即時比對連線）</p>
             </div>
         </div>
         
-        <!-- 套餐切換鈕區域 -->
         <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
             <span class="text-sm text-gray-500">正在同步試算表分頁...</span>
         </div>
@@ -79,11 +75,11 @@
                             <th class="p-3 text-right">數量</th>
                             <th class="p-3 text-right">打折</th>
                             <th class="p-3 text-right">加總</th>
-                            <th class="p-3 text-center rounded-r-md">層架</th>
+                            <th class="p-3 text-center">層架</th>
+                            <th class="p-3 text-center rounded-r-md">即時庫存</th>
                         </tr>
                     </thead>
                     <tbody id="table-rows">
-                        <!-- 資料由 JavaScript 動態生成 -->
                     </tbody>
                 </table>
             </div>
@@ -105,7 +101,6 @@
                     </div>
                 </div>
 
-                <!-- 零件折扣趴數輸入框 -->
                 <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
                     <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
                     <input 
@@ -139,15 +134,13 @@
                     <span class="mr-2">🔧</span>套餐内含零件圖解 (點擊表格高亮，點擊圖片彈出大圖)
                 </h3>
                 <div id="image-grid" class="flex-1 grid grid-cols-2 gap-4 overflow-y-auto custom-scrollbar p-1 align-content-start">
-                    <!-- 圖片卡片由 JavaScript 動態生成 -->
                 </div>
             </div>
 
-            <!-- 備註說明區 -->
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
                 <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
-                    請技師依照 PEUGEOT / CITROËN 原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
+                    請技師依照原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
                 </p>
             </div>
         </section>
@@ -171,9 +164,6 @@
     </div>
 
     <script>
-        // ==========================================================
-        // 🎯【Google Apps Script Web API 網址】
-        // ==========================================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
 
         let dynamicModelsData = []; 
@@ -183,7 +173,6 @@
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        // 初始化分頁清單
         async function initializeDynamicSheets() {
             const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
@@ -200,7 +189,7 @@
                 dynamicModelsData = await response.json();
                 
                 if (!Array.isArray(dynamicModelsData) || dynamicModelsData.length === 0) {
-                    throw new Error("未能讀取到任何分頁資訊");
+                    throw new Error("未能讀取到任何符合命名規格的分頁");
                 }
 
                 statusBadge.innerText = "連線正常";
@@ -211,7 +200,7 @@
                 console.error("載入分頁清單失敗:", error);
                 statusBadge.innerText = "連線失敗";
                 statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2.5 py-0.5 rounded-full font-semibold";
-                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請確認網路或試算表狀態";
+                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請確認分頁命名是否有加 P_ 或 C_";
                 tabsContainer.innerHTML = '<span class="text-sm text-red-400">分頁同步失敗</span>';
             }
         }
@@ -225,11 +214,7 @@
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
 
             brandSelect.innerHTML = availableBrands.map(brand => {
-                let displayName = brand;
-                if (brand === "PEUGEOT") displayName = "PEUGEOT (寶獅)";
-                else if (brand === "CITROËN") displayName = "CITROËN (雪鐵龍)";
-                else if (brand === "PROJECT") displayName = "罐頭專案零件";
-                return `<option value="${brand}">${displayName}</option>`;
+                return `<option value="${brand}">${brand}</option>`;
             }).join('');
 
             updateModelOptions();
@@ -275,11 +260,10 @@
                 brandLogo.className = "w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-sm text-gray-500">正在讀取雲端資料...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-sm text-gray-500">正在讀取雲端資料與即時庫存...</span>';
             fetchSheetData();
         }
 
-        // 透過 GAS API 直接提取當前分頁 CSV
         async function fetchSheetData() {
             if (!selectedModelObj) return;
 
@@ -289,7 +273,7 @@
                 const csvText = await response.text();
                 parseExcelCSV(csvText);
             } catch (error) {
-                console.error("抓取雲端資料失敗:", error);
+                console.error("抓取資料失敗:", error);
                 document.getElementById('current-package-title').innerText = "❌ 雲端資料加載失敗，請檢查網路連線";
                 clearDisplay();
             }
@@ -339,11 +323,13 @@
                     const subtotal = cols[6] || "";
                     const location = cols[7] || ""; 
                     const description = cols[9] || ""; 
+                    // 後端附加的即時庫存欄位
+                    const stock = cols[cols.length - 1] !== undefined ? cols[cols.length - 1] : "";
 
                     const cleanSubtotal = parseFloat(subtotal.replace(/[^0-9.-]+/g, "")) || 0;
 
                     packages[currentPackageName].items.push({
-                        attr, partId, name, price, qty, discount, subtotal, cleanSubtotal, location, description
+                        attr, partId, name, price, qty, discount, subtotal, cleanSubtotal, location, description, stock
                     });
                 }
             });
@@ -433,6 +419,19 @@
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
                 if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
+                // 庫存狀態徽章
+                let stockBadge = '<span class="text-gray-600">-</span>';
+                if (!isLabor && item.stock !== "") {
+                    const stockNum = parseFloat(item.stock);
+                    if (isNaN(stockNum) || stockNum <= 0) {
+                        stockBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900 animate-pulse">缺料 (0)</span>';
+                    } else if (stockNum <= 2) {
+                        stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950/80 text-amber-400 border border-amber-900">${stockNum} (告急)</span>`;
+                    } else {
+                        stockBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-900">${stockNum}</span>`;
+                    }
+                }
+
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
                         <td class="p-3">
@@ -447,6 +446,7 @@
                         <td class="p-3 text-right font-mono text-gray-400">${item.discount}</td>
                         <td class="p-3 text-right font-mono font-bold text-green-400">${item.subtotal}</td>
                         <td class="p-3 text-center font-mono text-amber-500 font-semibold">${item.location || '-'}</td>
+                        <td class="p-3 text-center font-mono">${stockBadge}</td>
                     </tr>
                 `;
 
@@ -569,7 +569,6 @@
             if (event.key === 'Escape') closeLightbox();
         });
 
-        // 啟動排版並向 Apps Script 請求最新分頁
         initializeDynamicSheets();
     </script>
 </body>
