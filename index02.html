@@ -166,9 +166,9 @@
     </main>
 
     <!-- 剪貼簿複製提示浮窗 (Toast) -->
-    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-emerald-950 border border-emerald-600 text-emerald-300 px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
-        <span>📋</span>
-        <span id="copy-toast-msg">已複製零件資訊至剪貼簿！</span>
+    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-[#161b22] border border-amber-500/80 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+        <span class="text-amber-400 text-sm">📋</span>
+        <span id="copy-toast-msg">已複製項目段落明細！</span>
     </div>
 
     <!-- Obsidian 標籤雲彈出視窗 -->
@@ -504,19 +504,19 @@
                     price: displayPrice,
                     qty: displayQty,
                     subtotal: lineSubtotal,
-                    location: item.location || '無',
-                    stock: item.stock !== "" ? item.stock : '無紀錄'
+                    location: item.location || '',
+                    stock: item.stock !== "" ? item.stock : ''
                 }));
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
                         <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
                         
-                        <!-- 料號欄位：點擊觸發段落資訊複製 -->
+                        <!-- 料號欄位：點擊觸發精美圖示排版段落複製 -->
                         <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
-                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目完整段落資訊">
+                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目圖文格式明細">
                                 ${item.partId}
-                                <span class="text-[10px] text-gray-500 opacity-60">📋</span>
+                                <span class="text-[10px] text-amber-500/80">📋</span>
                             </span>
                         </td>
                         
@@ -559,35 +559,63 @@
         }
 
         /* -------------------------------------------------------------
-           段落資訊複製與 Toast 提示模組
+           升級版：圖示化段落排版複製模組 (工單/LINE 最佳化)
         ------------------------------------------------------------- */
         function copyRowInfo(event, encodedData) {
-            event.stopPropagation(); // 防止觸發整列點擊
+            event.stopPropagation();
             try {
                 const item = JSON.parse(decodeURIComponent(encodedData));
+                const isLabor = item.attr === "工資";
                 
-                // 結構化段落文本 (清晰換行、排版工整)
+                // 動態判斷庫存燈號與文字
+                let stockStatus = "🟢 庫存正常";
+                let stockDisplay = item.stock || "0";
+                if (!isLabor && item.stock !== "") {
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockStatus = "🔴 缺料中 (0 件)";
+                        stockDisplay = "0 件 (⚠️ 現場缺料)";
+                    } else if (num <= 2) {
+                        stockStatus = `🟡 庫存告急 (${num} 件)`;
+                        stockDisplay = `${num} 件 (⚠️ 庫存告急)`;
+                    } else {
+                        stockStatus = `🟢 充足 (${num} 件)`;
+                        stockDisplay = `${num} 件 (充足)`;
+                    }
+                } else if (isLabor) {
+                    stockDisplay = "不適用 (標準工時項目)";
+                }
+
+                // 產出當下時間戳記
+                const now = new Date();
+                const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                // 精美圖示段落排版 (含邊框標頭與清晰項目圖示)
                 const formattedText = 
-`【零件維護資訊】
-• 料號：${item.partId}
-• 品名：${item.name} (${item.attr})
-• 單價：$ ${item.price.toLocaleString()}
-• 數量：${item.qty}
-• 加總：$ ${item.subtotal.toLocaleString()}
-• 儲位層架：${item.location}
-• 即時庫存：${item.stock}`;
+`┏━━━━━━━━━━━━━━━━━━━━┓
+   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
+┗━━━━━━━━━━━━━━━━━━━━┛
+🔹【${isLabor ? '工項代碼' : '零件料號'}】${item.partId}
+${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
+💵【標準單價】$ ${item.price.toLocaleString()}
+🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
+💰【加總金額】$ ${item.subtotal.toLocaleString()}
+📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
+${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
+━━━━━━━━━━━━━━━━━━━━
+⏱️ 查詢時間：${timeStr}
+🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
 
                 navigator.clipboard.writeText(formattedText).then(() => {
-                    showCopyToast(`已複製料號 [${item.partId}] 段落資訊！`);
+                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
                 }).catch(() => {
-                    // 相容舊型環境
                     const textarea = document.createElement('textarea');
                     textarea.value = formattedText;
                     document.body.appendChild(textarea);
                     textarea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textarea);
-                    showCopyToast(`已複製料號 [${item.partId}] 段落資訊！`);
+                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
                 });
             } catch (e) {
                 console.error("複製失敗:", e);
