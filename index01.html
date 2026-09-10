@@ -73,7 +73,7 @@
                         <thead>
                             <tr class="border-b border-gray-700 text-gray-400 bg-[#0d1117] sticky top-0 z-10">
                                 <th class="p-2.5 rounded-l-md">屬性</th>
-                                <th class="p-2.5">料號</th>
+                                <th class="p-2.5">料號 (點擊複製)</th>
                                 <th class="p-2.5">項目名稱</th>
                                 <th class="p-2.5 text-right">單價</th>
                                 <th class="p-2.5 text-right">數量</th>
@@ -127,11 +127,9 @@
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (極致緊湊優化版) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
-                
-                <!-- 頂部標題與標籤雲按鈕並列，空間不浪費 -->
                 <div class="flex justify-between items-center mb-2.5 shrink-0">
                     <h2 class="text-sm font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm"></span>原廠 TSB 與技術手冊
@@ -144,21 +142,17 @@
                     </div>
                 </div>
 
-                <!-- 搜尋列完全展寬 -->
                 <div class="relative mb-2 shrink-0">
                     <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
                 </div>
 
-                <!-- 標籤列：自適應緊湊高度 (不灌水、最高兩行、超過優雅折疊) -->
                 <div id="doc-tags-container" class="flex flex-wrap gap-1 mb-2.5 max-h-[58px] overflow-hidden shrink-0 border-b border-gray-800/80 pb-2"></div>
 
-                <!-- 文獻卡片列表 -->
                 <div id="docs-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                     <div class="text-center py-8 text-gray-500 text-xs">正在載入文獻...</div>
                 </div>
             </div>
 
-            <!-- 右側 PDF 預覽 -->
             <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative">
                 <div id="pdf-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-500">
                     <div class="text-4xl mb-2 opacity-40">📄</div>
@@ -170,6 +164,12 @@
         </section>
 
     </main>
+
+    <!-- 剪貼簿複製提示浮窗 (Toast) -->
+    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-[#161b22] border border-amber-500/80 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+        <span class="text-amber-400 text-sm">📋</span>
+        <span id="copy-toast-msg">已複製項目段落明細！</span>
+    </div>
 
     <!-- Obsidian 標籤雲彈出視窗 -->
     <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
@@ -496,10 +496,30 @@
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
                 if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
+                // 將完整資訊物件編碼，點擊料號時供快速複製
+                const rowInfoData = encodeURIComponent(JSON.stringify({
+                    attr: item.attr,
+                    partId: item.partId,
+                    name: item.name,
+                    price: displayPrice,
+                    qty: displayQty,
+                    subtotal: lineSubtotal,
+                    location: item.location || '',
+                    stock: item.stock !== "" ? item.stock : ''
+                }));
+
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
                         <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
-                        <td class="p-2.5 font-mono text-gray-300">${item.partId}</td>
+                        
+                        <!-- 料號欄位：點擊觸發精美圖示排版段落複製 -->
+                        <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
+                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目圖文格式明細">
+                                ${item.partId}
+                                <span class="text-[10px] text-amber-500/80">📋</span>
+                            </span>
+                        </td>
+                        
                         <td class="p-2.5 text-white font-medium">${item.name}</td>
                         <td class="p-2.5 text-right font-mono text-gray-300">${displayPrice}</td>
                         <td class="p-2.5 text-right font-mono text-gray-300">${displayQty}</td>
@@ -536,6 +556,86 @@
             document.getElementById('table-rows').innerHTML = tableHTML;
             document.getElementById('image-grid').innerHTML = gridHTML;
             calculateTotalsWithDiscount();
+        }
+
+        /* -------------------------------------------------------------
+           升級版：圖示化段落排版複製模組 (工單/LINE 最佳化)
+        ------------------------------------------------------------- */
+        function copyRowInfo(event, encodedData) {
+            event.stopPropagation();
+            try {
+                const item = JSON.parse(decodeURIComponent(encodedData));
+                const isLabor = item.attr === "工資";
+                
+                // 動態判斷庫存燈號與文字
+                let stockStatus = "🟢 庫存正常";
+                let stockDisplay = item.stock || "0";
+                if (!isLabor && item.stock !== "") {
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockStatus = "🔴 缺料中 (0 件)";
+                        stockDisplay = "0 件 (⚠️ 現場缺料)";
+                    } else if (num <= 2) {
+                        stockStatus = `🟡 庫存告急 (${num} 件)`;
+                        stockDisplay = `${num} 件 (⚠️ 庫存告急)`;
+                    } else {
+                        stockStatus = `🟢 充足 (${num} 件)`;
+                        stockDisplay = `${num} 件 (充足)`;
+                    }
+                } else if (isLabor) {
+                    stockDisplay = "不適用 (標準工時項目)";
+                }
+
+                // 產出當下時間戳記
+                const now = new Date();
+                const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                // 精美圖示段落排版 (含邊框標頭與清晰項目圖示)
+                const formattedText = 
+`┏━━━━━━━━━━━━━━━━━━━━┓
+   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
+┗━━━━━━━━━━━━━━━━━━━━┛
+🔹【${isLabor ? '工項代碼' : '零件料號'}】${item.partId}
+${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
+💵【標準單價】$ ${item.price.toLocaleString()}
+🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
+💰【加總金額】$ ${item.subtotal.toLocaleString()}
+📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
+${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
+━━━━━━━━━━━━━━━━━━━━
+⏱️ 查詢時間：${timeStr}
+🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
+
+                navigator.clipboard.writeText(formattedText).then(() => {
+                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
+                }).catch(() => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = formattedText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
+                });
+            } catch (e) {
+                console.error("複製失敗:", e);
+            }
+        }
+
+        let toastTimer = null;
+        function showCopyToast(msg) {
+            const toast = document.getElementById('copy-toast');
+            const toastMsg = document.getElementById('copy-toast-msg');
+            toastMsg.innerText = msg;
+
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 1800);
         }
 
         function calculateTotalsWithDiscount() {
