@@ -21,7 +21,7 @@
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
             <!-- 品牌專屬圓標 -->
-            <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
+            <div id="brand-logo" class="w-12 h-12 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
             <div>
                 <!-- 兩欄式動態聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
@@ -36,8 +36,7 @@
 
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
-                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
-                            <!-- 由 JavaScript 動態生成 -->
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[160px]">
                         </select>
                     </div>
                 </div>
@@ -62,12 +61,11 @@
         <section class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-5 overflow-hidden shadow-2xl">
             <div class="flex justify-between items-center mb-3">
                 <h2 id="current-package-title" class="text-lg font-bold text-gray-100 flex items-center">
-                    <span class="w-2 h-5 bg-[#48bb78] inline-block mr-2 rounded-sm"></span>連線成功，正在排版中...
+                    <span class="w-2 h-5 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>連線成功，正在排版中...
                 </h2>
                 <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2.5 py-0.5 rounded-full font-semibold">連線正常</span>
             </div>
 
-            <!-- 表格主體 -->
             <div class="flex-1 overflow-y-auto custom-scrollbar">
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -105,7 +103,6 @@
                     </div>
                 </div>
 
-                <!-- 零件折扣趴數輸入框 -->
                 <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
                     <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
                     <input 
@@ -116,13 +113,12 @@
                         max="100" 
                         step="5"
                         oninput="calculateTotalsWithDiscount()"
-                        class="w-12 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#48bb78] focus:border-emerald-500 font-mono"
+                        class="w-12 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] focus:border-amber-500 font-mono"
                     >
                     <span class="text-[11px] text-gray-300 font-bold">%</span>
                 </div>
             </div>
 
-            <!-- 底部總計金額 -->
             <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center">
                 <div class="flex flex-col">
                     <span class="text-gray-400 text-sm font-medium">套餐應付總金額 (Grand Total)</span>
@@ -142,9 +138,8 @@
                 </div>
             </div>
 
-            <!-- 備註說明區 -->
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
-                <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
+                <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
                     請技師依照原廠技術手冊與規範進行更換。機油添加完畢後，請透過儀表選單、中控系統或診斷電腦進行油位校正及保養週期歸零。
                 </p>
@@ -215,7 +210,6 @@
             initializeDynamicSheets();
         }
 
-        // 純英文品牌選單渲染
         function renderBrandSelect() {
             const brandSelect = document.getElementById('brand-select');
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
@@ -224,10 +218,15 @@
                 return `<option value="${brand}">${brand}</option>`;
             }).join('');
 
-            updateModelOptions();
+            // 預設鎖定 PROJECT 品牌
+            if (availableBrands.includes("PROJECT")) {
+                brandSelect.value = "PROJECT";
+            }
+
+            updateModelOptions(true);
         }
 
-        function updateModelOptions() {
+        function updateModelOptions(isInitial = false) {
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
@@ -239,8 +238,16 @@
             }).join('');
 
             if (matchedModels.length > 0) {
-                modelSelect.value = matchedModels[0].sheetName;
-                executeModelSwitch(matchedModels[0].sheetName);
+                let defaultTarget = matchedModels[0].sheetName;
+
+                // 若為初次載入，優先尋找通用專案分頁
+                if (isInitial && currentBrand === "PROJECT") {
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
+                    if (foundPrj) defaultTarget = foundPrj.sheetName;
+                }
+
+                modelSelect.value = defaultTarget;
+                executeModelSwitch(defaultTarget);
             } else {
                 clearDisplay();
             }
