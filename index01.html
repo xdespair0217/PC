@@ -13,18 +13,18 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
         .active-row { background-color: #1f242c !important; border-left: 4px solid #f59e0b !important; }
         .active-card { border-color: #f59e0b !important; background-color: #21262d !important; transform: scale(1.02); }
-        .active-doc { border-color: #ef4444 !important; background-color: #1f242c !important; }
+        .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
     </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col p-5 relative">
+<body class="h-screen overflow-hidden flex flex-col p-4 relative">
 
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <!-- 品牌專屬圓標 -->
+            <!-- 品牌圓標 -->
             <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
             <div>
-                <!-- 兩欄式動態聯動下拉選單 -->
+                <!-- 動態下拉選單 -->
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <!-- 主功能模式切換鈕 -->
+            <!-- 主功能切換鈕 -->
             <div class="flex bg-[#161b22] p-1 rounded-lg border border-gray-700">
                 <button id="btn-mode-package" onclick="switchMainMode('package')" class="px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow">
                     🛠️ 保養套餐看板
@@ -54,7 +54,7 @@
             </div>
         </div>
         
-        <!-- 套餐切換鈕區域 -->
+        <!-- 套餐切換標籤列 -->
         <div id="package-tabs" class="flex flex-wrap gap-1.5 max-w-2xl justify-start lg:justify-center">
             <span class="text-xs text-gray-500">正在同步試算表分頁...</span>
         </div>
@@ -64,13 +64,12 @@
         </button>
     </header>
 
-    <!-- 主顯示區 -->
+    <!-- 主工作區 -->
     <main class="flex-1 flex overflow-hidden">
         
-        <!-- 視圖一：保養套餐看板 (左表格 + 右圖牆) -->
+        <!-- 視圖一：保養套餐看板 (左表格 + 右零件圖) -->
         <section id="package-view" class="flex-1 flex space-x-4 overflow-hidden">
             
-            <!-- 左側：保養套餐表格 -->
             <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2 shrink-0">
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
@@ -79,7 +78,6 @@
                     <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
                 </div>
 
-                <!-- 表格主體 -->
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
                     <table class="w-full text-left text-xs">
                         <thead>
@@ -100,7 +98,6 @@
                     </table>
                 </div>
 
-                <!-- 工資、零件雙小計明細區 -->
                 <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center gap-2 text-xs text-gray-400 shrink-0">
                     <div class="flex flex-wrap space-x-4">
                         <div>工資小計：<span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span></div>
@@ -124,7 +121,6 @@
                     </div>
                 </div>
 
-                <!-- 底部總計金額 -->
                 <div class="border-t border-gray-800 pt-2 mt-2 flex justify-between items-center shrink-0">
                     <div class="flex flex-col">
                         <span class="text-gray-400 text-xs font-medium">套餐應付總金額</span>
@@ -134,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- 右側：零件圖片展示牆 -->
             <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
                 <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                     <h3 class="text-xs font-semibold text-gray-400 mb-3 tracking-wider flex items-center shrink-0">
@@ -154,10 +149,10 @@
 
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (左固定 380px 清單 + 右大版面 PDF 預覽) -->
+        <!-- 視圖二：技術文獻資料庫 (水平標準分欄：左 380px + 右自適應撐滿) -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             
-            <!-- 左側：清單面板 -->
+            <!-- 左側清單 -->
             <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-3 shrink-0">
                     <h2 class="text-sm font-bold text-gray-100 flex items-center">
@@ -166,33 +161,33 @@
                     <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份文件</span>
                 </div>
 
-                <!-- 搜尋列 -->
+                <!-- 搜尋框 -->
                 <div class="relative mb-3 shrink-0">
                     <input 
                         type="text" 
                         id="doc-search-input" 
                         oninput="filterDocs()" 
-                        placeholder="🔍 搜尋手冊標題、關鍵字或料號..." 
+                        placeholder="🔍 搜尋手冊標題、分類或料號..." 
                         class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500"
                     >
                 </div>
 
-                <!-- 標籤列 (支援橫向與多行折疊) -->
+                <!-- 標籤分類鈕 -->
                 <div id="doc-tags-container" class="flex flex-wrap gap-1.5 mb-3 overflow-y-auto max-h-24 custom-scrollbar shrink-0">
                 </div>
 
-                <!-- 文獻列表 (捲軸區) -->
+                <!-- 文獻卡片列表 -->
                 <div id="docs-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                     <div class="text-center py-8 text-gray-500 text-xs">正在載入文獻...</div>
                 </div>
             </div>
 
-            <!-- 右側：大版面預覽區 -->
+            <!-- 右側 PDF 預覽 -->
             <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative">
                 <div id="pdf-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-500">
                     <div class="text-4xl mb-2 opacity-40">📄</div>
                     <p class="text-sm font-bold text-gray-300">請選擇左側文件進行預覽</p>
-                    <p class="text-xs text-gray-500 mt-1">點擊左側檔案標題即可在此預覽原廠手冊 PDF</p>
+                    <p class="text-xs text-gray-500 mt-1">點擊左側卡片即可在此預覽原廠 PDF</p>
                 </div>
                 <iframe id="pdf-iframe" class="hidden w-full h-full rounded border-0 bg-[#0d1117]" src=""></iframe>
             </div>
@@ -201,7 +196,7 @@
 
     </main>
 
-    <!-- 點擊燈箱彈出視窗 -->
+    <!-- 零件大圖燈箱 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-3xl font-light focus:outline-none">&times;</button>
         <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
@@ -227,10 +222,8 @@
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        // 技術文獻資料緩存
         let rawDocsData = [];
         let activeDocTag = "ALL";
-        let activeDocIndex = -1;
 
         async function initializeDynamicSheets() {
             const tabsContainer = document.getElementById('package-tabs');
@@ -252,19 +245,19 @@
                 statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
                 
                 renderBrandSelect();
-                // 背景載入文獻資料
                 loadTechnicalDocs();
             } catch (error) {
                 console.error("載入分頁清單失敗:", error);
                 statusBadge.innerText = "連線失敗";
                 statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
-                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請檢查網路連線";
+                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請檢查連線";
                 tabsContainer.innerHTML = '<span class="text-xs text-red-400">分頁同步失敗</span>';
             }
         }
 
         function reloadAllData() {
             initializeDynamicSheets();
+            loadTechnicalDocs();
         }
 
         function renderBrandSelect() {
@@ -327,11 +320,6 @@
 
             document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">正在讀取套餐資料...</span>';
             fetchSheetData();
-
-            // 若目前在文獻模式，隨車型切換文獻過濾
-            if (!document.getElementById('docs-view').classList.contains('hidden')) {
-                filterDocs();
-            }
         }
 
         async function fetchSheetData() {
@@ -486,7 +474,6 @@
                     rawPartsSum += lineSubtotal;
                 }
 
-                // 庫存燈號渲染 (讀取 I 欄)
                 let stockBadge = '<span class="text-gray-600">-</span>';
                 if (!isLabor && item.stock !== "") {
                     const num = parseFloat(item.stock);
@@ -559,7 +546,7 @@
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
                 .active-row { background-color: #1f242c !important; border-left: 4px solid ${highlightColor} !important; }
                 .active-card { border-color: ${highlightColor} !important; background-color: #21262d !important; transform: scale(1.02); }
-                .active-doc { border-color: #ef4444 !important; background-color: #1f242c !important; }
+                .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
             `;
 
             calculateTotalsWithDiscount();
@@ -638,7 +625,7 @@
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統邏輯
+           技術文獻系統模組
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -675,29 +662,14 @@
             }
         }
 
-        // 日期正規化防呆 (將長字串還原為 YYYY-MM-DD)
-        function formatDocDate(rawDate) {
-            if (!rawDate) return "";
-            const str = rawDate.toString().trim();
-            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-            
-            const d = new Date(str);
-            if (!isNaN(d.getTime())) {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-            return str.split('T')[0];
-        }
-
         function renderDocTags() {
             const container = document.getElementById('doc-tags-container');
             const allTags = new Set();
 
             rawDocsData.forEach(doc => {
                 if (doc.category) {
-                    doc.category.split(/[\/,]/).forEach(t => {
+                    // 同時支援空白鍵、斜線、逗號切割標籤
+                    doc.category.split(/[\/, ]/).forEach(t => {
                         const trimmed = t.trim();
                         if (trimmed) allTags.add(trimmed);
                     });
@@ -736,26 +708,16 @@
 
         function filterDocs() {
             const searchKeyword = document.getElementById('doc-search-input').value.trim().toLowerCase();
-            const currentModelName = selectedModelObj ? selectedModelObj.model : "";
-            const currentBrandName = selectedModelObj ? selectedModelObj.brand : "";
 
             const filtered = rawDocsData.filter(doc => {
                 const matchTag = (activeDocTag === "ALL") || (doc.category && doc.category.includes(activeDocTag));
                 const matchSearch = !searchKeyword || 
                     (doc.title && doc.title.toLowerCase().includes(searchKeyword)) ||
                     (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
+                    (doc.keyword && doc.keyword.toLowerCase().includes(searchKeyword)) ||
                     (doc.date && doc.date.toLowerCase().includes(searchKeyword));
 
-                let matchModel = true;
-                if (doc.model && doc.model.trim() !== "") {
-                    const docTarget = doc.model.trim().toLowerCase();
-                    matchModel = docTarget.includes("通用") || 
-                                 docTarget.includes("all") || 
-                                 docTarget.includes(currentModelName.toLowerCase()) || 
-                                 docTarget.includes(currentBrandName.toLowerCase());
-                }
-
-                return matchTag && matchSearch && matchModel;
+                return matchTag && matchSearch;
             });
 
             renderDocsList(filtered);
@@ -772,16 +734,15 @@
             }
 
             listContainer.innerHTML = docs.map((doc, index) => {
-                const cleanDate = formatDocDate(doc.date);
                 return `
-                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md">
+                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
                         <div class="flex items-center justify-between">
                             <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
                                 ${doc.category || '未分類'}
                             </span>
-                            <span class="text-[10px] text-gray-500 font-mono">${cleanDate}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date}</span>
                         </div>
-                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2">${doc.title}</h4>
+                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
                         <div class="flex justify-end pt-1">
                             <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
                                 預覽 <span class="ml-1 text-[8px]">▶</span>
@@ -803,7 +764,6 @@
             const iframe = document.getElementById('pdf-iframe');
 
             let embedUrl = url;
-            // Google Drive 連結預覽相容轉換
             if (url.includes('drive.google.com') && url.includes('/view')) {
                 embedUrl = url.replace('/view', '/preview');
             }
@@ -817,7 +777,7 @@
             if (event.key === 'Escape') closeLightbox();
         });
 
-        // 啟動主流程
+        // 啟動流程
         initializeDynamicSheets();
     </script>
 </body>
