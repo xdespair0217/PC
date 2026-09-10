@@ -26,7 +26,6 @@
         }
         .controls h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid #2b5797; padding-bottom: 8px; }
         
-        /* 雲端日報表資料狀態列 */
         .sync-bar {
             background: #f0f4f8;
             border: 1px solid #d0dbe5;
@@ -56,7 +55,6 @@
         .form-group label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
         .form-group input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
         
-        /* 車牌特別醒目標示 */
         .highlight-input {
             border: 1.5px solid #2b5797 !important;
             background: #fbfdff;
@@ -101,7 +99,7 @@
         .btn-sync { background: #0288d1; color: #fff; padding: 6px 12px; }
         .btn-print { background: #2b5797; color: #fff; font-size: 1rem; margin-left: auto; }
 
-        /* 列印預覽區域 (原廠單據排版) */
+        /* 列印預覽區域 */
         .print-preview {
             background: #ffffff;
             padding: 30px 40px;
@@ -145,7 +143,6 @@
         .text-right { text-align: right !important; }
         .text-center { text-align: center !important; }
 
-        /* 列印模式特定設定 */
         @media print {
             body { 
                 background: #fff; 
@@ -168,46 +165,41 @@
 <body>
 
 <div class="container">
-    <!-- 編輯面板 -->
     <div class="controls">
         <h2>工時資料編輯面板</h2>
         
-        <!-- Google 試算表 CSV 串接狀態列 -->
         <div class="sync-bar">
-            <span style="font-weight: bold; color: #0288d1;">📊 日報表雲端 CSV:</span>
+            <span style="font-weight: bold; color: #0288d1;">📊 車籍工單 CSV 網址:</span>
             <input type="text" id="sheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRTY8U3Py3Rb5dH3v6RJDi-3Un7mEBM5t06oxtqdwXbgfJa0sJ3axhwyumrKqSSRu5gz4aRyNHmhF33/pub?gid=1615272433&single=true&output=csv">
             <button class="btn-sync" onclick="syncGoogleSheet()">🔄 重新整理雲端資料</button>
             <span id="syncStatus" style="color: #666; font-size: 0.8rem;">(初始化連線中...)</span>
         </div>
 
         <div class="form-grid">
-            <!-- 車牌欄位：綁定 datalist 即時建議 -->
             <div class="form-group">
                 <label style="color: #2b5797;">🔍 車牌 (輸入前綴自動推薦)</label>
-                <input type="text" id="carPlate" list="carPlateList" class="highlight-input" placeholder="例: CFN-9089" oninput="onCarPlateInput()">
-                <datalist id="carPlateList">
-                    <!-- 動態由程式碼注入建議清單 -->
-                </datalist>
+                <input type="text" id="carPlate" list="carPlateList" class="highlight-input" placeholder="例: RFT-9760" oninput="onCarPlateInput()">
+                <datalist id="carPlateList"></datalist>
             </div>
 
-            <div class="form-group"><label>單號編號 (工單號)</label><input type="text" id="docNo" value="B260800694" oninput="render()"></div>
+            <div class="form-group"><label>單號編號 (工單號)</label><input type="text" id="docNo" value="" oninput="render()"></div>
             <div class="form-group"><label>服務廠</label><input type="text" id="servicePlant" value="尚鵬汽車-內湖保養廠" oninput="render()"></div>
-            <div class="form-group"><label>工單類別</label><input type="text" id="workType" value="索賠" oninput="render()"></div>
-            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" value="29" oninput="render()"></div>
-            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" value="2026-07-23 15:49" oninput="render()"></div>
-            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" value="2026-07-28 16:08" oninput="render()"></div>
-            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" value="2029-07-23" oninput="render()"></div>
+            <div class="form-group"><label>工單類別</label><input type="text" id="workType" value="" oninput="render()"></div>
+            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" value="" oninput="render()"></div>
+            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" value="" oninput="render()"></div>
+            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" value="" oninput="render()"></div>
+            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" value="" oninput="render()"></div>
             
-            <div class="form-group"><label>車型</label><input type="text" id="carModel" value="WRANGLER RUBICON" oninput="render()"></div>
+            <div class="form-group"><label>車型</label><input type="text" id="carModel" value="" oninput="render()"></div>
             <div class="form-group"><label>年式</label><input type="text" id="carYear" value="2026" oninput="render()"></div>
-            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" value="1C4PJXFN4RW123456" oninput="render()"></div>
-            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" value="1C4PJXFN4RW" oninput="render()"></div>
-            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" value="1C4PJXFN4" oninput="render()"></div>
-            <div class="form-group"><label>車主</label><input type="text" id="owner" value="台灣客車股份有限公司" oninput="render()"></div>
-            <div class="form-group"><label>駕駛</label><input type="text" id="driver" value="王大明" oninput="render()"></div>
-            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" value="張智榮" oninput="render()"></div>
-            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" value="李專員" oninput="render()"></div>
-            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" value="2026-07-28 16:08:46" oninput="render()"></div>
+            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" value="" oninput="render()"></div>
+            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" value="" oninput="render()"></div>
+            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" value="" oninput="render()"></div>
+            <div class="form-group"><label>車主</label><input type="text" id="owner" value="" oninput="render()"></div>
+            <div class="form-group"><label>駕駛</label><input type="text" id="driver" value="" oninput="render()"></div>
+            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" value="" oninput="render()"></div>
+            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" value="" oninput="render()"></div>
+            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" value="" oninput="render()"></div>
             <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" oninput="render()"></div>
         </div>
 
@@ -240,7 +232,6 @@
         </div>
     </div>
 
-    <!-- 列印預覽輸出區域 -->
     <div class="print-preview">
         <div class="doc-title" id="outDocTitle">打卡記錄 - </div>
         
@@ -306,15 +297,23 @@
         'advisor', 'printTime', 'pageIndex'
     ];
 
-    // 車籍快取資料庫（由 Google 試算表 CSV 解析注入）
     let vehicleDatabase = [];
-
     let records = [
-        { date: '26-07-28', start: '13:55', end: '14:25', reason: '開工', code: '23020501', name: '前保險桿護罩 Rubicon/古基奇拆裝', stdHours: '0.5', tech: '林哲弘' },
-        { date: '26-07-28', start: '15:07', end: '16:08', reason: '開工', code: '97756555', name: '水箱護罩烤漆', stdHours: '1.0', tech: '林哲弘' }
+        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
     ];
 
-    // CSV 容錯拆分器（處理雙引號與逗號）
+    // 取得當前標準時間字串 (YYYY-MM-DD HH:mm:ss)
+    function getCurrentDateTime() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+    }
+
     function parseCSVLine(text) {
         let p = '', c = '', r = [];
         let q = false;
@@ -334,96 +333,103 @@
         return r;
     }
 
-    // 建立 datalist 下拉聯想項目
     function refreshDataList() {
         const datalist = document.getElementById('carPlateList');
         datalist.innerHTML = '';
         
-        // 排除外廠車/無牌代號以保持選單純淨
-        const validVehicles = vehicleDatabase.filter(v => v.plate && v.plate !== 'AAA-0000');
-        
-        validVehicles.forEach(v => {
+        vehicleDatabase.forEach(v => {
+            if (!v.plate) return;
             const opt = document.createElement('option');
             opt.value = v.plate;
-            opt.label = `[${v.docNo}] ${v.owner} (專員:${v.advisor})`;
+            opt.label = `[${v.docNo}] ${v.model} - ${v.owner}`;
             datalist.appendChild(opt);
         });
     }
 
-    // 當輸入車牌時，若精準匹配即自動帶入日報表對應資料
+    // 當選取或輸入車牌時：徹底覆蓋，無資料則留空，絕不殘留上一筆
     function onCarPlateInput() {
         const inputVal = document.getElementById('carPlate').value.trim().toUpperCase();
         const match = vehicleDatabase.find(v => v.plate.toUpperCase() === inputVal);
         
         if (match) {
-            if (match.docNo) document.getElementById('docNo').value = match.docNo;
-            if (match.workType) document.getElementById('workType').value = match.workType;
-            if (match.owner) document.getElementById('owner').value = match.owner;
-            if (match.mechanic) document.getElementById('mechanic').value = match.mechanic;
-            if (match.advisor) document.getElementById('advisor').value = match.advisor;
+            document.getElementById('docNo').value = match.docNo || '';
+            document.getElementById('workType').value = match.workType || '';
+            document.getElementById('mileage').value = match.mileage || '';
+            document.getElementById('openTime').value = match.openTime || '';
+            document.getElementById('finishTime').value = match.finishTime || '';
+            document.getElementById('carModel').value = match.model || '';
+            document.getElementById('vin').value = match.vin || '';
+            document.getElementById('engineNo').value = match.engineNo || '';
+            document.getElementById('bodyNo').value = match.bodyNo || '';
+            document.getElementById('owner').value = match.owner || '';
+            document.getElementById('driver').value = match.owner || '';
+            document.getElementById('advisor').value = match.advisor || '';
             if (match.plant) document.getElementById('servicePlant').value = '尚鵬汽車-' + match.plant;
             
-            // 同步技師名稱至工時紀錄
-            if (match.mechanic && records.length > 0) {
-                records.forEach(r => { if (!r.tech) r.tech = match.mechanic; });
-                renderInputs();
+            // 自動補上列印時間為當下
+            if (!document.getElementById('printTime').value) {
+                document.getElementById('printTime').value = getCurrentDateTime();
             }
         }
         render();
     }
 
-    // 同步 Google 試算表 CSV（專門對應 203 營業日報表格式）
     async function syncGoogleSheet() {
         const url = document.getElementById('sheetUrl').value.trim();
-        if (!url) {
-            alert('請提供有效的 CSV 連結！');
-            return;
-        }
+        if (!url) return;
 
         try {
-            document.getElementById('syncStatus').innerText = '正在自雲端抓取日報表...';
+            document.getElementById('syncStatus').innerText = '正在自雲端抓取 113BM01 工單清冊...';
             const res = await fetch(url);
             const text = await res.text();
             
             const lines = text.split(/\r?\n/).filter(r => r.trim() !== '');
-            
-            // 尋找欄位標題所在的行（包含「工單號碼」與「牌照號碼」）
-            let headerIdx = -1;
-            let colMap = { plate: 6, docNo: 4, workType: 3, owner: 7, advisor: 34, mechanic: 35, plant: 2 };
-
-            for (let i = 0; i < Math.min(lines.length, 25); i++) {
-                const cols = parseCSVLine(lines[i]);
-                if (cols.includes('牌照號碼') && cols.includes('工單號碼')) {
-                    headerIdx = i;
-                    colMap.plate = cols.indexOf('牌照號碼');
-                    colMap.docNo = cols.indexOf('工單號碼');
-                    colMap.workType = cols.indexOf('工單類別');
-                    colMap.owner = cols.indexOf('車主');
-                    colMap.advisor = cols.indexOf('服務專員');
-                    colMap.mechanic = cols.indexOf('承修技師');
-                    colMap.plant = cols.indexOf('服務廠');
-                    break;
-                }
+            if (lines.length <= 1) {
+                document.getElementById('syncStatus').innerText = '⚠️ 試算表無資料';
+                return;
             }
 
-            if (headerIdx === -1) {
-                // 若未抓到標題，使用 203 報表預設索引
-                headerIdx = 9;
-            }
+            const headerCols = parseCSVLine(lines[0]);
+            const getCol = (name, fallback) => {
+                const idx = headerCols.indexOf(name);
+                return idx !== -1 ? idx : fallback;
+            };
+
+            const colMap = {
+                plant: getCol('部門', 1),
+                openTime: getCol('開單時間', 2),
+                docNo: getCol('工單號碼', 3),
+                workType: getCol('工單類別', 4),
+                plate: getCol('牌照號碼', 5),
+                owner: getCol('車主', 6),
+                model: getCol('車型', 7),
+                mileage: getCol('里程', 8),
+                advisor: getCol('服務專員', 11),
+                finishTime: getCol('完工日期', 15),
+                engineNo: getCol('引擎#', 17),
+                bodyNo: getCol('車身#', 18),
+                vin: getCol('VIN#', 19)
+            };
 
             const newDb = [];
-            for (let i = headerIdx + 1; i < lines.length; i++) {
+            for (let i = 1; i < lines.length; i++) {
                 const cols = parseCSVLine(lines[i]);
                 const plate = cols[colMap.plate];
-                if (plate && plate !== '牌照號碼' && !plate.includes('===')) {
+                if (plate && plate !== '牌照號碼') {
                     newDb.push({
                         plate: plate,
+                        plant: cols[colMap.plant] || '內湖保養廠',
+                        openTime: cols[colMap.openTime] || '',
                         docNo: cols[colMap.docNo] || '',
                         workType: cols[colMap.workType] || '',
                         owner: cols[colMap.owner] || '',
+                        model: cols[colMap.model] || '',
+                        mileage: cols[colMap.mileage] || '',
                         advisor: cols[colMap.advisor] || '',
-                        mechanic: cols[colMap.mechanic] || '',
-                        plant: cols[colMap.plant] || '內湖保養廠'
+                        finishTime: cols[colMap.finishTime] || '',
+                        engineNo: cols[colMap.engineNo] || '',
+                        bodyNo: cols[colMap.bodyNo] || '',
+                        vin: cols[colMap.vin] || ''
                     });
                 }
             }
@@ -431,9 +437,8 @@
             if (newDb.length > 0) {
                 vehicleDatabase = newDb;
                 refreshDataList();
-                document.getElementById('syncStatus').innerText = `✅ 雲端連線成功！已載入 ${vehicleDatabase.length} 筆工單車籍。`;
-                localStorage.setItem('cached203Db', JSON.stringify(vehicleDatabase));
-                localStorage.setItem('cached203Url', url);
+                document.getElementById('syncStatus').innerText = `✅ 雲端連線成功！已載入 ${vehicleDatabase.length} 筆在廠工單車籍。`;
+                localStorage.setItem('cached113BM01Db', JSON.stringify(vehicleDatabase));
             } else {
                 document.getElementById('syncStatus').innerText = `⚠️ 未抓取到有效車籍列`;
             }
@@ -473,6 +478,8 @@
                 document.getElementById(id).value = '尚鵬汽車-內湖保養廠';
             } else if (id === 'pageIndex') {
                 document.getElementById(id).value = '1 / 1';
+            } else if (id === 'carYear') {
+                document.getElementById(id).value = '2026';
             } else {
                 document.getElementById(id).value = '';
             }
@@ -595,9 +602,11 @@
         event.target.value = '';
     }
 
-    // 啟動載入：讀取本機快取並在背景向 Google 試算表同步
     window.onload = function() {
-        const cachedDb = localStorage.getItem('cached203Db');
+        // 預設填入當前列印時間
+        document.getElementById('printTime').value = getCurrentDateTime();
+
+        const cachedDb = localStorage.getItem('cached113BM01Db');
         if (cachedDb) {
             try {
                 vehicleDatabase = JSON.parse(cachedDb);
@@ -606,7 +615,6 @@
             } catch(e) {}
         }
         
-        // 自動執行連線抓取
         syncGoogleSheet();
         renderInputs();
         render();
