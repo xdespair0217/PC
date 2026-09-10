@@ -2,624 +2,908 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業多車型保養看板與技術文獻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: Arial, "Microsoft JhengHei", sans-serif;
-            background: #eef2f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-        }
-        /* 控制面板樣式 */
-        .controls {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .controls h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid #2b5797; padding-bottom: 8px; }
-        
-        .sync-bar {
-            background: #f0f4f8;
-            border: 1px solid #d0dbe5;
-            border-radius: 4px;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-        }
-        .sync-bar input {
-            flex: 1;
-            padding: 6px 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-        .form-group { display: flex; flex-direction: column; position: relative; }
-        .form-group label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
-        .form-group input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
-        
-        .highlight-input {
-            border: 1.5px solid #2b5797 !important;
-            background: #fbfdff;
-        }
-
-        .table-input {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        .table-input th, .table-input td {
-            border: 1px solid #ddd;
-            padding: 6px;
-            text-align: left;
-            font-size: 0.85rem;
-        }
-        .table-input th { background: #f8f9fa; }
-        .table-input input { width: 100%; border: none; padding: 4px; font-size: 0.85rem; }
-        
-        .btn-group { 
-            display: flex; 
-            gap: 10px; 
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        button, .file-label-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-add { background: #4caf50; color: #fff; }
-        .btn-del { background: #f44336; color: #fff; padding: 4px 8px; font-size: 0.8rem; }
-        .btn-clear { background: #e53935; color: #fff; }
-        .btn-export { background: #ff9800; color: #fff; }
-        .btn-import { background: #607d8b; color: #fff; }
-        .btn-sync { background: #0288d1; color: #fff; padding: 6px 12px; }
-        .btn-print { background: #2b5797; color: #fff; font-size: 1rem; margin-left: auto; }
-
-        /* 列印預覽區域 */
-        .print-preview {
-            background: #ffffff;
-            padding: 30px 40px;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-family: "Courier New", "Consolas", monospace, "Microsoft JhengHei";
-            color: #000;
-        }
-        .doc-title {
-            text-align: center;
-            font-size: 1.25rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-        .meta-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1.5fr 1.1fr;
-            gap: 10px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-        .meta-col { display: flex; flex-direction: column; }
-        .separator {
-            border: none;
-            border-top: 1px dashed #000;
-            margin: 12px 0 6px 0;
-        }
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            table-layout: fixed;
-        }
-        .report-table th, .report-table td {
-            padding: 4px 2px;
-            text-align: left;
-            word-break: break-word;
-        }
-        .report-table th { font-weight: bold; }
-        .text-right { text-align: right !important; }
-        .text-center { text-align: center !important; }
-
-        @media print {
-            body { 
-                background: #fff; 
-                padding: 1.5cm 1cm; 
-            }
-            .controls { display: none !important; }
-            .print-preview { 
-                box-shadow: none; 
-                padding: 0; 
-                margin: 0; 
-                width: 100%;
-            }
-            @page { 
-                size: auto;
-                margin: 0; 
-            }
-        }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+        .active-row { background-color: #1f242c !important; border-left: 4px solid #f59e0b !important; }
+        .active-card { border-color: #f59e0b !important; background-color: #21262d !important; transform: scale(1.02); }
+        .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
     </style>
 </head>
-<body>
+<body class="h-screen overflow-hidden flex flex-col p-4 relative">
 
-<div class="container">
-    <div class="controls">
-        <h2>工時資料編輯面板</h2>
-        
-        <div class="sync-bar">
-            <span style="font-weight: bold; color: #0288d1;">📊 車籍工單 CSV 網址:</span>
-            <input type="text" id="sheetUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRTY8U3Py3Rb5dH3v6RJDi-3Un7mEBM5t06oxtqdwXbgfJa0sJ3axhwyumrKqSSRu5gz4aRyNHmhF33/pub?gid=1615272433&single=true&output=csv">
-            <button class="btn-sync" onclick="syncGoogleSheet()">🔄 重新整理雲端資料</button>
-            <span id="syncStatus" style="color: #666; font-size: 0.8rem;">(初始化連線中...)</span>
-        </div>
-
-        <div class="form-grid">
-            <div class="form-group">
-                <label style="color: #2b5797;">🔍 車牌 (輸入前綴自動推薦)</label>
-                <input type="text" id="carPlate" list="carPlateList" class="highlight-input" placeholder="例: RFT-9760" oninput="onCarPlateInput()">
-                <datalist id="carPlateList"></datalist>
+    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
+        <div class="flex items-center space-x-3 shrink-0">
+            <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
+            <div>
+                <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
+                    <div class="flex items-center space-x-1">
+                        <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
+                        <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
+                            <option value="">載入中...</option>
+                        </select>
+                    </div>
+                    <div class="h-4 border-l border-gray-700"></div>
+                    <div class="flex items-center space-x-1">
+                        <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer min-w-[150px]">
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group"><label>單號編號 (工單號)</label><input type="text" id="docNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>服務廠</label><input type="text" id="servicePlant" value="尚鵬汽車-內湖保養廠" oninput="render()"></div>
-            <div class="form-group"><label>工單類別</label><input type="text" id="workType" value="" oninput="render()"></div>
-            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" value="" oninput="render()"></div>
-            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" value="" oninput="render()"></div>
+            <div class="flex bg-[#161b22] p-1 rounded-lg border border-gray-700">
+                <button id="btn-mode-package" onclick="switchMainMode('package')" class="px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow">
+                    🛠️ 保養套餐看板
+                </button>
+                <button id="btn-mode-docs" onclick="switchMainMode('docs')" class="px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white">
+                    📚 技術文獻資料庫
+                </button>
+            </div>
+        </div>
+        
+        <div id="package-tabs" class="flex flex-wrap gap-1.5 max-w-2xl justify-start lg:justify-center">
+            <span class="text-xs text-gray-500">正在同步試算表分頁...</span>
+        </div>
+
+        <button onclick="reloadAllData(true)" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-lg transition-all border border-gray-700 flex items-center space-x-1 shrink-0">
+            <span>🔄</span> <span>強制重新整理</span>
+        </button>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- 視圖一：保養套餐看板 -->
+        <section id="package-view" class="flex-1 flex space-x-4 overflow-hidden">
+            <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
+                <div class="flex justify-between items-center mb-2 shrink-0">
+                    <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
+                        <span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>載入中...
+                    </h2>
+                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-gray-700 text-gray-400 bg-[#0d1117] sticky top-0 z-10">
+                                <th class="p-2.5 rounded-l-md">屬性</th>
+                                <th class="p-2.5">料號 (點擊複製)</th>
+                                <th class="p-2.5">項目名稱</th>
+                                <th class="p-2.5 text-right">單價</th>
+                                <th class="p-2.5 text-right">數量</th>
+                                <th class="p-2.5 text-right">打折</th>
+                                <th class="p-2.5 text-right">加總</th>
+                                <th class="p-2.5 text-center">層架</th>
+                                <th class="p-2.5 text-center rounded-r-md">即時庫存</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="border-t border-gray-800 pt-3 mt-2 flex justify-between items-center gap-2 text-xs text-gray-400 shrink-0">
+                    <div class="flex flex-wrap space-x-4">
+                        <div>工資小計：<span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span></div>
+                        <div class="border-l border-gray-800 pl-4">零件原價：<span id="parts-original-total" class="font-bold text-gray-200 font-mono">$ 0</span></div>
+                        <div class="border-l border-gray-800 pl-4">零件折後：<span id="parts-subtotal" class="font-bold text-amber-500 font-mono">$ 0</span></div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 shrink-0">
+                        <span class="text-[11px] text-gray-400 font-bold">零件折扣：</span>
+                        <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
+                        <span class="text-[11px] text-gray-300 font-bold">%</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-800 pt-2 mt-2 flex justify-between items-center shrink-0">
+                    <div class="flex flex-col">
+                        <span class="text-gray-400 text-xs font-medium">套餐應付總金額</span>
+                        <span id="discount-note" class="text-[10px] text-amber-500/80 font-medium hidden">＊已套用零件折扣</span>
+                    </div>
+                    <span id="package-total" class="text-2xl font-black text-green-400 font-mono tracking-tight">$ 0</span>
+                </div>
+            </div>
+
+            <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
+                <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
+                    <h3 class="text-xs font-semibold text-gray-400 mb-3 tracking-wider flex items-center shrink-0">
+                        <span class="mr-1.5">🔧</span>套餐内含零件圖解
+                    </h3>
+                    <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start"></div>
+                </div>
+
+                <div class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0">
+                    <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
+                    <p class="text-[11px] text-gray-400 leading-relaxed">
+                        請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 視圖二：技術文獻資料庫 -->
+        <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
+            <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
+                <div class="flex justify-between items-center mb-2.5 shrink-0">
+                    <h2 class="text-sm font-bold text-gray-100 flex items-center">
+                        <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm"></span>原廠 TSB 與技術手冊
+                    </h2>
+                    <div class="flex items-center space-x-1.5">
+                        <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份文件</span>
+                        <button onclick="openTagCloudModal()" title="開啟完整標籤雲" class="px-2 py-0.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 hover:border-red-500 text-gray-300 hover:text-white rounded text-[11px] font-semibold flex items-center space-x-1 transition-colors shadow">
+                            <span>🏷️</span><span>標籤雲</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative mb-2 shrink-0">
+                    <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+                </div>
+
+                <div id="doc-tags-container" class="flex flex-wrap gap-1 mb-2.5 max-h-[58px] overflow-hidden shrink-0 border-b border-gray-800/80 pb-2"></div>
+
+                <div id="docs-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                    <div class="text-center py-8 text-gray-500 text-xs">正在載入文獻...</div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative">
+                <div id="pdf-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-500">
+                    <div class="text-4xl mb-2 opacity-40">📄</div>
+                    <p class="text-sm font-bold text-gray-300">請選擇左側文件進行預覽</p>
+                    <p class="text-xs text-gray-500 mt-1">點擊左側卡片即可在此預覽原廠 PDF</p>
+                </div>
+                <iframe id="pdf-iframe" class="hidden w-full h-full rounded border-0 bg-[#0d1117]" src=""></iframe>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 剪貼簿複製提示浮窗 (Toast) -->
+    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-emerald-950 border border-emerald-600 text-emerald-300 px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+        <span>📋</span>
+        <span id="copy-toast-msg">已複製零件資訊至剪貼簿！</span>
+    </div>
+
+    <!-- Obsidian 標籤雲彈出視窗 -->
+    <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
+        <div class="bg-[#161b22] border border-gray-700 w-full max-w-xl rounded-xl p-5 shadow-2xl flex flex-col max-h-[75vh]" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                    <span class="text-base">🏷️</span>
+                    <h3 class="text-sm font-bold text-white tracking-wide">文獻標籤庫 (Tag Cloud Matrix)</h3>
+                </div>
+                <button onclick="closeTagCloudModal()" class="text-gray-400 hover:text-white text-xl font-light focus:outline-none">&times;</button>
+            </div>
             
-            <div class="form-group"><label>車型</label><input type="text" id="carModel" value="" oninput="render()"></div>
-            <div class="form-group"><label>年式</label><input type="text" id="carYear" value="2026" oninput="render()"></div>
-            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" value="" oninput="render()"></div>
-            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>車主</label><input type="text" id="owner" value="" oninput="render()"></div>
-            <div class="form-group"><label>駕駛</label><input type="text" id="driver" value="" oninput="render()"></div>
-            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" value="" oninput="render()"></div>
-            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" value="" oninput="render()"></div>
-            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" oninput="render()"></div>
-        </div>
+            <div class="my-3">
+                <input type="text" id="modal-tag-search" oninput="filterModalTags()" placeholder="過濾標籤名稱..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+            </div>
 
-        <table class="table-input" id="itemsTable">
-            <thead>
-                <tr>
-                    <th style="width: 100px;">打卡日期</th>
-                    <th style="width: 70px;">起始</th>
-                    <th style="width: 70px;">結束</th>
-                    <th style="width: 80px;">打卡原因</th>
-                    <th style="width: 100px;">工作代號</th>
-                    <th>工作項目</th>
-                    <th style="width: 70px;">標準工時</th>
-                    <th style="width: 70px;">技師</th>
-                    <th style="width: 50px;">操作</th>
-                </tr>
-            </thead>
-            <tbody id="itemsBody"></tbody>
-        </table>
+            <div id="modal-tag-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-2 p-1 content-start"></div>
 
-        <div class="btn-group">
-            <button class="btn-add" onclick="addRow()">+ 新增工作行</button>
-            <button class="btn-clear" onclick="clearAllData()">🧹 一鍵清空</button>
-            <button class="btn-export" onclick="exportData()">💾 匯出存檔 (JSON)</button>
-            <label class="file-label-btn btn-import">
-                📂 匯入檔案
-                <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importData(event)">
-            </label>
-            <button class="btn-print" onclick="window.print()">🖨️ 列印打卡單</button>
+            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-[11px] text-gray-500">
+                <span id="modal-tag-stats">共計 0 個分類標籤</span>
+                <span>點選標籤即可立即套用</span>
+            </div>
         </div>
     </div>
 
-    <div class="print-preview">
-        <div class="doc-title" id="outDocTitle">打卡記錄 - </div>
-        
-        <div class="meta-grid">
-            <div class="meta-col">
-                <div>服務廠: <span id="outServicePlant"></span></div>
-                <div>工單類別: <span id="outWorkType"></span></div>
-                <div>進廠里程: <span id="outMileage"></span></div>
-                <div>開單時間: <span id="outOpenTime"></span></div>
-                <div>完工日期: <span id="outFinishTime"></span></div>
-                <div>保固到期: <span id="outWarrantyDate"></span></div>
-            </div>
-            <div class="meta-col">
-                <div>車牌: <span id="outCarPlate"></span></div>
-                <div>車型: <span id="outCarModel"></span></div>
-                <div>年式: <span id="outCarYear"></span></div>
-                <div>VIN#: <span id="outVin"></span></div>
-                <div>引擎#: <span id="outEngineNo"></span></div>
-                <div>車身#: <span id="outBodyNo"></span></div>
-            </div>
-            <div class="meta-col">
-                <div>車主: <span id="outOwner"></span></div>
-                <div>駕駛: <span id="outDriver"></span></div>
-                <div>承修技師: <span id="outMechanic"></span></div>
-                <div>服務專員: <span id="outAdvisor"></span></div>
-                <div>列印時間: <span id="outPrintTime"></span></div>
-                <div>頁次: <span id="outPageIndex"></span></div>
+    <!-- 零件大圖燈箱 -->
+    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
+        <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-3xl font-light focus:outline-none">&times;</button>
+        <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[75vh] object-contain rounded">
+        </div>
+        <div class="mt-3 text-center max-w-xl" onclick="event.stopPropagation()">
+            <p id="lightbox-part-id" class="text-xs text-gray-500 font-mono tracking-widest"></p>
+            <h3 id="lightbox-title" class="text-base font-bold text-white mt-0.5"></h3>
+            <div id="lightbox-desc-container" class="mt-2 px-3 py-1.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-xs hidden leading-relaxed">
+                <span class="font-bold block text-amber-500 text-[10px] tracking-wider uppercase mb-0.5">⚠️ 現場維護說明 NOTE</span>
+                <span id="lightbox-desc-text"></span>
             </div>
         </div>
-
-        <hr class="separator">
-
-        <table class="report-table">
-            <thead>
-                <tr>
-                    <th style="width: 4%;">序</th>
-                    <th style="width: 11%;">打卡日期</th>
-                    <th style="width: 7%;">起始<br>時間</th>
-                    <th style="width: 7%;">結束<br>時間</th>
-                    <th style="width: 9%;">打卡原因</th>
-                    <th style="width: 13%;">工作代號</th>
-                    <th style="width: 27%;">工作項目</th>
-                    <th class="text-right" style="width: 6%;">標準<br>工時</th>
-                    <th class="text-center" style="width: 6%;">技師</th>
-                    <th class="text-right" style="width: 5%;">打卡<br>工時</th>
-                    <th class="text-right" style="width: 5%;">累計<br>工時</th>
-                </tr>
-            </thead>
-        </table>
-        <hr class="separator" style="margin: 4px 0 8px 0;">
-        
-        <table class="report-table" id="outItemsTable">
-            <tbody></tbody>
-        </table>
     </div>
-</div>
 
-<script>
-    const formFields = [
-        'docNo', 'servicePlant', 'workType', 'mileage', 'openTime', 
-        'finishTime', 'warrantyDate', 'carPlate', 'carModel', 'carYear', 
-        'vin', 'engineNo', 'bodyNo', 'owner', 'driver', 'mechanic', 
-        'advisor', 'printTime', 'pageIndex'
-    ];
+    <script>
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
 
-    let vehicleDatabase = [];
-    let records = [
-        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
-    ];
+        const CACHE_SHEET_DATA = new Map();
+        let CACHE_MODELS_DATA = null;
+        let CACHE_DOCS_DATA = null;
 
-    // 取得當前標準時間字串 (YYYY-MM-DD HH:mm:ss)
-    function getCurrentDateTime() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-        return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
-    }
+        let dynamicModelsData = []; 
+        let allParsedPackages = {}; 
+        let currentPackageKey = "";
+        let selectedModelObj = null;
+        let rawLaborSum = 0;
+        let rawPartsSum = 0;
 
-    function parseCSVLine(text) {
-        let p = '', c = '', r = [];
-        let q = false;
-        for (let i = 0; i < text.length; i++) {
-            c = text[i];
-            if (c === '"') {
-                if (q && text[i+1] === '"') { p += '"'; i++; }
-                else { q = !q; }
-            } else if (c === ',' && !q) {
-                r.push(p.trim());
-                p = '';
+        let rawDocsData = [];
+        let sortedTagsList = [];
+        let activeDocTag = "ALL";
+
+        async function initializeDynamicSheets(force = false) {
+            const tabsContainer = document.getElementById('package-tabs');
+            const statusBadge = document.getElementById('status-badge');
+            
+            try {
+                if (!force && CACHE_MODELS_DATA) {
+                    dynamicModelsData = CACHE_MODELS_DATA;
+                } else {
+                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
+                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
+                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
+                    dynamicModelsData = await response.json();
+                    CACHE_MODELS_DATA = dynamicModelsData;
+                }
+
+                statusBadge.innerText = "連線正常 (極速模式)";
+                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
+                
+                renderBrandSelect();
+                loadTechnicalDocs(force);
+            } catch (error) {
+                console.error("載入失敗:", error);
+                statusBadge.innerText = "連線失敗";
+                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
+            }
+        }
+
+        function reloadAllData(force = false) {
+            if (force) {
+                CACHE_SHEET_DATA.clear();
+                CACHE_MODELS_DATA = null;
+                CACHE_DOCS_DATA = null;
+            }
+            initializeDynamicSheets(force);
+        }
+
+        function renderBrandSelect() {
+            const brandSelect = document.getElementById('brand-select');
+            const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
+
+            brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
+
+            if (availableBrands.includes("PROJECT")) {
+                brandSelect.value = "PROJECT";
+            }
+
+            updateModelOptions(true);
+        }
+
+        function updateModelOptions(isInitial = false) {
+            const brandSelect = document.getElementById('brand-select');
+            const modelSelect = document.getElementById('car-model-select');
+            const currentBrand = brandSelect.value;
+
+            const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
+
+            modelSelect.innerHTML = matchedModels.map(item => `<option value="${item.sheetName}">${item.model}</option>`).join('');
+
+            if (matchedModels.length > 0) {
+                let defaultTarget = matchedModels[0].sheetName;
+
+                if (isInitial && currentBrand === "PROJECT") {
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
+                    if (foundPrj) defaultTarget = foundPrj.sheetName;
+                }
+
+                modelSelect.value = defaultTarget;
+                executeModelSwitch(defaultTarget);
             } else {
-                p += c;
+                clearDisplay();
             }
         }
-        r.push(p.trim());
-        return r;
-    }
 
-    function refreshDataList() {
-        const datalist = document.getElementById('carPlateList');
-        datalist.innerHTML = '';
-        
-        vehicleDatabase.forEach(v => {
-            if (!v.plate) return;
-            const opt = document.createElement('option');
-            opt.value = v.plate;
-            opt.label = `[${v.docNo}] ${v.model} - ${v.owner}`;
-            datalist.appendChild(opt);
-        });
-    }
+        function executeModelSwitch(sheetName) {
+            selectedModelObj = dynamicModelsData.find(item => item.sheetName === sheetName);
+            if (!selectedModelObj) return;
 
-    // 當選取或輸入車牌時：徹底覆蓋，無資料則留空，絕不殘留上一筆
-    function onCarPlateInput() {
-        const inputVal = document.getElementById('carPlate').value.trim().toUpperCase();
-        const match = vehicleDatabase.find(v => v.plate.toUpperCase() === inputVal);
-        
-        if (match) {
-            document.getElementById('docNo').value = match.docNo || '';
-            document.getElementById('workType').value = match.workType || '';
-            document.getElementById('mileage').value = match.mileage || '';
-            document.getElementById('openTime').value = match.openTime || '';
-            document.getElementById('finishTime').value = match.finishTime || '';
-            document.getElementById('carModel').value = match.model || '';
-            document.getElementById('vin').value = match.vin || '';
-            document.getElementById('engineNo').value = match.engineNo || '';
-            document.getElementById('bodyNo').value = match.bodyNo || '';
-            document.getElementById('owner').value = match.owner || '';
-            document.getElementById('driver').value = match.owner || '';
-            document.getElementById('advisor').value = match.advisor || '';
-            if (match.plant) document.getElementById('servicePlant').value = '尚鵬汽車-' + match.plant;
-            
-            // 自動補上列印時間為當下
-            if (!document.getElementById('printTime').value) {
-                document.getElementById('printTime').value = getCurrentDateTime();
+            const brandLogo = document.getElementById('brand-logo');
+            const brand = selectedModelObj.brand;
+
+            if (brand === "CITROËN") {
+                brandLogo.innerText = "CITR";
+                brandLogo.className = "w-10 h-10 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
+            } else if (brand === "PROJECT") {
+                brandLogo.innerText = "CANN";
+                brandLogo.className = "w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
+            } else if (brand === "ALFA ROMEO") {
+                brandLogo.innerText = "ALFA";
+                brandLogo.className = "w-10 h-10 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
+            } else {
+                brandLogo.innerText = "PEUG";
+                brandLogo.className = "w-10 h-10 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
+            }
+
+            fetchSheetData();
+            if (!document.getElementById('docs-view').classList.contains('hidden')) {
+                filterDocs();
             }
         }
-        render();
-    }
 
-    async function syncGoogleSheet() {
-        const url = document.getElementById('sheetUrl').value.trim();
-        if (!url) return;
+        async function fetchSheetData() {
+            if (!selectedModelObj) return;
+            const sheetName = selectedModelObj.sheetName;
 
-        try {
-            document.getElementById('syncStatus').innerText = '正在自雲端抓取 113BM01 工單清冊...';
-            const res = await fetch(url);
-            const text = await res.text();
-            
-            const lines = text.split(/\r?\n/).filter(r => r.trim() !== '');
-            if (lines.length <= 1) {
-                document.getElementById('syncStatus').innerText = '⚠️ 試算表無資料';
+            if (CACHE_SHEET_DATA.has(sheetName)) {
+                parseExcelCSV(CACHE_SHEET_DATA.get(sheetName));
                 return;
             }
 
-            const headerCols = parseCSVLine(lines[0]);
-            const getCol = (name, fallback) => {
-                const idx = headerCols.indexOf(name);
-                return idx !== -1 ? idx : fallback;
-            };
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
 
-            const colMap = {
-                plant: getCol('部門', 1),
-                openTime: getCol('開單時間', 2),
-                docNo: getCol('工單號碼', 3),
-                workType: getCol('工單類別', 4),
-                plate: getCol('牌照號碼', 5),
-                owner: getCol('車主', 6),
-                model: getCol('車型', 7),
-                mileage: getCol('里程', 8),
-                advisor: getCol('服務專員', 11),
-                finishTime: getCol('完工日期', 15),
-                engineNo: getCol('引擎#', 17),
-                bodyNo: getCol('車身#', 18),
-                vin: getCol('VIN#', 19)
-            };
+            try {
+                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
+                const response = await fetch(targetUrl);
+                const csvText = await response.text();
+                
+                CACHE_SHEET_DATA.set(sheetName, csvText);
+                parseExcelCSV(csvText);
+            } catch (error) {
+                console.error("載入失敗:", error);
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
+                clearDisplay();
+            }
+        }
 
-            const newDb = [];
-            for (let i = 1; i < lines.length; i++) {
-                const cols = parseCSVLine(lines[i]);
-                const plate = cols[colMap.plate];
-                if (plate && plate !== '牌照號碼') {
-                    newDb.push({
-                        plate: plate,
-                        plant: cols[colMap.plant] || '內湖保養廠',
-                        openTime: cols[colMap.openTime] || '',
-                        docNo: cols[colMap.docNo] || '',
-                        workType: cols[colMap.workType] || '',
-                        owner: cols[colMap.owner] || '',
-                        model: cols[colMap.model] || '',
-                        mileage: cols[colMap.mileage] || '',
-                        advisor: cols[colMap.advisor] || '',
-                        finishTime: cols[colMap.finishTime] || '',
-                        engineNo: cols[colMap.engineNo] || '',
-                        bodyNo: cols[colMap.bodyNo] || '',
-                        vin: cols[colMap.vin] || ''
+        function parseExcelCSV(csvText) {
+            const lines = csvText.split(/\r?\n/);
+            const packages = {};
+            let currentPackageName = ""; 
+
+            lines.forEach((line) => {
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
+                if (cols.length < 3) return;
+
+                const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
+                
+                if (foundPackageCell) {
+                    currentPackageName = foundPackageCell;
+                    packages[currentPackageName] = {
+                        name: currentPackageName,
+                        pdfUrl: "",
+                        items: []
+                    };
+                    const rawLCol = cols[11] || "";
+                    if (rawLCol.startsWith("http")) packages[currentPackageName].pdfUrl = rawLCol;
+                    return;
+                }
+
+                if (currentPackageName) {
+                    const rawLCol = cols[11] || "";
+                    if (rawLCol.startsWith("http") && !packages[currentPackageName].pdfUrl) {
+                        packages[currentPackageName].pdfUrl = rawLCol;
+                    }
+                }
+
+                const attr = cols[0] || "";
+                const partId = cols[1] || "";
+                const name = cols[2] || "";
+
+                if (currentPackageName && partId && partId !== "料號" && attr !== "屬性") {
+                    packages[currentPackageName].items.push({
+                        attr,
+                        partId,
+                        name,
+                        price: cols[3] || "0",
+                        qty: cols[4] || "1",
+                        discount: cols[5] || "1",
+                        subtotal: cols[6] || "0",
+                        location: cols[7] || "", 
+                        stock: cols[8] || "", 
+                        description: cols[9] || ""
                     });
                 }
-            }
+            });
 
-            if (newDb.length > 0) {
-                vehicleDatabase = newDb;
-                refreshDataList();
-                document.getElementById('syncStatus').innerText = `✅ 雲端連線成功！已載入 ${vehicleDatabase.length} 筆在廠工單車籍。`;
-                localStorage.setItem('cached113BM01Db', JSON.stringify(vehicleDatabase));
+            allParsedPackages = packages;
+            const keys = Object.keys(allParsedPackages);
+            if (keys.length > 0) {
+                renderTabs(keys);
+                switchPackage(keys[0]);
             } else {
-                document.getElementById('syncStatus').innerText = `⚠️ 未抓取到有效車籍列`;
+                document.getElementById('current-package-title').innerText = "⚠️ 查無套餐項目";
+                clearDisplay();
             }
-        } catch (err) {
-            console.error(err);
-            document.getElementById('syncStatus').innerText = '❌ 連線逾時或讀取失敗';
         }
-    }
 
-    function calculateHours(start, end) {
-        if (!start || !end) return 0;
-        const [h1, m1] = start.split(':').map(Number);
-        const [h2, m2] = end.split(':').map(Number);
-        let diffMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
-        if (diffMinutes < 0) diffMinutes += 24 * 60;
-        return Math.round((diffMinutes / 60) * 10) / 10;
-    }
-
-    function addRow() {
-        const defaultTech = document.getElementById('mechanic').value || '';
-        records.push({ date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: defaultTech });
-        renderInputs();
-        render();
-    }
-
-    function deleteRow(idx) {
-        records.splice(idx, 1);
-        renderInputs();
-        render();
-    }
-
-    function clearAllData() {
-        if (!confirm('確定要清空所有填寫內容嗎？（服務廠名稱將會保留）')) return;
-
-        formFields.forEach(id => {
-            if (id === 'servicePlant') {
-                document.getElementById(id).value = '尚鵬汽車-內湖保養廠';
-            } else if (id === 'pageIndex') {
-                document.getElementById(id).value = '1 / 1';
-            } else if (id === 'carYear') {
-                document.getElementById(id).value = '2026';
-            } else {
-                document.getElementById(id).value = '';
-            }
-        });
-
-        records = [{ date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }];
-        renderInputs();
-        render();
-    }
-
-    function renderInputs() {
-        const tbody = document.getElementById('itemsBody');
-        tbody.innerHTML = '';
-        records.forEach((row, i) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" value="${row.date || ''}" oninput="records[${i}].date=this.value; render();"></td>
-                <td><input type="text" value="${row.start || ''}" oninput="records[${i}].start=this.value; render();"></td>
-                <td><input type="text" value="${row.end || ''}" oninput="records[${i}].end=this.value; render();"></td>
-                <td><input type="text" value="${row.reason || ''}" oninput="records[${i}].reason=this.value; render();"></td>
-                <td><input type="text" value="${row.code || ''}" oninput="records[${i}].code=this.value; render();"></td>
-                <td><input type="text" value="${row.name || ''}" oninput="records[${i}].name=this.value; render();"></td>
-                <td><input type="text" value="${row.stdHours || ''}" oninput="records[${i}].stdHours=this.value; render();"></td>
-                <td><input type="text" value="${row.tech || ''}" oninput="records[${i}].tech=this.value; render();"></td>
-                <td style="text-align: center;"><button class="btn-del" onclick="deleteRow(${i})">刪除</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function render() {
-        document.getElementById('outDocTitle').innerText = '打卡記錄 - ' + document.getElementById('docNo').value;
-        document.getElementById('outServicePlant').innerText = document.getElementById('servicePlant').value;
-        document.getElementById('outWorkType').innerText = document.getElementById('workType').value;
-        document.getElementById('outMileage').innerText = document.getElementById('mileage').value;
-        document.getElementById('outOpenTime').innerText = document.getElementById('openTime').value;
-        document.getElementById('outFinishTime').innerText = document.getElementById('finishTime').value;
-        document.getElementById('outWarrantyDate').innerText = document.getElementById('warrantyDate').value;
-        
-        document.getElementById('outCarPlate').innerText = document.getElementById('carPlate').value;
-        document.getElementById('outCarModel').innerText = document.getElementById('carModel').value;
-        document.getElementById('outCarYear').innerText = document.getElementById('carYear').value;
-        document.getElementById('outVin').innerText = document.getElementById('vin').value;
-        document.getElementById('outEngineNo').innerText = document.getElementById('engineNo').value;
-        document.getElementById('outBodyNo').innerText = document.getElementById('bodyNo').value;
-
-        document.getElementById('outOwner').innerText = document.getElementById('owner').value;
-        document.getElementById('outDriver').innerText = document.getElementById('driver').value;
-        document.getElementById('outMechanic').innerText = document.getElementById('mechanic').value;
-        document.getElementById('outAdvisor').innerText = document.getElementById('advisor').value;
-        document.getElementById('outPrintTime').innerText = document.getElementById('printTime').value;
-        document.getElementById('outPageIndex').innerText = document.getElementById('pageIndex').value;
-
-        const outTbody = document.querySelector('#outItemsTable tbody');
-        outTbody.innerHTML = '';
-        let cumulative = 0;
-
-        records.forEach((row, i) => {
-            const hasTime = row.start && row.end;
-            const workHours = hasTime ? calculateHours(row.start, row.end) : 0;
-            cumulative += workHours;
+        function renderTabs(keys) {
+            const tabsContainer = document.getElementById('package-tabs');
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
             
-            const stdVal = row.stdHours ? parseFloat(row.stdHours).toFixed(1) : '';
-            const workVal = hasTime ? workHours.toFixed(1) : '';
-            const cumVal = hasTime ? cumulative.toFixed(1) : '';
+            let activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : (isProject ? "bg-[#f59e0b] border-[#d97706]" : "bg-emerald-600 border-emerald-500");
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="width: 4%;">${i + 1}</td>
-                <td style="width: 11%;">${row.date || ''}</td>
-                <td style="width: 7%;">${row.start || ''}</td>
-                <td style="width: 7%;">${row.end || ''}</td>
-                <td style="width: 9%;">${row.reason || ''}</td>
-                <td style="width: 13%;">${row.code || ''}</td>
-                <td style="width: 27%;">${row.name || ''}</td>
-                <td class="text-right" style="width: 6%;">${stdVal}</td>
-                <td class="text-center" style="width: 6%;">${row.tech || ''}</td>
-                <td class="text-right" style="width: 5%;">${workVal}</td>
-                <td class="text-right" style="width: 5%;">${cumVal}</td>
-            `;
-            outTbody.appendChild(tr);
-        });
-    }
+            tabsContainer.innerHTML = keys.map(key => `
+                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
+                    ${key}
+                </button>
+            `).join('');
+        }
 
-    function exportData() {
-        const data = { fields: {}, records: records };
-        formFields.forEach(id => { data.fields[id] = document.getElementById(id).value; });
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const filename = `${data.fields.docNo || '工時記錄'}_${data.fields.carPlate || ''}.json`;
-        a.href = url;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
+        function switchPackage(key) {
+            if (!allParsedPackages[key]) return;
 
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
+            if (currentPackageKey) {
+                const prevTab = document.getElementById(`tab-${currentPackageKey}`);
+                if (prevTab) prevTab.className = "px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap";
+            }
+            
+            const activeTab = document.getElementById(`tab-${key}`);
+            if (activeTab) {
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 border-emerald-500";
+                activeTab.className = `px-2.5 py-1 rounded text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
+            }
+
+            currentPackageKey = key;
+            const pkg = allParsedPackages[key];
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
+            let indicatorColor = isCitroen ? "bg-[#da291c]" : (isProject ? "bg-[#f59e0b]" : "bg-[#48bb78]");
+
+            let titleHTML = `<span class="w-2 h-4 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
+            if (pkg.pdfUrl) {
+                titleHTML += `
+                    <a href="${pkg.pdfUrl}" target="_blank" rel="noopener noreferrer" class="ml-2.5 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded hover:bg-amber-900/80 hover:text-white transition-all shadow-sm">
+                        <span>📄</span>
+                        <span>技術 PDF</span>
+                    </a>
+                `;
+            }
+            document.getElementById('current-package-title').innerHTML = titleHTML;
+            
+            let tableHTML = '';
+            let gridHTML = '';
+            rawLaborSum = 0;
+            rawPartsSum = 0;
+
+            pkg.items.forEach(item => {
+                const isLabor = item.attr === "工資";
+                const displayPrice = parseFloat(item.price) || 0;
+                const displayQty = parseFloat(item.qty) || 1;
+                const displayDiscount = parseFloat(item.discount) || 1;
+                const lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
+
+                if (isLabor) {
+                    rawLaborSum += lineSubtotal;
+                } else {
+                    rawPartsSum += lineSubtotal;
+                }
+
+                let stockBadge = '<span class="text-gray-600">-</span>';
+                if (!isLabor && item.stock !== "") {
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900 animate-pulse">缺料 (0)</span>';
+                    } else if (num <= 2) {
+                        stockBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950/80 text-amber-400 border border-amber-900">${num} (告急)</span>`;
+                    } else {
+                        stockBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-900">${num}</span>`;
+                    }
+                }
+
+                let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
+                if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
+                if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
+
+                // 將完整資訊物件編碼，點擊料號時供快速複製
+                const rowInfoData = encodeURIComponent(JSON.stringify({
+                    attr: item.attr,
+                    partId: item.partId,
+                    name: item.name,
+                    price: displayPrice,
+                    qty: displayQty,
+                    subtotal: lineSubtotal,
+                    location: item.location || '無',
+                    stock: item.stock !== "" ? item.stock : '無紀錄'
+                }));
+
+                tableHTML += `
+                    <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
+                        <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
+                        
+                        <!-- 料號欄位：點擊觸發段落資訊複製 -->
+                        <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
+                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目完整段落資訊">
+                                ${item.partId}
+                                <span class="text-[10px] text-gray-500 opacity-60">📋</span>
+                            </span>
+                        </td>
+                        
+                        <td class="p-2.5 text-white font-medium">${item.name}</td>
+                        <td class="p-2.5 text-right font-mono text-gray-300">${displayPrice}</td>
+                        <td class="p-2.5 text-right font-mono text-gray-300">${displayQty}</td>
+                        <td class="p-2.5 text-right font-mono text-gray-400">${item.discount}</td>
+                        <td class="p-2.5 text-right font-mono font-bold text-green-400">${lineSubtotal}</td>
+                        <td class="p-2.5 text-center font-mono text-amber-500 font-semibold">${item.location || '-'}</td>
+                        <td class="p-2.5 text-center font-mono">${stockBadge}</td>
+                    </tr>
+                `;
+
+                if (!isLabor && item.partId) {
+                    const imgUrlPng = `${item.partId}.png`;
+                    const imgUrlJpg = `${item.partId}.jpg`;
+                    const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
+                    const safeDesc = encodeURIComponent(item.description || "");
+
+                    gridHTML += `
+                        <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
+                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                                <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
+                                    <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
+                                </div>
+                            </div>
+                            <div class="text-center w-full">
+                                <p class="text-[10px] text-gray-500 font-mono">${item.partId}</p>
+                                <p class="text-xs text-white font-medium truncate">${item.name}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('table-rows').innerHTML = tableHTML;
+            document.getElementById('image-grid').innerHTML = gridHTML;
+            calculateTotalsWithDiscount();
+        }
+
+        /* -------------------------------------------------------------
+           段落資訊複製與 Toast 提示模組
+        ------------------------------------------------------------- */
+        function copyRowInfo(event, encodedData) {
+            event.stopPropagation(); // 防止觸發整列點擊
             try {
-                const data = JSON.parse(e.target.result);
-                if (data.fields) {
-                    formFields.forEach(id => {
-                        if (data.fields[id] !== undefined) document.getElementById(id).value = data.fields[id];
+                const item = JSON.parse(decodeURIComponent(encodedData));
+                
+                // 結構化段落文本 (清晰換行、排版工整)
+                const formattedText = 
+`【零件維護資訊】
+• 料號：${item.partId}
+• 品名：${item.name} (${item.attr})
+• 單價：$ ${item.price.toLocaleString()}
+• 數量：${item.qty}
+• 加總：$ ${item.subtotal.toLocaleString()}
+• 儲位層架：${item.location}
+• 即時庫存：${item.stock}`;
+
+                navigator.clipboard.writeText(formattedText).then(() => {
+                    showCopyToast(`已複製料號 [${item.partId}] 段落資訊！`);
+                }).catch(() => {
+                    // 相容舊型環境
+                    const textarea = document.createElement('textarea');
+                    textarea.value = formattedText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showCopyToast(`已複製料號 [${item.partId}] 段落資訊！`);
+                });
+            } catch (e) {
+                console.error("複製失敗:", e);
+            }
+        }
+
+        let toastTimer = null;
+        function showCopyToast(msg) {
+            const toast = document.getElementById('copy-toast');
+            const toastMsg = document.getElementById('copy-toast-msg');
+            toastMsg.innerText = msg;
+
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 1800);
+        }
+
+        function calculateTotalsWithDiscount() {
+            const discountInput = document.getElementById('part-discount-input');
+            let discountRate = parseFloat(discountInput.value);
+            if (isNaN(discountRate) || discountRate < 0) discountRate = 100;
+
+            const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
+            const grandTotal = rawLaborSum + discountedPartsSum;
+
+            document.getElementById('labor-subtotal').innerText = `$ ${rawLaborSum.toLocaleString()}`;
+            document.getElementById('parts-original-total').innerText = `$ ${rawPartsSum.toLocaleString()}`;
+            document.getElementById('parts-subtotal').innerText = `$ ${discountedPartsSum.toLocaleString()}`;
+            document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
+
+            const discountNote = document.getElementById('discount-note');
+            if (discountRate < 100) {
+                discountNote.innerText = `＊已套用 ${discountRate}% 零件折扣`;
+                discountNote.classList.remove('hidden');
+            } else {
+                discountNote.classList.add('hidden');
+            }
+        }
+
+        function syncHighlight(partId) {
+            document.querySelectorAll('tr').forEach(el => el.classList.remove('active-row'));
+            document.querySelectorAll('#image-grid > div').forEach(el => el.classList.remove('active-card'));
+
+            const row = document.getElementById(`row-${partId}`);
+            const card = document.getElementById(`card-${partId}`);
+            if (row) row.classList.add('active-row');
+            if (card) card.classList.add('active-card');
+        }
+
+        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxPartId = document.getElementById('lightbox-part-id');
+            const lightboxTitle = document.getElementById('lightbox-title');
+            
+            const description = decodeURIComponent(encodedDesc).trim();
+            const descContainer = document.getElementById('lightbox-desc-container');
+            const descText = document.getElementById('lightbox-desc-text');
+
+            lightboxImg.src = imgSrc;
+            lightboxImg.onerror = function() { this.src = defaultImg; };
+            lightboxPartId.innerText = partId;
+            lightboxTitle.innerText = title;
+
+            if (description) {
+                descText.innerText = description;
+                descContainer.classList.remove('hidden');
+            } else {
+                descContainer.classList.add('hidden');
+            }
+
+            lightbox.classList.remove('hidden');
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => { lightbox.classList.add('hidden'); }, 300);
+        }
+
+        function clearDisplay() {
+            document.getElementById('table-rows').innerHTML = '';
+            document.getElementById('image-grid').innerHTML = '';
+            document.getElementById('package-total').innerText = '$ 0';
+        }
+
+        /* -------------------------------------------------------------
+           技術文獻系統
+        ------------------------------------------------------------- */
+        function switchMainMode(mode) {
+            const packageView = document.getElementById('package-view');
+            const docsView = document.getElementById('docs-view');
+            const btnPackage = document.getElementById('btn-mode-package');
+            const btnDocs = document.getElementById('btn-mode-docs');
+            const pkgTabs = document.getElementById('package-tabs');
+
+            if (mode === 'docs') {
+                packageView.classList.add('hidden');
+                docsView.classList.remove('hidden');
+                btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
+                btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#da291c] text-white shadow";
+                pkgTabs.classList.add('invisible');
+                filterDocs();
+            } else {
+                docsView.classList.add('hidden');
+                packageView.classList.remove('hidden');
+                btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
+                btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
+                pkgTabs.classList.remove('invisible');
+            }
+        }
+
+        async function loadTechnicalDocs(force = false) {
+            try {
+                if (!force && CACHE_DOCS_DATA) {
+                    rawDocsData = CACHE_DOCS_DATA;
+                } else {
+                    const res = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    
+                    rawDocsData = data.sort((a, b) => {
+                        const dateA = new Date(a.date || '1970-01-01').getTime();
+                        const dateB = new Date(b.date || '1970-01-01').getTime();
+                        return dateB - dateA;
+                    });
+                    CACHE_DOCS_DATA = rawDocsData;
+                }
+
+                calculateTagStatistics();
+                renderDocTags();
+                filterDocs();
+            } catch (err) {
+                console.error("文獻載入異常:", err);
+            }
+        }
+
+        function calculateTagStatistics() {
+            const counts = {};
+            rawDocsData.forEach(doc => {
+                if (doc.category) {
+                    doc.category.split(/[\/, ]/).forEach(t => {
+                        const trimmed = t.trim();
+                        if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
                     });
                 }
-                if (Array.isArray(data.records)) records = data.records;
-                renderInputs();
-                render();
-                alert('資料匯入成功！');
-            } catch (err) {
-                alert('檔案格式錯誤，無法解析 JSON！');
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-    }
+            });
 
-    window.onload = function() {
-        // 預設填入當前列印時間
-        document.getElementById('printTime').value = getCurrentDateTime();
-
-        const cachedDb = localStorage.getItem('cached113BM01Db');
-        if (cachedDb) {
-            try {
-                vehicleDatabase = JSON.parse(cachedDb);
-                refreshDataList();
-                document.getElementById('syncStatus').innerText = `(已載入快取 ${vehicleDatabase.length} 筆，正在檢查雲端更新...)`;
-            } catch(e) {}
+            sortedTagsList = Object.keys(counts).map(tag => ({
+                tag: tag,
+                count: counts[tag]
+            })).sort((a, b) => b.count - a.count);
         }
-        
-        syncGoogleSheet();
-        renderInputs();
-        render();
-    };
-</script>
 
+        function renderDocTags() {
+            const container = document.getElementById('doc-tags-container');
+            let tagsHTML = `
+                <button onclick="setDocTag('ALL')" id="tag-btn-ALL" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all shrink-0 ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
+                    全部 (${rawDocsData.length})
+                </button>
+            `;
+
+            sortedTagsList.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                tagsHTML += `
+                    <button onclick="setDocTag('${item.tag}')" id="tag-btn-${item.tag}" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all shrink-0 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
+                        ${item.tag} (${item.count})
+                    </button>
+                `;
+            });
+
+            container.innerHTML = tagsHTML;
+        }
+
+        function setDocTag(tag) {
+            activeDocTag = tag;
+            renderDocTags();
+            filterDocs();
+            closeTagCloudModal();
+        }
+
+        function filterDocs() {
+            const searchKeyword = document.getElementById('doc-search-input').value.trim().toLowerCase();
+
+            const filtered = rawDocsData.filter(doc => {
+                const matchTag = (activeDocTag === "ALL") || (doc.category && doc.category.includes(activeDocTag));
+                const matchSearch = !searchKeyword || 
+                    (doc.title && doc.title.toLowerCase().includes(searchKeyword)) ||
+                    (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
+                    (doc.keyword && doc.keyword.toLowerCase().includes(searchKeyword)) ||
+                    (doc.date && doc.date.toLowerCase().includes(searchKeyword));
+
+                return matchTag && matchSearch;
+            });
+
+            renderDocsList(filtered);
+        }
+
+        function renderDocsList(docs) {
+            const listContainer = document.getElementById('docs-list-container');
+            const countBadge = document.getElementById('docs-count-badge');
+            countBadge.innerText = `${docs.length} 份文件`;
+
+            if (docs.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">查無符合條件的技術文獻</div>';
+                return;
+            }
+
+            listContainer.innerHTML = docs.map((doc, index) => {
+                return `
+                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
+                        <div class="flex items-center justify-between">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
+                                ${doc.category || '未分類'}
+                            </span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date}</span>
+                        </div>
+                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
+                        <div class="flex justify-end pt-1">
+                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
+                                預覽 <span class="ml-1 text-[8px]">▶</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function previewDoc(url, index) {
+            if (!url) return;
+
+            document.querySelectorAll('#docs-list-container > div').forEach(el => el.classList.remove('active-doc'));
+            const activeCard = document.getElementById(`doc-card-${index}`);
+            if (activeCard) activeCard.classList.add('active-doc');
+
+            const placeholder = document.getElementById('pdf-placeholder');
+            const iframe = document.getElementById('pdf-iframe');
+
+            let embedUrl = url;
+            if (url.includes('drive.google.com') && url.includes('/view')) {
+                embedUrl = url.replace('/view', '/preview');
+            }
+
+            placeholder.classList.add('hidden');
+            iframe.classList.remove('hidden');
+            iframe.src = embedUrl;
+        }
+
+        /* -------------------------------------------------------------
+           Obsidian 標籤雲 Modal 控制
+        ------------------------------------------------------------- */
+        function openTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            const searchInput = document.getElementById('modal-tag-search');
+            searchInput.value = '';
+            
+            renderModalTagGrid(sortedTagsList);
+            document.getElementById('modal-tag-stats').innerText = `共計 ${sortedTagsList.length} 個分類標籤`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+            searchInput.focus();
+        }
+
+        function closeTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        function filterModalTags() {
+            const query = document.getElementById('modal-tag-search').value.trim().toLowerCase();
+            const filtered = sortedTagsList.filter(item => item.tag.toLowerCase().includes(query));
+            renderModalTagGrid(filtered);
+        }
+
+        function renderModalTagGrid(list) {
+            const grid = document.getElementById('modal-tag-grid');
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="text-xs text-gray-500 py-4 w-full text-center">找不到匹配的標籤</div>';
+                return;
+            }
+
+            let html = `
+                <button onclick="setDocTag('ALL')" class="px-3 py-1 rounded text-xs font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 border border-gray-700'}">
+                    # 全部 (${rawDocsData.length})
+                </button>
+            `;
+
+            list.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                html += `
+                    <button onclick="setDocTag('${item.tag}')" class="px-3 py-1 rounded text-xs font-bold transition-all flex items-center space-x-1.5 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 hover:border-red-500 border border-gray-700'}">
+                        <span># ${item.tag}</span>
+                        <span class="text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500 font-mono'}">(${item.count})</span>
+                    </button>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+                closeTagCloudModal();
+            }
+        });
+
+        initializeDynamicSheets();
+    </script>
 </body>
 </html>
