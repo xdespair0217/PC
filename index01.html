@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法系車專業多車型保養看板</title>
+    <title>專業多車型保養看板</title>
     <!-- Tailwind CSS 暗色風格 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -20,8 +20,10 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-4 mb-4 gap-4">
         <div class="flex items-center space-x-4 shrink-0">
+            <!-- 品牌專屬圓標 -->
             <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
             <div>
+                <!-- 兩欄式動態聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
@@ -35,13 +37,15 @@
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
                         <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
+                            <!-- 由 JavaScript 動態生成 -->
                         </select>
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（動態庫存即時比對連線）</p>
+                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（動態庫存與訂價即時連線）</p>
             </div>
         </div>
         
+        <!-- 套餐切換鈕區域 -->
         <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
             <span class="text-sm text-gray-500">正在同步試算表分頁...</span>
         </div>
@@ -101,6 +105,7 @@
                     </div>
                 </div>
 
+                <!-- 零件折扣趴數輸入框 -->
                 <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 shrink-0">
                     <span class="text-[11px] text-gray-400 font-bold">🛠️ 零件折扣比率：</span>
                     <input 
@@ -137,6 +142,7 @@
                 </div>
             </div>
 
+            <!-- 備註說明區 -->
             <div class="h-32 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col justify-center">
                 <h4 class="text-xs font-bold text-emerald-400 mb-1">💡 現場維護提示</h4>
                 <p class="text-xs text-gray-400 leading-relaxed">
@@ -189,7 +195,7 @@
                 dynamicModelsData = await response.json();
                 
                 if (!Array.isArray(dynamicModelsData) || dynamicModelsData.length === 0) {
-                    throw new Error("未能讀取到任何符合命名規格的分頁");
+                    throw new Error("未能讀取到任何符合規則的分頁");
                 }
 
                 statusBadge.innerText = "連線正常";
@@ -200,7 +206,7 @@
                 console.error("載入分頁清單失敗:", error);
                 statusBadge.innerText = "連線失敗";
                 statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2.5 py-0.5 rounded-full font-semibold";
-                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請確認分頁命名是否有加 P_ 或 C_";
+                document.getElementById('current-package-title').innerText = "❌ 讀取失敗，請確認分頁命名或連線狀態";
                 tabsContainer.innerHTML = '<span class="text-sm text-red-400">分頁同步失敗</span>';
             }
         }
@@ -209,6 +215,7 @@
             initializeDynamicSheets();
         }
 
+        // 純英文品牌選單渲染
         function renderBrandSelect() {
             const brandSelect = document.getElementById('brand-select');
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
@@ -323,7 +330,6 @@
                     const subtotal = cols[6] || "";
                     const location = cols[7] || ""; 
                     const description = cols[9] || ""; 
-                    // 後端附加的即時庫存欄位
                     const stock = cols[cols.length - 1] !== undefined ? cols[cols.length - 1] : "";
 
                     const cleanSubtotal = parseFloat(subtotal.replace(/[^0-9.-]+/g, "")) || 0;
@@ -341,7 +347,7 @@
                 renderTabs(keys);
                 switchPackage(keys[0]);
             } else {
-                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁資料格式";
+                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁格式";
                 clearDisplay();
             }
         }
@@ -419,7 +425,6 @@
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
                 if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
-                // 庫存狀態徽章
                 let stockBadge = '<span class="text-gray-600">-</span>';
                 if (!isLabor && item.stock !== "") {
                     const stockNum = parseFloat(item.stock);
