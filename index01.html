@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>專業多車型保養看板與技術文獻</title>
-    <!-- Tailwind CSS 暗色風格 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -21,10 +20,8 @@
     <!-- 頂部標頭列 -->
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <!-- 品牌圓標 -->
             <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
             <div>
-                <!-- 動態下拉選單 -->
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
@@ -32,9 +29,7 @@
                             <option value="">載入中...</option>
                         </select>
                     </div>
-                    
                     <div class="h-4 border-l border-gray-700"></div>
-
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
                         <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer min-w-[150px]">
@@ -67,9 +62,8 @@
     <!-- 主工作區 -->
     <main class="flex-1 flex overflow-hidden">
         
-        <!-- 視圖一：保養套餐看板 (左表格 + 右零件圖) -->
+        <!-- 視圖一：保養套餐看板 -->
         <section id="package-view" class="flex-1 flex space-x-4 overflow-hidden">
-            
             <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2 shrink-0">
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
@@ -93,8 +87,7 @@
                                 <th class="p-2.5 text-center rounded-r-md">即時庫存</th>
                             </tr>
                         </thead>
-                        <tbody id="table-rows">
-                        </tbody>
+                        <tbody id="table-rows"></tbody>
                     </table>
                 </div>
 
@@ -107,16 +100,7 @@
 
                     <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 shrink-0">
                         <span class="text-[11px] text-gray-400 font-bold">零件折扣：</span>
-                        <input 
-                            type="number" 
-                            id="part-discount-input" 
-                            value="100" 
-                            min="0" 
-                            max="100" 
-                            step="5"
-                            oninput="calculateTotalsWithDiscount()"
-                            class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono"
-                        >
+                        <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
                         <span class="text-[11px] text-gray-300 font-bold">%</span>
                     </div>
                 </div>
@@ -135,8 +119,7 @@
                     <h3 class="text-xs font-semibold text-gray-400 mb-3 tracking-wider flex items-center shrink-0">
                         <span class="mr-1.5">🔧</span>套餐内含零件圖解
                     </h3>
-                    <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start">
-                    </div>
+                    <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start"></div>
                 </div>
 
                 <div class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0">
@@ -146,13 +129,12 @@
                     </p>
                 </div>
             </div>
-
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (水平標準分欄：左 380px + 右自適應撐滿) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             
-            <!-- 左側清單 -->
+            <!-- 左側清單面板 -->
             <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-3 shrink-0">
                     <h2 class="text-sm font-bold text-gray-100 flex items-center">
@@ -161,19 +143,19 @@
                     <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份文件</span>
                 </div>
 
-                <!-- 搜尋框 -->
-                <div class="relative mb-3 shrink-0">
-                    <input 
-                        type="text" 
-                        id="doc-search-input" 
-                        oninput="filterDocs()" 
-                        placeholder="🔍 搜尋手冊標題、分類或料號..." 
-                        class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500"
-                    >
+                <!-- 搜尋列與標籤雲按鈕 -->
+                <div class="flex items-center space-x-2 mb-2.5 shrink-0">
+                    <div class="relative flex-1">
+                        <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+                    </div>
+                    <button onclick="openTagCloudModal()" title="開啟完整標籤雲" class="px-2 py-1 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 hover:border-red-500 text-gray-300 hover:text-white rounded-lg text-xs font-semibold flex items-center space-x-1 shrink-0 transition-colors shadow">
+                        <span>🏷️</span>
+                        <span>標籤雲</span>
+                    </button>
                 </div>
 
-                <!-- 標籤分類鈕 -->
-                <div id="doc-tags-container" class="flex flex-wrap gap-1.5 mb-3 overflow-y-auto max-h-24 custom-scrollbar shrink-0">
+                <!-- 嚴格限制最多兩行的高頻標籤列 -->
+                <div id="doc-tags-container" class="flex flex-wrap gap-1.5 mb-3 h-[62px] overflow-hidden shrink-0 border-b border-gray-800/80 pb-2">
                 </div>
 
                 <!-- 文獻卡片列表 -->
@@ -195,6 +177,31 @@
         </section>
 
     </main>
+
+    <!-- Obsidian 風格全標籤雲彈出 Modal -->
+    <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
+        <div class="bg-[#161b22] border border-gray-700 w-full max-w-xl rounded-xl p-5 shadow-2xl flex flex-col max-h-[75vh]" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                    <span class="text-base">🏷️</span>
+                    <h3 class="text-sm font-bold text-white tracking-wide">文獻標籤庫 (Obsidian Tag Matrix)</h3>
+                </div>
+                <button onclick="closeTagCloudModal()" class="text-gray-400 hover:text-white text-xl font-light focus:outline-none">&times;</button>
+            </div>
+            
+            <div class="my-3">
+                <input type="text" id="modal-tag-search" oninput="filterModalTags()" placeholder="過濾標籤名稱..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+            </div>
+
+            <div id="modal-tag-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-2 p-1 content-start">
+            </div>
+
+            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-[11px] text-gray-500">
+                <span id="modal-tag-stats">共載入 0 個分類標籤</span>
+                <span>點選標籤即可套用過濾</span>
+            </div>
+        </div>
+    </div>
 
     <!-- 零件大圖燈箱 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
@@ -223,6 +230,7 @@
         let rawPartsSum = 0;
 
         let rawDocsData = [];
+        let sortedTagsList = []; // 依熱度降冪排序的標籤清單
         let activeDocTag = "ALL";
 
         async function initializeDynamicSheets() {
@@ -625,7 +633,7 @@
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統模組
+           技術文獻系統模組（高頻雙行 + Obsidian 標籤雲彈窗）
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -654,7 +662,16 @@
             try {
                 const res = await fetch(GAS_API_URL + "?action=getDocs&t=" + Date.now());
                 if (!res.ok) return;
-                rawDocsData = await res.json();
+                const data = await res.json();
+                
+                // 日期降冪排序
+                rawDocsData = data.sort((a, b) => {
+                    const dateA = new Date(a.date || '1970-01-01').getTime();
+                    const dateB = new Date(b.date || '1970-01-01').getTime();
+                    return dateB - dateA;
+                });
+
+                calculateTagStatistics();
                 renderDocTags();
                 filterDocs();
             } catch (err) {
@@ -662,31 +679,43 @@
             }
         }
 
-        function renderDocTags() {
-            const container = document.getElementById('doc-tags-container');
-            const allTags = new Set();
-
+        // 計算並依熱度排序標籤
+        function calculateTagStatistics() {
+            const counts = {};
             rawDocsData.forEach(doc => {
                 if (doc.category) {
-                    // 同時支援空白鍵、斜線、逗號切割標籤
                     doc.category.split(/[\/, ]/).forEach(t => {
                         const trimmed = t.trim();
-                        if (trimmed) allTags.add(trimmed);
+                        if (trimmed) {
+                            counts[trimmed] = (counts[trimmed] || 0) + 1;
+                        }
                     });
                 }
             });
 
+            // 轉成陣列並以出現次數由大到小排序
+            sortedTagsList = Object.keys(counts).map(tag => ({
+                tag: tag,
+                count: counts[tag]
+            })).sort((a, b) => b.count - a.count);
+        }
+
+        // 渲染頂部兩行高頻標籤
+        function renderDocTags() {
+            const container = document.getElementById('doc-tags-container');
+
             let tagsHTML = `
-                <button onclick="setDocTag('ALL')" id="tag-btn-ALL" class="px-2.5 py-1 rounded text-[11px] font-bold transition-all bg-red-600 text-white shadow">
+                <button onclick="setDocTag('ALL')" id="tag-btn-ALL" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
                     全部 (${rawDocsData.length})
                 </button>
             `;
 
-            allTags.forEach(tag => {
-                const count = rawDocsData.filter(d => d.category && d.category.includes(tag)).length;
+            // 將依次數排序的標籤輸出至雙行容器中
+            sortedTagsList.forEach(item => {
+                const isActive = activeDocTag === item.tag;
                 tagsHTML += `
-                    <button onclick="setDocTag('${tag}')" id="tag-btn-${tag}" class="px-2 py-1 rounded text-[11px] font-bold transition-all bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800">
-                        ${tag} (${count})
+                    <button onclick="setDocTag('${item.tag}')" id="tag-btn-${item.tag}" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
+                        ${item.tag} (${item.count})
                     </button>
                 `;
             });
@@ -696,14 +725,9 @@
 
         function setDocTag(tag) {
             activeDocTag = tag;
-            document.querySelectorAll('#doc-tags-container button').forEach(btn => {
-                btn.className = "px-2 py-1 rounded text-[11px] font-bold transition-all bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800";
-            });
-            const activeBtn = document.getElementById(`tag-btn-${tag}`);
-            if (activeBtn) {
-                activeBtn.className = "px-2.5 py-1 rounded text-[11px] font-bold transition-all bg-red-600 text-white shadow";
-            }
+            renderDocTags(); // 重新渲染更新選中樣式
             filterDocs();
+            closeTagCloudModal();
         }
 
         function filterDocs() {
@@ -773,11 +797,68 @@
             iframe.src = embedUrl;
         }
 
+        /* -------------------------------------------------------------
+           Obsidian 標籤雲彈窗控制
+        ------------------------------------------------------------- */
+        function openTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            const searchInput = document.getElementById('modal-tag-search');
+            searchInput.value = '';
+            
+            renderModalTagGrid(sortedTagsList);
+            document.getElementById('modal-tag-stats').innerText = `共計 ${sortedTagsList.length} 個分類標籤`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+            searchInput.focus();
+        }
+
+        function closeTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        function filterModalTags() {
+            const query = document.getElementById('modal-tag-search').value.trim().toLowerCase();
+            const filtered = sortedTagsList.filter(item => item.tag.toLowerCase().includes(query));
+            renderModalTagGrid(filtered);
+        }
+
+        function renderModalTagGrid(list) {
+            const grid = document.getElementById('modal-tag-grid');
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="text-xs text-gray-500 py-4 w-full text-center">找不到匹配的標籤</div>';
+                return;
+            }
+
+            let html = `
+                <button onclick="setDocTag('ALL')" class="px-3 py-1 rounded text-xs font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 border border-gray-700'}">
+                    # 全部 (${rawDocsData.length})
+                </button>
+            `;
+
+            list.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                html += `
+                    <button onclick="setDocTag('${item.tag}')" class="px-3 py-1 rounded text-xs font-bold transition-all flex items-center space-x-1.5 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 hover:border-red-500 border border-gray-700'}">
+                        <span># ${item.tag}</span>
+                        <span class="text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500 font-mono'}">(${item.count})</span>
+                    </button>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeLightbox();
+            if (event.key === 'Escape') {
+                closeLightbox();
+                closeTagCloudModal();
+            }
         });
 
-        // 啟動流程
+        // 啟動主流程
         initializeDynamicSheets();
     </script>
 </body>
