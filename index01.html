@@ -23,14 +23,12 @@
             <!-- 品牌專屬圓標 -->
             <div id="brand-logo" class="w-12 h-12 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PSA</div>
             <div>
-                <!-- 優化後的兩欄式聯動下拉選單 -->
+                <!-- 兩欄式動態聯動下拉選單 -->
                 <div class="flex items-center space-x-3 bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer">
-                            <option value="PEUGEOT">PEUGEOT (寶獅)</option>
-                            <option value="CITROËN">CITROËN (雪鐵龍)</option>
-                            <option value="PROJECT">罐頭專案零件</option>
+                            <option value="">載入中...</option>
                         </select>
                     </div>
                     
@@ -39,20 +37,20 @@
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
                         <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-2 py-1 text-sm font-bold focus:outline-none focus:border-emerald-500 cursor-pointer min-w-[140px]">
-                            <!-- 由 JavaScript 根據品牌動態帶入 -->
+                            <!-- 由 JavaScript 根據試算表分頁動態生成 -->
                         </select>
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端同步試算表（獨立分頁精準連線）</p>
+                <p class="text-[10px] text-gray-500 mt-1">數據來源：Google 雲端試算表（動態分頁讀取）</p>
             </div>
         </div>
         
         <!-- 套餐切換鈕區域 -->
         <div id="package-tabs" class="flex flex-wrap gap-2 max-w-2xl justify-start lg:justify-center">
-            <span class="text-sm text-gray-500">正在辨識保養套餐項目...</span>
+            <span class="text-sm text-gray-500">正在同步試算表分頁...</span>
         </div>
 
-        <button onclick="fetchSheetData()" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-4 py-2 rounded-lg transition-all border border-gray-700 flex items-center space-x-1.5 shrink-0">
+        <button onclick="reloadAllData()" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-4 py-2 rounded-lg transition-all border border-gray-700 flex items-center space-x-1.5 shrink-0">
             <span>🔄</span> <span>手動重新整理</span>
         </button>
     </header>
@@ -66,7 +64,7 @@
                 <h2 id="current-package-title" class="text-lg font-bold text-gray-100 flex items-center">
                     <span class="w-2 h-5 bg-[#48bb78] inline-block mr-2 rounded-sm"></span>連線成功，正在排版中...
                 </h2>
-                <span class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2.5 py-0.5 rounded-full font-semibold">連線正常</span>
+                <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2.5 py-0.5 rounded-full font-semibold">連線正常</span>
             </div>
 
             <!-- 表格主體 -->
@@ -174,64 +172,101 @@
 
     <script>
         // ==========================================================
-        // 🎯【完美網址資料庫對照表】
+        // 🎯【Google Apps Script 動態 API 設定】
+        // 請將下方網址替換為你在試算表 Apps Script 部署後的 Web App 網址 (/exec)
         // ==========================================================
-        const CAR_MODELS_SHEETS = {
-            // --- PEUGEOT 系列 ---
-            "PEUGEOT_208": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv",
-            "PEUGEOT_2008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=548899643&single=true&output=csv", 
-            "PEUGEOT_308": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_3008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_408": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_508": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            "PEUGEOT_5008": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=1525555317&single=true&output=csv",
-            
-            // --- CITROËN 系列 ---
-            "CITROËN_C4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
-            "CITROËN_C5_AIRCROSS": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=185633172&single=true&output=csv",
-            "CITROËN_BERLINGO": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5HdgQrIifhCs12XLfy8GP_SF9znHAhkvr4yl_U7RFP712U3EOATCSm0_-h6aDtF2LA4kSwImjRcEp/pub?gid=0&single=true&output=csv",
+        const GAS_API_URL = "https://script.google.com/macros/s/你的AppsScript部署ID/exec";
 
-            // --- 罐頭專案系列 ---
-            "PROJECT_通用套餐": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
-        };
-
+        let dynamicModelsData = []; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
-        let selectedModel = Object.keys(CAR_MODELS_SHEETS)[0]; // 預設選取第一個
+        let selectedModelObj = null;
         let rawLaborSum = 0;
         let rawPartsSum = 0;
 
-        // 動態更新第二層車型選單
+        // 初始化：先呼叫 Apps Script 取得試算表中所有有效分頁與 CSV 網址
+        async function initializeDynamicSheets() {
+            const tabsContainer = document.getElementById('package-tabs');
+            const statusBadge = document.getElementById('status-badge');
+            
+            try {
+                tabsContainer.innerHTML = '<span class="text-sm text-gray-500">正在讀取試算表分頁...</span>';
+                
+                const response = await fetch(GAS_API_URL + "?cachebust=" + new Date().getTime());
+                if (!response.ok) throw new Error("API 回應異常: " + response.status);
+                
+                dynamicModelsData = await response.json();
+                
+                if (!Array.isArray(dynamicModelsData) || dynamicModelsData.length === 0) {
+                    throw new Error("未能讀取到任何分頁資訊");
+                }
+
+                statusBadge.innerText = "連線正常";
+                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2.5 py-0.5 rounded-full font-semibold";
+                
+                renderBrandSelect();
+            } catch (error) {
+                console.error("載入分頁清單失敗:", error);
+                statusBadge.innerText = "連線失敗";
+                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2.5 py-0.5 rounded-full font-semibold";
+                document.getElementById('current-package-title').innerText = "❌ 無法讀取試算表分頁，請確認 Apps Script 權限或 API 網址";
+                tabsContainer.innerHTML = '<span class="text-sm text-red-400">分頁同步失敗</span>';
+            }
+        }
+
+        // 重新整理按鈕呼叫
+        function reloadAllData() {
+            initializeDynamicSheets();
+        }
+
+        // 動態生成品牌選單
+        function renderBrandSelect() {
+            const brandSelect = document.getElementById('brand-select');
+            const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
+
+            brandSelect.innerHTML = availableBrands.map(brand => {
+                let displayName = brand;
+                if (brand === "PEUGEOT") displayName = "PEUGEOT (寶獅)";
+                else if (brand === "CITROËN") displayName = "CITROËN (雪鐵龍)";
+                else if (brand === "PROJECT") displayName = "罐頭專案零件";
+                return `<option value="${brand}">${displayName}</option>`;
+            }).join('');
+
+            updateModelOptions();
+        }
+
+        // 依據選擇的品牌，動態更新第二層車型選單
         function updateModelOptions() {
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
 
-            // 篩選出符合當前品牌的試算表 Key 值
-            const matchedModels = Object.keys(CAR_MODELS_SHEETS).filter(key => key.startsWith(currentBrand));
+            const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
 
-            // 生成第二層 Option 文字
-            modelSelect.innerHTML = matchedModels.map(key => {
-                const modelDisplay = key.replace(`${currentBrand}_`, "").replace("_", " ");
-                return `<option value="${key}">${modelDisplay}</option>`;
+            modelSelect.innerHTML = matchedModels.map(item => {
+                return `<option value="${item.sheetName}">${item.model}</option>`;
             }).join('');
 
             if (matchedModels.length > 0) {
-                modelSelect.value = matchedModels[0];
-                executeModelSwitch(matchedModels[0]);
+                modelSelect.value = matchedModels[0].sheetName;
+                executeModelSwitch(matchedModels[0].sheetName);
+            } else {
+                clearDisplay();
             }
         }
 
         // 執行車型切換與介面色彩微調
-        function executeModelSwitch(modelName) {
-            selectedModel = modelName;
-            
-            // 同步變更圓標文字與風格
+        function executeModelSwitch(sheetName) {
+            selectedModelObj = dynamicModelsData.find(item => item.sheetName === sheetName);
+            if (!selectedModelObj) return;
+
             const brandLogo = document.getElementById('brand-logo');
-            if (modelName.startsWith("CITROËN")) {
+            const brand = selectedModelObj.brand;
+
+            if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-12 h-12 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
-            } else if (modelName.startsWith("PROJECT")) {
+            } else if (brand === "PROJECT") {
                 brandLogo.innerText = "CANN";
                 brandLogo.className = "w-12 h-12 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
             } else {
@@ -243,17 +278,17 @@
             fetchSheetData();
         }
 
+        // 下載並解析當前分頁 CSV
         async function fetchSheetData() {
-            const targetUrl = CAR_MODELS_SHEETS[selectedModel];
-            if (!targetUrl) return;
+            if (!selectedModelObj || !selectedModelObj.csvUrl) return;
 
             try {
-                const response = await fetch(targetUrl + "&cachebust=" + new Date().getTime());
+                const response = await fetch(selectedModelObj.csvUrl + "&cachebust=" + new Date().getTime());
                 const csvText = await response.text();
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("抓取雲端資料失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 雲端資料加載失敗，請檢查網路連線";
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料加載失敗，請檢查網路或試算表共用權限";
                 clearDisplay();
             }
         }
@@ -277,7 +312,7 @@
                         items: []
                     };
                     
-                    // 如果標題列的 Column L (cols[11]) 有網址就記錄
+                    // Column L (cols[11]) 若有技術 PDF 網址則儲存
                     const rawLCol = cols[11] || "";
                     if (rawLCol.startsWith("http")) {
                         packages[currentPackageName].pdfUrl = rawLCol;
@@ -285,7 +320,6 @@
                     return;
                 }
 
-                // 如果在套餐內容行（零件或工資列）的 Column L 發現網址，也自動記錄下來
                 if (currentPackageName) {
                     const rawLCol = cols[11] || "";
                     if (rawLCol.startsWith("http") && !packages[currentPackageName].pdfUrl) {
@@ -320,15 +354,16 @@
                 renderTabs(keys);
                 switchPackage(keys[0]);
             } else {
-                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁資料格式是否正確";
+                document.getElementById('current-package-title').innerText = "⚠️ 找不到任何套餐項目，請確認此分頁格式";
                 clearDisplay();
             }
         }
 
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
-            const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
             
             let activeBgClass = "bg-emerald-600 border-emerald-500";
             if (isCitroen) activeBgClass = "bg-[#da291c] border-[#da291c]";
@@ -358,17 +393,16 @@
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
 
-            const isCitroen = selectedModel.startsWith("CITROËN");
-            const isProject = selectedModel.startsWith("PROJECT");
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
             
             let indicatorColor = "bg-[#48bb78]";
             if (isCitroen) indicatorColor = "bg-[#da291c]";
             if (isProject) indicatorColor = "bg-[#f59e0b]";
 
-            // 動態產生標題 HTML
             let titleHTML = `<span class="w-2 h-5 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             
-            // 只要掃描到該套餐範圍內的 Column L 有網址，即刻生成按鈕
             if (pkg.pdfUrl) {
                 titleHTML += `
                     <a href="${pkg.pdfUrl}" target="_blank" rel="noopener noreferrer" class="ml-3 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded-md hover:bg-amber-900/80 hover:text-white hover:border-amber-600 transition-all shadow-sm">
@@ -416,7 +450,6 @@
                 `;
 
                 if (item.attr !== "工資" && item.partId) {
-                    // 自動判定 .png 與 .jpg 機制
                     const imgUrlPng = `${item.partId}.png`;
                     const imgUrlJpg = `${item.partId}.jpg`;
                     const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
@@ -535,8 +568,8 @@
             if (event.key === 'Escape') closeLightbox();
         });
 
-        // 啟動排版與第一階段選單建立
-        updateModelOptions();
+        // 啟動排版並向 Apps Script 請求最新分頁
+        initializeDynamicSheets();
     </script>
 </body>
 </html>
