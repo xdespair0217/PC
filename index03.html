@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>保養套餐與技術文獻 (行動版)</title>
+    <title>專業保養套餐與技術文獻 (行動整合版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body {
@@ -23,7 +23,6 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
-        .active-nav { color: #f59e0b !important; }
         
         main {
             overscroll-behavior-y: contain;
@@ -47,40 +46,51 @@
         <span id="copy-toast-msg">料號明細已複製到剪貼簿</span>
     </div>
 
-    <!-- 頂部導航與車型篩選 (釘頂) -->
-    <header class="bg-[#161b22] border-b border-gray-800 px-3 py-2.5 shrink-0 z-30 shadow-md">
+    <!-- 頂部操控區 (Header：品牌選擇 + 視圖切換 + 套餐分頁) -->
+    <header class="bg-[#161b22] border-b border-gray-800 px-3 py-2 shrink-0 z-30 shadow-md flex flex-col gap-2">
+        <!-- 列一：品牌與型號 + 重新整理 -->
         <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center space-x-2 min-w-0">
-                <div id="brand-logo" class="w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shrink-0">CANN</div>
-                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg p-1 text-xs min-w-0">
-                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer border-r border-gray-700 pr-1 text-xs">
+            <div class="flex items-center space-x-2 min-w-0 flex-1">
+                <div id="brand-logo" class="w-7 h-7 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shrink-0">CANN</div>
+                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 text-xs min-w-0 flex-1">
+                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer border-r border-gray-700 pr-1.5 text-xs">
                         <option value="">品牌...</option>
                     </select>
-                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer pl-1 text-xs truncate max-w-[130px]">
+                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer pl-1.5 text-xs truncate flex-1">
                     </select>
                 </div>
             </div>
 
-            <button onclick="reloadAllData(true)" class="p-1.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 rounded-lg text-xs text-gray-300 active:scale-95 shrink-0" title="重新整理">
+            <button onclick="reloadAllData(true)" class="p-1.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 rounded-lg text-xs text-gray-300 active:scale-95 shrink-0" title="強制重新整理">
                 🔄
             </button>
         </div>
 
-        <!-- 套餐橫向滑動分頁列 -->
-        <div id="package-tabs-bar" class="mt-2 pt-1 border-t border-gray-800/60 flex items-center">
+        <!-- 列二：模式切換 (移至上方頂部) -->
+        <div class="flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-700 shrink-0">
+            <button id="btn-mode-package" onclick="switchMainMode('package')" class="flex-1 py-1 rounded-md text-xs font-bold transition-all bg-[#161b22] text-white shadow">
+                🛠️ 保養套餐看板
+            </button>
+            <button id="btn-mode-docs" onclick="switchMainMode('docs')" class="flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400">
+                📚 技術文獻資料庫
+            </button>
+        </div>
+
+        <!-- 列三：套餐橫向滑動分頁列 (保養模式時才顯示) -->
+        <div id="package-tabs-bar" class="flex items-center">
             <div id="package-tabs" class="flex space-x-2 overflow-x-auto hide-scrollbar py-0.5 w-full">
                 <span class="text-[11px] text-gray-500">同步分頁中...</span>
             </div>
         </div>
     </header>
 
-    <!-- 主要內容滾動區 (只在中間這塊獨立滾動，徹底不影響底部常駐面板) -->
+    <!-- 中間主要滾動內容區 (上頂 Header，下抵結算 Bar，絕不遮擋) -->
     <main class="flex-1 overflow-y-auto custom-scrollbar relative p-3">
         
-        <!-- 視圖一：保養套餐看板 (行動版) -->
+        <!-- 視圖一：保養套餐看板 -->
         <section id="package-view" class="space-y-3">
             
-            <!-- 套餐標題與顯示切換 -->
+            <!-- 套餐標題與顯示切換 (清單 / 圖解) -->
             <div class="flex items-center justify-between bg-[#161b22] p-2.5 rounded-xl border border-gray-800">
                 <div class="flex items-center min-w-0 pr-2">
                     <h2 id="current-package-title" class="text-xs font-bold text-gray-100 truncate">載入中...</h2>
@@ -112,7 +122,7 @@
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (行動版) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden space-y-3">
             <div class="flex gap-1.5">
                 <div class="relative flex-1">
@@ -133,39 +143,28 @@
         </section>
     </main>
 
-    <!-- 固定常駐：底部金額摘要列 (結構獨立在 main 之外，保證 100% 絕對常駐) -->
-    <div id="package-bottom-bar" class="shrink-0 bg-[#161b22] border-t border-gray-800 px-3 py-2 z-30 shadow-2xl">
+    <!-- 底部常駐：工資、零件、折扣與總計面板 (保養模式下 100% 常駐最下方) -->
+    <footer id="package-bottom-bar" class="shrink-0 bg-[#161b22] border-t border-gray-800 px-3 py-2 z-30 shadow-2xl">
         <div class="flex items-center justify-between text-xs">
             <div class="flex flex-col">
-                <div class="flex items-center space-x-2 text-[11px] text-gray-400">
+                <div class="flex items-center space-x-3 text-[11px] text-gray-400">
                     <span>工資: <b id="labor-subtotal" class="text-gray-200 font-mono">$0</b></span>
                     <span>零件: <b id="parts-subtotal" class="text-amber-500 font-mono">$0</b></span>
                 </div>
-                <div class="flex items-center space-x-1 mt-0.5">
-                    <span class="text-gray-400 text-[10px]">總額:</span>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                    <span class="text-gray-400 text-[11px] font-medium">應付總額:</span>
                     <span id="package-total" class="text-lg font-black text-green-400 font-mono tracking-tight">$ 0</span>
+                    <span id="discount-note" class="text-[9px] text-amber-500 font-medium hidden"></span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-1.5 bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1">
-                <span class="text-[10px] text-gray-400 font-bold">折</span>
-                <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-9 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
-                <span class="text-[10px] text-gray-300">%</span>
+                <span class="text-[10px] text-gray-400 font-bold">零件折</span>
+                <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
+                <span class="text-[10px] text-gray-300 font-bold">%</span>
             </div>
         </div>
-    </div>
-
-    <!-- 固定常駐：底部切換導航欄 -->
-    <nav class="shrink-0 h-12 bg-[#0d1117] border-t border-gray-800 flex items-center justify-around z-30">
-        <button id="nav-btn-package" onclick="switchMainMode('package')" class="flex flex-col items-center justify-center flex-1 h-full active-nav">
-            <span class="text-base leading-none">🛠️</span>
-            <span class="text-[10px] font-bold mt-1">保養套餐</span>
-        </button>
-        <button id="nav-btn-docs" onclick="switchMainMode('docs')" class="flex flex-col items-center justify-center flex-1 h-full text-gray-400">
-            <span class="text-base leading-none">📚</span>
-            <span class="text-[10px] font-bold mt-1">技術文獻</span>
-        </button>
-    </nav>
+    </footer>
 
     <!-- 行動版文獻預覽 Modal -->
     <div id="pdf-modal" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col">
@@ -195,7 +194,7 @@
         </div>
     </div>
 
-    <!-- 零件大圖燈箱 (修復破圖 fallback) -->
+    <!-- 零件大圖燈箱 (修復破圖與精確繼承縮圖路徑) -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4">
         <div class="max-w-xs w-full bg-[#161b22] p-3 rounded-xl border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
             <div class="w-full h-52 bg-[#0d1117] rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-800">
@@ -295,16 +294,16 @@
 
             if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
-                brandLogo.className = "w-8 h-8 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-7 h-7 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
             } else if (brand === "PROJECT") {
                 brandLogo.innerText = "CANN";
-                brandLogo.className = "w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-7 h-7 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
             } else if (brand === "ALFA ROMEO") {
                 brandLogo.innerText = "ALFA";
-                brandLogo.className = "w-8 h-8 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-7 h-7 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
             } else {
                 brandLogo.innerText = "PEUG";
-                brandLogo.className = "w-8 h-8 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-7 h-7 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
             }
 
             fetchSheetData();
@@ -457,12 +456,12 @@
                     }
                 }
 
-                // 判斷屬性顏色
+                // 屬性顏色
                 let attrBadgeClass = isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/60 text-amber-400';
                 if (item.attr.includes('1.2')) attrBadgeClass = 'bg-amber-900/60 text-amber-400 border border-amber-700/50';
                 if (item.attr.includes('油品')) attrBadgeClass = 'bg-orange-950/80 text-orange-400 border border-orange-800/50';
 
-                // 行動版零件卡片
+                // 行動版卡片
                 listHTML += `
                     <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2.5 flex flex-col space-y-1 shadow-sm">
                         <div class="flex items-center justify-between">
@@ -483,7 +482,7 @@
                     </div>
                 `;
 
-                // 行動版縮圖卡片
+                // 縮圖卡片
                 if (!isLabor && item.partId) {
                     const imgUrlPng = `${item.partId}.png`;
                     const imgUrlJpg = `${item.partId}.jpg`;
@@ -594,6 +593,14 @@
             document.getElementById('labor-subtotal').innerText = `$${rawLaborSum.toLocaleString()}`;
             document.getElementById('parts-subtotal').innerText = `$${discountedPartsSum.toLocaleString()}`;
             document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
+
+            const discountNote = document.getElementById('discount-note');
+            if (discountRate < 100) {
+                discountNote.innerText = `(${discountRate}折)`;
+                discountNote.classList.remove('hidden');
+            } else {
+                discountNote.classList.add('hidden');
+            }
         }
 
         function switchPackageSubView(view) {
@@ -615,13 +622,14 @@
             }
         }
 
+        /* ---------------- 頂部主模式切換 ---------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
             const docsView = document.getElementById('docs-view');
             const bottomBar = document.getElementById('package-bottom-bar');
             const tabsBar = document.getElementById('package-tabs-bar');
-            const navPackage = document.getElementById('nav-btn-package');
-            const navDocs = document.getElementById('nav-btn-docs');
+            const btnPackage = document.getElementById('btn-mode-package');
+            const btnDocs = document.getElementById('btn-mode-docs');
 
             if (mode === 'docs') {
                 packageView.classList.add('hidden');
@@ -629,10 +637,8 @@
                 tabsBar.classList.add('hidden');
                 docsView.classList.remove('hidden');
                 
-                navPackage.classList.remove('active-nav');
-                navPackage.classList.add('text-gray-400');
-                navDocs.classList.add('active-nav');
-                navDocs.classList.remove('text-gray-400');
+                btnPackage.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400";
+                btnDocs.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all bg-red-600 text-white shadow";
                 filterDocs();
             } else {
                 docsView.classList.add('hidden');
@@ -640,10 +646,8 @@
                 bottomBar.classList.remove('hidden');
                 tabsBar.classList.remove('hidden');
 
-                navDocs.classList.remove('active-nav');
-                navDocs.classList.add('text-gray-400');
-                navPackage.classList.add('active-nav');
-                navPackage.classList.remove('text-gray-400');
+                btnDocs.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400";
+                btnPackage.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all bg-[#161b22] text-white shadow";
             }
         }
 
@@ -781,12 +785,11 @@
             document.getElementById('modal-tag-grid').innerHTML = html;
         }
 
-        /* ---------------- 燈箱大圖 (精確繼承縮圖成功路徑，不再破圖) ---------------- */
+        /* ---------------- 燈箱大圖 (繼承縮圖成功路徑) ---------------- */
         function openLightboxFromImg(imgEl, partId, title, encodedDesc) {
             const lightbox = document.getElementById('lightbox');
             const img = document.getElementById('lightbox-img');
             
-            // 直接繼承縮圖當前成功載入的圖片來源
             img.src = imgEl ? imgEl.src : `${partId}.png`;
             img.onerror = function() {
                 this.src = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
