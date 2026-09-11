@@ -15,6 +15,8 @@
             -webkit-overflow-scrolling: touch;
             height: 100%;
             width: 100%;
+            margin: 0;
+            padding: 0;
         }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -27,27 +29,26 @@
             overscroll-behavior-y: contain;
         }
 
-        /* 料號點擊按鈕效果 */
         .part-copy-btn {
             cursor: pointer;
             transition: transform 0.1s ease, opacity 0.1s ease;
         }
         .part-copy-btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
             opacity: 0.8;
         }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden relative">
+<body class="flex flex-col h-[100dvh] overflow-hidden relative">
 
-    <!-- 頂部複製提示 Toast (行動版專用) -->
+    <!-- 頂部複製提示 Toast -->
     <div id="copy-toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#161b22]/95 border border-emerald-500 text-emerald-400 px-4 py-2 rounded-xl text-xs font-bold shadow-2xl flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-3">
         <span class="text-sm">📋</span>
         <span id="copy-toast-msg">料號明細已複製到剪貼簿</span>
     </div>
 
-    <!-- 頂部導航與車型篩選 -->
-    <header class="bg-[#161b22] border-b border-gray-800 px-3 py-2.5 shrink-0 z-20 shadow-md">
+    <!-- 頂部導航與車型篩選 (釘頂) -->
+    <header class="bg-[#161b22] border-b border-gray-800 px-3 py-2.5 shrink-0 z-30 shadow-md">
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center space-x-2 min-w-0">
                 <div id="brand-logo" class="w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shrink-0">CANN</div>
@@ -73,11 +74,11 @@
         </div>
     </header>
 
-    <!-- 主要內容滾動區 -->
-    <main class="flex-1 overflow-y-auto custom-scrollbar relative pb-36 overscroll-contain">
+    <!-- 主要內容滾動區 (只在中間這塊獨立滾動，徹底不影響底部常駐面板) -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar relative p-3">
         
         <!-- 視圖一：保養套餐看板 (行動版) -->
-        <section id="package-view" class="p-3 space-y-3">
+        <section id="package-view" class="space-y-3">
             
             <!-- 套餐標題與顯示切換 -->
             <div class="flex items-center justify-between bg-[#161b22] p-2.5 rounded-xl border border-gray-800">
@@ -112,7 +113,7 @@
         </section>
 
         <!-- 視圖二：技術文獻資料庫 (行動版) -->
-        <section id="docs-view" class="hidden p-3 space-y-3">
+        <section id="docs-view" class="hidden space-y-3">
             <div class="flex gap-1.5">
                 <div class="relative flex-1">
                     <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、關鍵字、料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 placeholder-gray-500">
@@ -132,8 +133,8 @@
         </section>
     </main>
 
-    <!-- 行動版固定底部摘要面板 -->
-    <div id="package-bottom-bar" class="fixed bottom-12 left-0 right-0 bg-[#161b22]/95 backdrop-blur border-t border-gray-800 px-3 py-2 z-20">
+    <!-- 固定常駐：底部金額摘要列 (結構獨立在 main 之外，保證 100% 絕對常駐) -->
+    <div id="package-bottom-bar" class="shrink-0 bg-[#161b22] border-t border-gray-800 px-3 py-2 z-30 shadow-2xl">
         <div class="flex items-center justify-between text-xs">
             <div class="flex flex-col">
                 <div class="flex items-center space-x-2 text-[11px] text-gray-400">
@@ -154,8 +155,8 @@
         </div>
     </div>
 
-    <!-- 底部切換 Tab Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 h-12 bg-[#0d1117] border-t border-gray-800 flex items-center justify-around z-30">
+    <!-- 固定常駐：底部切換導航欄 -->
+    <nav class="shrink-0 h-12 bg-[#0d1117] border-t border-gray-800 flex items-center justify-around z-30">
         <button id="nav-btn-package" onclick="switchMainMode('package')" class="flex flex-col items-center justify-center flex-1 h-full active-nav">
             <span class="text-base leading-none">🛠️</span>
             <span class="text-[10px] font-bold mt-1">保養套餐</span>
@@ -194,18 +195,20 @@
         </div>
     </div>
 
-    <!-- 零件大圖燈箱 -->
+    <!-- 零件大圖燈箱 (修復破圖 fallback) -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4">
-        <div class="max-w-xs bg-[#161b22] p-2 rounded-xl border border-gray-800" onclick="event.stopPropagation()">
-            <img id="lightbox-img" src="" class="w-full h-48 object-contain rounded bg-[#0d1117]">
-            <div class="mt-2 text-center">
+        <div class="max-w-xs w-full bg-[#161b22] p-3 rounded-xl border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
+            <div class="w-full h-52 bg-[#0d1117] rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-800">
+                <img id="lightbox-img" src="" class="w-full h-full object-contain p-2">
+            </div>
+            <div class="text-center">
                 <p id="lightbox-part-id" class="text-[10px] text-gray-500 font-mono"></p>
                 <h3 id="lightbox-title" class="text-xs font-bold text-white mt-0.5"></h3>
-                <div id="lightbox-desc-container" class="mt-1.5 p-1.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-[10px] text-left hidden">
+                <div id="lightbox-desc-container" class="mt-2 p-2 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-[10px] text-left hidden leading-relaxed">
                     <span id="lightbox-desc-text"></span>
                 </div>
             </div>
-            <button onclick="closeLightbox()" class="w-full mt-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs">關閉</button>
+            <button onclick="closeLightbox()" class="w-full mt-3 py-1.5 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-gray-300 rounded-lg text-xs font-bold transition-all">關閉</button>
         </div>
     </div>
 
@@ -427,7 +430,7 @@
             rawLaborSum = 0;
             rawPartsSum = 0;
 
-            pkg.items.forEach((item, index) => {
+            pkg.items.forEach((item) => {
                 const isLabor = item.attr === "工資";
                 const price = parseFloat(item.price) || 0;
                 const qty = parseFloat(item.qty) || 1;
@@ -454,12 +457,17 @@
                     }
                 }
 
-                // 行動版零件卡片 (點擊料號觸發複製)
+                // 判斷屬性顏色
+                let attrBadgeClass = isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/60 text-amber-400';
+                if (item.attr.includes('1.2')) attrBadgeClass = 'bg-amber-900/60 text-amber-400 border border-amber-700/50';
+                if (item.attr.includes('油品')) attrBadgeClass = 'bg-orange-950/80 text-orange-400 border border-orange-800/50';
+
+                // 行動版零件卡片
                 listHTML += `
                     <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2.5 flex flex-col space-y-1 shadow-sm">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-1.5">
-                                <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/60 text-amber-400'}">${item.attr}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${attrBadgeClass}">${item.attr}</span>
                                 <span onclick="copyMobilePartDetails('${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${price}', '${qty}', '${subtotal}', '${item.location}', '${item.stock}', '${stockStatusDesc}', '${item.attr}')" class="part-copy-btn text-xs font-mono text-blue-400 font-bold bg-blue-950/40 border border-blue-900/50 px-1.5 py-0.5 rounded flex items-center gap-1">
                                     <span>${item.partId}</span>
                                     <span class="text-[9px] text-gray-400">📋</span>
@@ -484,7 +492,7 @@
 
                     gridHTML += `
                         <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2 flex flex-col items-center justify-between shadow-sm">
-                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${defaultImg}', '${safeDesc}')">
+                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openLightboxFromImg(this.querySelector('img'), '${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${safeDesc}')">
                                 <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1">
                             </div>
                             <div class="text-center w-full">
@@ -773,12 +781,17 @@
             document.getElementById('modal-tag-grid').innerHTML = html;
         }
 
-        /* ---------------- Lightbox ---------------- */
-        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
+        /* ---------------- 燈箱大圖 (精確繼承縮圖成功路徑，不再破圖) ---------------- */
+        function openLightboxFromImg(imgEl, partId, title, encodedDesc) {
             const lightbox = document.getElementById('lightbox');
             const img = document.getElementById('lightbox-img');
-            img.src = imgSrc;
-            img.onerror = function() { this.src = defaultImg; };
+            
+            // 直接繼承縮圖當前成功載入的圖片來源
+            img.src = imgEl ? imgEl.src : `${partId}.png`;
+            img.onerror = function() {
+                this.src = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
+            };
+
             document.getElementById('lightbox-part-id').innerText = partId;
             document.getElementById('lightbox-title').innerText = title;
             
