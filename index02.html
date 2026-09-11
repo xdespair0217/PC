@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -56,6 +55,13 @@
         .form-group label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
         .form-group input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
         
+        /* 灰字佔位提示樣式 (Placeholder) */
+        input::placeholder {
+            color: #aaa;
+            font-size: 0.82rem;
+            font-style: italic;
+        }
+
         .highlight-input {
             border: 1.5px solid #2b5797 !important;
             background: #fbfdff;
@@ -178,43 +184,43 @@
 
         <div class="form-grid">
             <div class="form-group">
-                <label style="color: #2b5797;">🔍 車牌 (輸入前綴自動推薦)</label>
+                <label style="color: #2b5797;">🔍 車牌 (打前綴自動推薦)</label>
                 <input type="text" id="carPlate" list="carPlateList" class="highlight-input" placeholder="例: RFT-9760" oninput="onCarPlateInput()">
                 <datalist id="carPlateList"></datalist>
             </div>
 
-            <div class="form-group"><label>單號編號 (工單號)</label><input type="text" id="docNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>服務廠</label><input type="text" id="servicePlant" value="尚鵬汽車-內湖保養廠" oninput="render()"></div>
-            <div class="form-group"><label>工單類別</label><input type="text" id="workType" value="" oninput="render()"></div>
-            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" value="" oninput="render()"></div>
-            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" value="" oninput="render()"></div>
+            <div class="form-group"><label>單號編號 (工單號)</label><input type="text" id="docNo" placeholder="例: B260900261" oninput="render()"></div>
+            <div class="form-group"><label>服務廠</label><input type="text" id="servicePlant" value="尚鵬汽車-內湖保養廠" placeholder="例: 尚鵬汽車-內湖保養廠" oninput="render()"></div>
+            <div class="form-group"><label>工單類別</label><input type="text" id="workType" placeholder="例: 索賠 / 引電 / 定保" oninput="render()"></div>
+            <div class="form-group"><label>進廠里程</label><input type="text" id="mileage" placeholder="例: 4129" oninput="render()"></div>
+            <div class="form-group"><label>開單時間</label><input type="text" id="openTime" placeholder="例: 2026-09-10 10:36" oninput="render()"></div>
+            <div class="form-group"><label>完工日期</label><input type="text" id="finishTime" placeholder="例: 2026-09-10 12:00" oninput="render()"></div>
+            <div class="form-group"><label>保固到期</label><input type="text" id="warrantyDate" placeholder="例: 2029-09-10" oninput="render()"></div>
             
-            <div class="form-group"><label>車型</label><input type="text" id="carModel" value="" oninput="render()"></div>
-            <div class="form-group"><label>年式</label><input type="text" id="carYear" value="2026" oninput="render()"></div>
-            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" value="" oninput="render()"></div>
-            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" value="" oninput="render()"></div>
-            <div class="form-group"><label>車主</label><input type="text" id="owner" value="" oninput="render()"></div>
-            <div class="form-group"><label>駕駛</label><input type="text" id="driver" value="" oninput="render()"></div>
-            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" value="" oninput="render()"></div>
-            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" value="" oninput="render()"></div>
-            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" value="" oninput="render()"></div>
-            <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" oninput="render()"></div>
+            <div class="form-group"><label>車型</label><input type="text" id="carModel" placeholder="例: 3008 HYBRID / GIULIA" oninput="render()"></div>
+            <div class="form-group"><label>年式</label><input type="text" id="carYear" value="2026" placeholder="例: 2026" oninput="render()"></div>
+            <div class="form-group"><label>VIN碼 (車身號碼)</label><input type="text" id="vin" placeholder="例: VR3KAHPY1SS052436" oninput="render()"></div>
+            <div class="form-group"><label>引擎碼</label><input type="text" id="engineNo" placeholder="例: 10XR020008228" oninput="render()"></div>
+            <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" placeholder="例: VR3KAHPY1SS..." oninput="render()"></div>
+            <div class="form-group"><label>車主</label><input type="text" id="owner" placeholder="例: 王修芬 / 租賃公司" oninput="render()"></div>
+            <div class="form-group"><label>駕駛</label><input type="text" id="driver" placeholder="例: 王大明" oninput="render()"></div>
+            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" placeholder="例: 張智榮" oninput="render()"></div>
+            <div class="form-group"><label>服務專員</label><input type="text" id="advisor" placeholder="例: 徐漢威 / 周永盛" oninput="render()"></div>
+            <div class="form-group"><label>列印時間</label><input type="text" id="printTime" placeholder="例: 2026-09-10 11:30:00" oninput="render()"></div>
+            <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" placeholder="例: 1 / 1" oninput="render()"></div>
         </div>
 
         <table class="table-input" id="itemsTable">
             <thead>
                 <tr>
-                    <th style="width: 100px;">打卡日期</th>
+                    <th style="width: 105px;">打卡日期</th>
                     <th style="width: 70px;">起始</th>
                     <th style="width: 70px;">結束</th>
-                    <th style="width: 80px;">打卡原因</th>
-                    <th style="width: 100px;">工作代號</th>
+                    <th style="width: 75px;">打卡原因</th>
+                    <th style="width: 95px;">工作代號</th>
                     <th>工作項目</th>
                     <th style="width: 70px;">標準工時</th>
-                    <th style="width: 70px;">技師</th>
+                    <th style="width: 75px;">技師</th>
                     <th style="width: 50px;">操作</th>
                 </tr>
             </thead>
@@ -303,7 +309,6 @@
         { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
     ];
 
-    // 取得當前標準時間字串 (YYYY-MM-DD HH:mm:ss)
     function getCurrentDateTime() {
         const now = new Date();
         const y = now.getFullYear();
@@ -347,7 +352,6 @@
         });
     }
 
-    // 當選取或輸入車牌時：徹底覆蓋，無資料則留空，絕不殘留上一筆
     function onCarPlateInput() {
         const inputVal = document.getElementById('carPlate').value.trim().toUpperCase();
         const match = vehicleDatabase.find(v => v.plate.toUpperCase() === inputVal);
@@ -367,7 +371,6 @@
             document.getElementById('advisor').value = match.advisor || '';
             if (match.plant) document.getElementById('servicePlant').value = '尚鵬汽車-' + match.plant;
             
-            // 自動補上列印時間為當下
             if (!document.getElementById('printTime').value) {
                 document.getElementById('printTime').value = getCurrentDateTime();
             }
@@ -491,20 +494,21 @@
         render();
     }
 
+    // 每一行輸入格皆加入灰字範例 (Placeholder)
     function renderInputs() {
         const tbody = document.getElementById('itemsBody');
         tbody.innerHTML = '';
         records.forEach((row, i) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" value="${row.date || ''}" oninput="records[${i}].date=this.value; render();"></td>
-                <td><input type="text" value="${row.start || ''}" oninput="records[${i}].start=this.value; render();"></td>
-                <td><input type="text" value="${row.end || ''}" oninput="records[${i}].end=this.value; render();"></td>
-                <td><input type="text" value="${row.reason || ''}" oninput="records[${i}].reason=this.value; render();"></td>
-                <td><input type="text" value="${row.code || ''}" oninput="records[${i}].code=this.value; render();"></td>
-                <td><input type="text" value="${row.name || ''}" oninput="records[${i}].name=this.value; render();"></td>
-                <td><input type="text" value="${row.stdHours || ''}" oninput="records[${i}].stdHours=this.value; render();"></td>
-                <td><input type="text" value="${row.tech || ''}" oninput="records[${i}].tech=this.value; render();"></td>
+                <td><input type="text" value="${row.date || ''}" placeholder="26-07-28" oninput="records[${i}].date=this.value; render();"></td>
+                <td><input type="text" value="${row.start || ''}" placeholder="10:00" oninput="records[${i}].start=this.value; render();"></td>
+                <td><input type="text" value="${row.end || ''}" placeholder="12:00" oninput="records[${i}].end=this.value; render();"></td>
+                <td><input type="text" value="${row.reason || ''}" placeholder="開工" oninput="records[${i}].reason=this.value; render();"></td>
+                <td><input type="text" value="${row.code || ''}" placeholder="1820099J" oninput="records[${i}].code=this.value; render();"></td>
+                <td><input type="text" value="${row.name || ''}" placeholder="預防性操作:檢查及更新" oninput="records[${i}].name=this.value; render();"></td>
+                <td><input type="text" value="${row.stdHours || ''}" placeholder="2.0" oninput="records[${i}].stdHours=this.value; render();"></td>
+                <td><input type="text" value="${row.tech || ''}" placeholder="張智榮" oninput="records[${i}].tech=this.value; render();"></td>
                 <td style="text-align: center;"><button class="btn-del" onclick="deleteRow(${i})">刪除</button></td>
             `;
             tbody.appendChild(tr);
@@ -604,7 +608,6 @@
     }
 
     window.onload = function() {
-        // 預設填入當前列印時間
         document.getElementById('printTime').value = getCurrentDateTime();
 
         const cachedDb = localStorage.getItem('cached113BM01Db');
