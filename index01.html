@@ -6,52 +6,20 @@
     <title>專業多車型保養看板與技術文獻</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            /* 右側零件圖解專用動態變數 (預設 Peugeot) */
-            --right-panel-bg: #04101e;
-            --right-panel-border: #0284c7;
-            --right-card-bg: #0a1c33;
-            --right-card-border: #153359;
-            --right-accent: #06b6d4;
-            --right-glow: rgba(6, 182, 212, 0.25);
-            --right-btn-bg: #0284c7;
-        }
-
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-
         .active-row { background-color: #1f242c !important; border-left: 4px solid #f59e0b !important; }
-        .active-card { 
-            border-color: var(--right-accent) !important; 
-            background-color: var(--right-card-bg) !important; 
-            transform: scale(1.02); 
-            box-shadow: 0 0 12px var(--right-glow);
-        }
+        .active-card { border-color: #f59e0b !important; transform: scale(1.02); }
         .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
-
-        /* 右側面板獨立動態色彩樣式 */
-        #right-parts-panel {
-            background-color: var(--right-panel-bg) !important;
-            border-color: var(--right-panel-border) !important;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        .theme-right-card {
-            background-color: var(--right-card-bg) !important;
-            border-color: var(--right-card-border) !important;
-            transition: all 0.2s ease;
-        }
-        .theme-right-card:hover {
-            border-color: var(--right-accent) !important;
-        }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col p-4 relative">
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <div id="brand-logo" class="w-10 h-10 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PEUG</div>
+            <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
             <div>
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
@@ -80,7 +48,7 @@
         </div>
         
         <div id="package-tabs" class="flex flex-wrap gap-1.5 max-w-2xl justify-start lg:justify-center">
-            <span class="text-xs text-gray-500">正在載入套餐項目...</span>
+            <span class="text-xs text-gray-500">正在同步試算表分頁...</span>
         </div>
 
         <button onclick="reloadAllData(true)" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-lg transition-all border border-gray-700 flex items-center space-x-1 shrink-0">
@@ -92,13 +60,13 @@
         
         <!-- 視圖一：保養套餐看板 -->
         <section id="package-view" class="flex-1 flex space-x-4 overflow-hidden">
-            <!-- 左側表格：固定沉穩經典黑底 -->
+            <!-- 左側：固定為深灰黑經典風格 -->
             <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2 shrink-0">
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>載入中...
                     </h2>
-                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">直連極速模式</span>
+                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
                 </div>
 
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
@@ -143,28 +111,27 @@
                 </div>
             </div>
 
-            <!-- 右側：僅此處零件圖解隨品牌動態變換色彩風格 -->
+            <!-- 右側：僅此區變換品牌配色 -->
             <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
-                <div id="right-parts-panel" class="flex-1 rounded-xl border p-4 flex flex-col overflow-hidden shadow-2xl">
-                    <h3 id="right-parts-title" class="text-xs font-semibold mb-3 tracking-wider flex items-center shrink-0" style="color: var(--right-accent);">
-                        <span class="mr-1.5">🔧</span>套餐内含零件圖解
+                <div id="right-panel-box" class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl transition-all duration-300">
+                    <h3 class="text-xs font-semibold text-gray-300 mb-3 tracking-wider flex items-center shrink-0">
+                        <span class="mr-1.5">🔧</span>套餐內含零件圖解
                     </h3>
                     <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start"></div>
                 </div>
 
-                <div class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0">
+                <div id="right-panel-tip" class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0 transition-all duration-300">
                     <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
-                    <p class="text-[11px] text-gray-400 leading-relaxed">
+                    <p class="text-[11px] text-gray-300 leading-relaxed">
                         請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
                     </p>
                 </div>
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (維持固定黑底) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
-                
                 <div class="flex justify-between items-center mb-2.5 shrink-0">
                     <h2 class="text-sm font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm"></span>原廠 TSB 與技術手冊
@@ -188,7 +155,6 @@
                 </div>
             </div>
 
-            <!-- 右側 PDF 預覽 -->
             <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative">
                 <div id="pdf-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-500">
                     <div class="text-4xl mb-2 opacity-40">📄</div>
@@ -220,7 +186,7 @@
 
             <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-[11px] text-gray-500">
                 <span id="modal-tag-stats">共計 0 個分類標籤</span>
-                <span>點選標籤即可立即套用</span>
+                <span>點選標籤即可套用</span>
             </div>
         </div>
     </div>
@@ -242,86 +208,52 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 固化鎖定車型與獨立 CSV 發佈連結矩陣 (不可動)
-        // =========================================================================
-        const FIXED_MODELS_DATA = [
-            {
-                brand: "PROJECT_通用套餐",
-                model: "PROJECT_通用套餐",
-                sheetName: "PROJECT_通用套餐",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
-            },
-            {
-                brand: "PEUGEOT",
-                model: "P_408H",
-                sheetName: "P_408H",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1525555317&single=true&output=csv"
-            },
-            {
-                brand: "PEUGEOT",
-                model: "P_3008H",
-                sheetName: "P_3008H",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1074672360&single=true&output=csv"
-            },
-            {
-                brand: "PEUGEOT",
-                model: "P_5008H",
-                sheetName: "P_5008H",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1080538&single=true&output=csv"
-            },
-            {
-                brand: "CITROËN",
-                model: "C_新 Berlingo",
-                sheetName: "C_新 Berlingo",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=934233668&single=true&output=csv"
-            },
-            {
-                brand: "PEUGEOT",
-                model: "P_408Y",
-                sheetName: "P_408Y",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=555416694&single=true&output=csv"
-            },
-            {
-                brand: "ALFA ROMEO",
-                model: "ALFA_STELVIO INTENSA_2.0",
-                sheetName: "ALFA_STELVIO INTENSA_2.0",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1863556503&single=true&output=csv"
-            },
-            {
-                brand: "ALFA ROMEO",
-                model: "ALFA_GIULIA SPRINT_2.0",
-                sheetName: "ALFA_GIULIA SPRINT_2.0",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=272988726&single=true&output=csv"
-            },
-            {
-                brand: "ALFA ROMEO",
-                model: "ALFA_GIULIA QUADRIFOGLIO",
-                sheetName: "ALFA_GIULIA QUADRIFOGLIO",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1179522210&single=true&output=csv"
-            },
-            {
-                brand: "ALFA ROMEO",
-                model: "ALFA_JUNIOR IBRIDA Q2",
-                sheetName: "ALFA_JUNIOR IBRIDA Q2",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=293336719&single=true&output=csv"
-           },
-              {
-               brand: "JEEP",
-                model: "JEEP_WRANGLER RUBICON2",
-                sheetName: "JEEP_WRANGLER RUBICON",
-                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=493818607&single=true&output=csv
-            },
-
-
-
-        // GAS API 網址 (保留予技術文獻系統讀取)
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
 
+        // 右側專屬品牌主題配色表
+        const BRAND_THEMES = {
+            "JEEP": {
+                panelBg: "style='background-color: #07150c; border: 1px solid #16a34a;'",
+                tipBg: "style='background-color: #0e2416; border: 1px solid #22c55e;'",
+                cardBg: "#0e2416",
+                cardBorder: "#16a34a",
+                previewBg: "#07150c"
+            },
+            "PEUGEOT": {
+                panelBg: "style='background-color: #04101e; border: 1px solid #0284c7;'",
+                tipBg: "style='background-color: #0a1c33; border: 1px solid #06b6d4;'",
+                cardBg: "#0a1c33",
+                cardBorder: "#0284c7",
+                previewBg: "#04101e"
+            },
+            "ALFA ROMEO": {
+                panelBg: "style='background-color: #170408; border: 1px solid #991b1b;'",
+                tipBg: "style='background-color: #28080f; border: 1px solid #dc2626;'",
+                cardBg: "#28080f",
+                cardBorder: "#991b1b",
+                previewBg: "#170408"
+            },
+            "CITROËN": {
+                panelBg: "style='background-color: #1a0613; border: 1px solid #ec4899;'",
+                tipBg: "style='background-color: #2c0b20; border: 1px solid #f43f5e;'",
+                cardBg: "#2c0b20",
+                cardBorder: "#ec4899",
+                previewBg: "#1a0613"
+            },
+            "PROJECT": {
+                panelBg: "style='background-color: #170e03; border: 1px solid #d97706;'",
+                tipBg: "style='background-color: #291907; border: 1px solid #f59e0b;'",
+                cardBg: "#291907",
+                cardBorder: "#d97706",
+                previewBg: "#170e03"
+            }
+        };
+
         const CACHE_SHEET_DATA = new Map();
+        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = FIXED_MODELS_DATA; 
+        let dynamicModelsData = []; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
@@ -332,75 +264,37 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        // =========================================================================
-        // 專門針對「右半部圖解區域」的獨立品牌調色設定
-        // =========================================================================
-        function updateRightPanelTheme(brandName) {
-            const b = (brandName || "").toUpperCase();
-            const root = document.documentElement;
-
-            if (b.includes("JEEP")) {
-                // JEEP 軍規橄欖野戰綠沉浸風格
-                root.style.setProperty('--right-panel-bg', '#061309');
-                root.style.setProperty('--right-panel-border', '#16a34a');
-                root.style.setProperty('--right-card-bg', '#0c2214');
-                root.style.setProperty('--right-card-border', '#19492b');
-                root.style.setProperty('--right-accent', '#22c55e');
-                root.style.setProperty('--right-glow', 'rgba(34, 197, 94, 0.3)');
-                root.style.setProperty('--right-btn-bg', '#16a34a');
-            } else if (b.includes("CITROËN") || b.includes("CITROEN")) {
-                // CITROËN 新潮珊瑚/玫瑰金粉沉浸風格
-                root.style.setProperty('--right-panel-bg', '#180512');
-                root.style.setProperty('--right-panel-border', '#ec4899');
-                root.style.setProperty('--right-card-bg', '#2a0b20');
-                root.style.setProperty('--right-card-border', '#5c1644');
-                root.style.setProperty('--right-accent', '#f43f5e');
-                root.style.setProperty('--right-glow', 'rgba(244, 63, 94, 0.3)');
-                root.style.setProperty('--right-btn-bg', '#e11d48');
-            } else if (b.includes("ALFA")) {
-                // ALFA ROMEO 經典競技深紅沉浸風格
-                root.style.setProperty('--right-panel-bg', '#170307');
-                root.style.setProperty('--right-panel-border', '#991b1b');
-                root.style.setProperty('--right-card-bg', '#29070e');
-                root.style.setProperty('--right-card-border', '#5a1220');
-                root.style.setProperty('--right-accent', '#dc2626');
-                root.style.setProperty('--right-glow', 'rgba(220, 38, 38, 0.3)');
-                root.style.setProperty('--right-btn-bg', '#b91c1c');
-            } else if (b.includes("PROJECT") || b.includes("CANN") || b.includes("通用")) {
-                // PROJECT 工程琥珀黃沉浸風格
-                root.style.setProperty('--right-panel-bg', '#170e03');
-                root.style.setProperty('--right-panel-border', '#d97706');
-                root.style.setProperty('--right-card-bg', '#271907');
-                root.style.setProperty('--right-card-border', '#5a3b12');
-                root.style.setProperty('--right-accent', '#f59e0b');
-                root.style.setProperty('--right-glow', 'rgba(245, 158, 11, 0.3)');
-                root.style.setProperty('--right-btn-bg', '#d97706');
-            } else {
-                // PEUGEOT 法國賽道電氣藍沉浸風格
-                root.style.setProperty('--right-panel-bg', '#04101e');
-                root.style.setProperty('--right-panel-border', '#0284c7');
-                root.style.setProperty('--right-card-bg', '#0a1c33');
-                root.style.setProperty('--right-card-border', '#153359');
-                root.style.setProperty('--right-accent', '#06b6d4');
-                root.style.setProperty('--right-glow', 'rgba(6, 182, 212, 0.3)');
-                root.style.setProperty('--right-btn-bg', '#0284c7');
-            }
-        }
-
-        function initializeDynamicSheets(force = false) {
+        async function initializeDynamicSheets(force = false) {
+            const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
-            dynamicModelsData = FIXED_MODELS_DATA;
-
-            statusBadge.innerText = "直連極速模式 (已固化)";
-            statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
             
-            renderBrandSelect();
-            loadTechnicalDocs(force);
+            try {
+                if (!force && CACHE_MODELS_DATA) {
+                    dynamicModelsData = CACHE_MODELS_DATA;
+                } else {
+                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
+                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
+                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
+                    dynamicModelsData = await response.json();
+                    CACHE_MODELS_DATA = dynamicModelsData;
+                }
+
+                statusBadge.innerText = "連線正常 (極速模式)";
+                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
+                
+                renderBrandSelect();
+                loadTechnicalDocs(force);
+            } catch (error) {
+                console.error("載入失敗:", error);
+                statusBadge.innerText = "連線失敗";
+                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
+            }
         }
 
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
+                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
             }
             initializeDynamicSheets(force);
@@ -412,8 +306,8 @@
 
             brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
 
-            if (availableBrands.length > 0) {
-                brandSelect.value = availableBrands[0];
+            if (availableBrands.includes("PROJECT")) {
+                brandSelect.value = "PROJECT";
             }
 
             updateModelOptions(true);
@@ -430,6 +324,12 @@
 
             if (matchedModels.length > 0) {
                 let defaultTarget = matchedModels[0].sheetName;
+
+                if (isInitial && currentBrand === "PROJECT") {
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
+                    if (foundPrj) defaultTarget = foundPrj.sheetName;
+                }
+
                 modelSelect.value = defaultTarget;
                 executeModelSwitch(defaultTarget);
             } else {
@@ -444,56 +344,60 @@
             const brandLogo = document.getElementById('brand-logo');
             const brand = selectedModelObj.brand;
 
-            // 僅右側零件圖解變更色彩系統
-            updateRightPanelTheme(brand);
-
-            // 左上角標誌維持精緻對應
-            if (brand.includes("CITROËN")) {
+            if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-10 h-10 bg-[#1a0613] border border-[#ec4899] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-pink-900/30 transition-all";
-            } else if (brand.includes("ALFA")) {
+            } else if (brand === "PROJECT") {
+                brandLogo.innerText = "CANN";
+                brandLogo.className = "w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
+            } else if (brand === "ALFA ROMEO") {
                 brandLogo.innerText = "ALFA";
-                brandLogo.className = "w-10 h-10 bg-[#170307] border border-[#991b1b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
-            } else if (brand.includes("JEEP")) {
+                brandLogo.className = "w-10 h-10 bg-[#200508] border border-[#991b1b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
+            } else if (brand === "JEEP") {
                 brandLogo.innerText = "JEEP";
-                brandLogo.className = "w-10 h-10 bg-[#061309] border border-[#16a34a] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-green-950 transition-all";
-            } else if (brand.includes("PROJECT") || brand.includes("CANN") || brand.includes("通用")) {
-                brandLogo.innerText = "PROJ";
-                brandLogo.className = "w-10 h-10 bg-[#170e03] border border-[#d97706] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-950 transition-all";
+                brandLogo.className = "w-10 h-10 bg-[#07150c] border border-[#16a34a] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-green-900/30 transition-all";
             } else {
                 brandLogo.innerText = "PEUG";
-                brandLogo.className = "w-10 h-10 bg-[#04101e] border border-[#0284c7] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-cyan-900/30 transition-all";
+                brandLogo.className = "w-10 h-10 bg-[#04101e] border border-[#0284c7] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-sky-900/30 transition-all";
             }
 
+            applyRightPanelTheme(brand);
             fetchSheetData();
             if (!document.getElementById('docs-view').classList.contains('hidden')) {
                 filterDocs();
             }
         }
 
+        function applyRightPanelTheme(brand) {
+            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
+            const rightBox = document.getElementById('right-panel-box');
+            const rightTip = document.getElementById('right-panel-tip');
+
+            rightBox.setAttribute('style', theme.panelBg.replace("style='", "").replace("'", ""));
+            rightTip.setAttribute('style', theme.tipBg.replace("style='", "").replace("'", ""));
+        }
+
         async function fetchSheetData() {
             if (!selectedModelObj) return;
             const sheetName = selectedModelObj.sheetName;
-            const csvUrl = selectedModelObj.csvUrl;
 
             if (CACHE_SHEET_DATA.has(sheetName)) {
                 parseExcelCSV(CACHE_SHEET_DATA.get(sheetName));
                 return;
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 直連試算表載入中...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
 
             try {
-                const targetUrl = csvUrl + (csvUrl.includes('?') ? '&' : '?') + "t=" + Date.now();
+                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
                 const response = await fetch(targetUrl);
-                if (!response.ok) throw new Error("CSV 回應異常: " + response.status);
                 const csvText = await response.text();
                 
                 CACHE_SHEET_DATA.set(sheetName, csvText);
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("載入失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 試算表直連載入失敗";
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
                 clearDisplay();
             }
         }
@@ -561,9 +465,16 @@
 
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            
+            let activeBgClass = "bg-amber-600 border-amber-500";
+            if (brand === "CITROËN") activeBgClass = "bg-pink-600 border-pink-500";
+            else if (brand === "JEEP") activeBgClass = "bg-green-600 border-green-500";
+            else if (brand === "PEUGEOT") activeBgClass = "bg-sky-600 border-sky-500";
+            else if (brand === "ALFA ROMEO") activeBgClass = "bg-red-700 border-red-600";
 
             tabsContainer.innerHTML = keys.map(key => `
-                <button onclick="switchPackage('${key}')" id="tab-${key}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
+                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
                     ${key}
                 </button>
             `).join('');
@@ -579,13 +490,16 @@
             
             const activeTab = document.getElementById(`tab-${key}`);
             if (activeTab) {
-                activeTab.className = "px-2.5 py-1 rounded text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap bg-emerald-600 border-emerald-500";
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-amber-600 border-amber-500";
+                activeTab.className = `px-2.5 py-1 rounded text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
 
-            let titleHTML = `<span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>${pkg.name}`;
+            let titleHTML = `<span class="w-2 h-4 inline-block mr-2 rounded-sm" style="background-color: ${theme.cardBorder};"></span>${pkg.name}`;
             if (pkg.pdfUrl) {
                 titleHTML += `
                     <a href="${pkg.pdfUrl}" target="_blank" rel="noopener noreferrer" class="ml-2.5 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded hover:bg-amber-900/80 hover:text-white transition-all shadow-sm">
@@ -626,7 +540,7 @@
                     }
                 }
 
-                let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
+                const attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -648,13 +562,12 @@
                     const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
                     const safeDesc = encodeURIComponent(item.description || "");
 
-                    // 套用右側專屬深色卡片與高光 border
                     gridHTML += `
-                        <div id="card-${item.partId}" class="theme-right-card border rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer shadow-md" onclick="syncHighlight('${item.partId}')">
-                            <div class="w-full h-24 bg-black/40 rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                        <div id="card-${item.partId}" style="background-color: ${theme.cardBg}; border: 1px solid ${theme.cardBorder};" class="rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer hover:brightness-125 shadow-md" onclick="syncHighlight('${item.partId}')">
+                            <div style="background-color: ${theme.previewBg};" class="w-full h-24 rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-[10px] text-white px-1.5 py-0.5 rounded shadow" style="background-color: var(--right-btn-bg);">🔍 看大圖</span>
+                                    <span class="text-[10px] text-white px-1.5 py-0.5 rounded shadow" style="background-color: ${theme.cardBorder};">🔍 看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full">
@@ -673,23 +586,23 @@
 
         function calculateTotalsWithDiscount() {
             const discountInput = document.getElementById('part-discount-input');
-            let discountRate = parseFloat(discountInput.value);
-            if (isNaN(discountRate) || discountRate < 0) discountRate = 100;
+            let pct = parseFloat(discountInput.value);
+            if (isNaN(pct) || pct < 0) pct = 100;
 
-            const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
-            const grandTotal = rawLaborSum + discountedPartsSum;
+            const discountedParts = Math.round(rawPartsSum * (pct / 100));
+            const grandTotal = rawLaborSum + discountedParts;
 
             document.getElementById('labor-subtotal').innerText = `$ ${rawLaborSum.toLocaleString()}`;
             document.getElementById('parts-original-total').innerText = `$ ${rawPartsSum.toLocaleString()}`;
-            document.getElementById('parts-subtotal').innerText = `$ ${discountedPartsSum.toLocaleString()}`;
+            document.getElementById('parts-subtotal').innerText = `$ ${discountedParts.toLocaleString()}`;
             document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
 
-            const discountNote = document.getElementById('discount-note');
-            if (discountRate < 100) {
-                discountNote.innerText = `＊已套用 ${discountRate}% 零件折扣`;
-                discountNote.classList.remove('hidden');
+            const note = document.getElementById('discount-note');
+            if (pct < 100) {
+                note.innerText = `＊已套用 ${pct}% 零件折扣`;
+                note.classList.remove('hidden');
             } else {
-                discountNote.classList.add('hidden');
+                note.classList.add('hidden');
             }
         }
 
@@ -697,73 +610,46 @@
             document.querySelectorAll('tr').forEach(el => el.classList.remove('active-row'));
             document.querySelectorAll('#image-grid > div').forEach(el => el.classList.remove('active-card'));
 
-            const row = document.getElementById(`row-${partId}`);
-            const card = document.getElementById(`card-${partId}`);
-            if (row) row.classList.add('active-row');
-            if (card) card.classList.add('active-card');
-        }
-
-        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
-            const lightboxPartId = document.getElementById('lightbox-part-id');
-            const lightboxTitle = document.getElementById('lightbox-title');
-            
-            const description = decodeURIComponent(encodedDesc).trim();
-            const descContainer = document.getElementById('lightbox-desc-container');
-            const descText = document.getElementById('lightbox-desc-text');
-
-            lightboxImg.src = imgSrc;
-            lightboxImg.onerror = function() { this.src = defaultImg; };
-            lightboxPartId.innerText = partId;
-            lightboxTitle.innerText = title;
-
-            if (description) {
-                descText.innerText = description;
-                descContainer.classList.remove('hidden');
-            } else {
-                descContainer.classList.add('hidden');
+            const targetRow = document.getElementById(`row-${partId}`);
+            if (targetRow) {
+                targetRow.classList.add('active-row');
+                targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            lightbox.classList.remove('hidden');
-            setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
-        }
-
-        function closeLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            lightbox.classList.add('opacity-0');
-            setTimeout(() => { lightbox.classList.add('hidden'); }, 300);
+            const targetCard = document.getElementById(`card-${partId}`);
+            if (targetCard) {
+                targetCard.classList.add('active-card');
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
 
         function clearDisplay() {
             document.getElementById('table-rows').innerHTML = '';
             document.getElementById('image-grid').innerHTML = '';
+            document.getElementById('package-tabs').innerHTML = '';
+            document.getElementById('labor-subtotal').innerText = '$ 0';
+            document.getElementById('parts-original-total').innerText = '$ 0';
+            document.getElementById('parts-subtotal').innerText = '$ 0';
             document.getElementById('package-total').innerText = '$ 0';
         }
 
-        /* -------------------------------------------------------------
-           技術文獻系統 (保留與 GAS 連線)
-        ------------------------------------------------------------- */
         function switchMainMode(mode) {
-            const packageView = document.getElementById('package-view');
+            const pkgView = document.getElementById('package-view');
             const docsView = document.getElementById('docs-view');
-            const btnPackage = document.getElementById('btn-mode-package');
+            const btnPkg = document.getElementById('btn-mode-package');
             const btnDocs = document.getElementById('btn-mode-docs');
-            const pkgTabs = document.getElementById('package-tabs');
 
-            if (mode === 'docs') {
-                packageView.classList.add('hidden');
-                docsView.classList.remove('hidden');
-                btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
-                btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#da291c] text-white shadow";
-                pkgTabs.classList.add('invisible');
-                filterDocs();
-            } else {
+            if (mode === 'package') {
+                pkgView.classList.remove('hidden');
                 docsView.classList.add('hidden');
-                packageView.classList.remove('hidden');
+                btnPkg.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
                 btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
-                btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
-                pkgTabs.classList.remove('invisible');
+            } else {
+                pkgView.classList.add('hidden');
+                docsView.classList.remove('hidden');
+                btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
+                btnPkg.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
+                filterDocs();
             }
         }
 
@@ -772,23 +658,16 @@
                 if (!force && CACHE_DOCS_DATA) {
                     rawDocsData = CACHE_DOCS_DATA;
                 } else {
-                    const res = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    
-                    rawDocsData = data.sort((a, b) => {
-                        const dateA = new Date(a.date || '1970-01-01').getTime();
-                        const dateB = new Date(b.date || '1970-01-01').getTime();
-                        return dateB - dateA;
-                    });
+                    const response = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
+                    if (!response.ok) return;
+                    rawDocsData = await response.json();
                     CACHE_DOCS_DATA = rawDocsData;
                 }
-
                 calculateTagStatistics();
                 renderDocTags();
                 filterDocs();
             } catch (err) {
-                console.error("文獻載入異常:", err);
+                console.error("載入技術文獻失敗:", err);
             }
         }
 
@@ -870,7 +749,7 @@
                             <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
                                 ${doc.category || '未分類'}
                             </span>
-                            <span class="text-[10px] text-gray-500 font-mono">${doc.date}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
                         </div>
                         <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
                         <div class="flex justify-end pt-1">
@@ -954,6 +833,37 @@
             grid.innerHTML = html;
         }
 
+        function openLightbox(src, partId, title, defaultImg, safeDesc) {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const pId = document.getElementById('lightbox-part-id');
+            const pTitle = document.getElementById('lightbox-title');
+            const descBox = document.getElementById('lightbox-desc-container');
+            const descText = document.getElementById('lightbox-desc-text');
+
+            img.src = src;
+            img.onerror = function() { this.src = defaultImg; };
+            pId.innerText = partId;
+            pTitle.innerText = title;
+
+            const desc = decodeURIComponent(safeDesc).trim();
+            if (desc) {
+                descText.innerText = desc;
+                descBox.classList.remove('hidden');
+            } else {
+                descBox.classList.add('hidden');
+            }
+
+            lightbox.classList.remove('hidden');
+            setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => lightbox.classList.add('hidden'), 300);
+        }
+
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLightbox();
@@ -961,7 +871,7 @@
             }
         });
 
-        // 啟動直連
+        // 確保在 script 載入完畢後立即執行啟動[cite: 1]
         initializeDynamicSheets();
     </script>
 </body>
