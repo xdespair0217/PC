@@ -3,22 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業保養看板與技術文獻 (手機版)</title>
+    <title>專業保養看板與技術文獻 (行動版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: #0d1117; 
+            color: #c9d1d9; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+        .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen bg-[#0d1117] pb-8 select-none">
+<body class="flex flex-col min-h-screen bg-[#0d1117] pb-12 select-none">
 
-    <!-- 手機頂部固定區 -->
+    <!-- 手機頂部固定導覽區 -->
     <header class="sticky top-0 z-30 bg-[#161b22]/95 backdrop-blur-md border-b border-gray-800 px-3 pt-2.5 pb-2 shadow-lg">
         
-        <!-- 第一列：品牌與總模式切換 -->
+        <!-- 第一列：品牌切換與主模式開關 -->
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
                 <div id="brand-logo" class="w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0">CANN</div>
@@ -42,22 +48,23 @@
             </div>
         </div>
 
-        <!-- 第二列：水平滑動分頁標籤 -->
-        <div id="package-tabs-scroll" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1.5 items-center">
+        <!-- 第二列：水平滑動分頁標籤（保養套餐專用） -->
+        <div id="package-tabs-scroll" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1 items-center">
             <span class="text-xs text-gray-500">同步雲端分頁中...</span>
         </div>
 
-        <!-- 第三列：頂部金額看板 -->
+        <!-- 第三列：頂部金額看板（含折讓計算） -->
         <div id="top-price-banner" class="mt-1 bg-[#0d1117] border border-gray-800 rounded-lg px-3 py-1.5 flex items-center justify-between shadow-inner">
             <div class="flex flex-col">
                 <div class="flex items-center space-x-2 text-[10px] text-gray-400 font-mono">
-                    <span>工資: <b id="labor-subtotal" class="text-gray-200 font-normal">$0</b></span>
+                    <span>工資: <b id="labor-subtotal" class="text-gray-200 font-normal">$ 0</b></span>
                     <span class="text-gray-600">|</span>
-                    <span>零件: <b id="parts-subtotal" class="text-amber-500 font-normal">$0</b></span>
+                    <span>零件: <b id="parts-subtotal" class="text-amber-500 font-normal">$ 0</b></span>
                 </div>
-                <div class="flex items-baseline space-x-1 mt-0.5">
+                <div class="flex items-baseline space-x-1.5 mt-0.5">
                     <span class="text-[11px] text-gray-400 font-medium">總計應付</span>
                     <span id="package-total" class="text-lg font-black text-green-400 font-mono tracking-tight">$ 0</span>
+                    <span id="discount-badge-label" class="text-[9px] text-amber-500 font-mono hidden">(已折)</span>
                 </div>
             </div>
 
@@ -68,7 +75,7 @@
             </div>
         </div>
 
-        <!-- 第四列：項目明細 / 零件圖解 切換開關 -->
+        <!-- 第四列：工項明細 / 零件圖解 切換開關 -->
         <div id="sub-mode-switch" class="mt-2 flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-800">
             <button id="btn-sub-list" onclick="switchSubView('list')" class="flex-1 py-1 text-xs font-bold rounded-md bg-[#161b22] text-amber-400 shadow transition-all flex items-center justify-center space-x-1">
                 <span>📋</span><span>工項明細清單</span>
@@ -90,15 +97,25 @@
                     <span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span>載入中...
                 </h2>
                 <button onclick="reloadAllData(true)" class="text-[11px] bg-[#161b22] border border-gray-700 hover:border-amber-500 text-gray-300 px-2 py-0.5 rounded-md flex items-center space-x-1 shrink-0">
-                    <span>🔄</span><span>更新</span>
+                    <span>🔄</span><span>強制更新</span>
                 </button>
             </div>
 
-            <!-- 子視圖 A：項目明細清單 -->
+            <!-- 子視圖 A：項目明細清單 (卡片結構) -->
             <div id="sub-view-list" class="space-y-2.5"></div>
 
             <!-- 子視圖 B：零件圖解雙欄網格 -->
             <div id="sub-view-grid" class="hidden grid grid-cols-2 gap-2.5"></div>
+
+            <!-- 現場維護提醒卡片 -->
+            <div id="mobile-panel-tip" class="bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shadow-lg transition-all">
+                <h4 class="text-xs font-bold text-amber-400 mb-1 flex items-center gap-1">
+                    <span>💡</span> 現場維護注意事項
+                </h4>
+                <p class="text-[11px] text-gray-300 leading-relaxed">
+                    請依照原廠手冊標準程序施工。完成機油更換與周邊保養後，務必透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零重設。
+                </p>
+            </div>
         </section>
 
         <!-- 視圖二：技術文獻資料庫 -->
@@ -108,15 +125,22 @@
                     <span class="w-2 h-3.5 bg-red-600 inline-block rounded-sm"></span>
                     <h2 class="text-sm font-bold text-gray-100">原廠技術手冊 (TSB)</h2>
                 </div>
-                <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份</span>
+                <div class="flex items-center space-x-1.5">
+                    <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份</span>
+                    <button onclick="openTagCloudModal()" class="px-2 py-0.5 bg-[#161b22] border border-gray-700 text-amber-400 rounded text-[10px] font-bold flex items-center space-x-0.5">
+                        <span>🏷️</span><span>標籤庫</span>
+                    </button>
+                </div>
             </div>
 
             <div class="relative">
-                <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+                <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500 shadow-inner">
             </div>
 
+            <!-- 水平捲動標籤列 -->
             <div id="doc-tags-container" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
 
+            <!-- 文獻卡片容器 -->
             <div id="docs-list-container" class="space-y-2">
                 <div class="text-center py-10 text-gray-500 text-xs">正在載入文獻...</div>
             </div>
@@ -124,36 +148,106 @@
 
     </main>
 
-    <!-- 剪貼簿提示 -->
-    <div id="copy-toast" class="fixed top-28 left-1/2 -translate-x-1/2 z-50 bg-[#161b22] border border-amber-500 text-white px-4 py-2 rounded-full shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none">
+    <!-- 剪貼簿複製提示 -->
+    <div id="copy-toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[#161b22] border border-amber-500 text-white px-4 py-2 rounded-full shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none">
         <span class="text-amber-400 text-sm">📋</span>
         <span id="copy-toast-msg">已複製項目明細！</span>
     </div>
 
+    <!-- 標籤雲彈出視窗 (Modal) -->
+    <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
+        <div class="bg-[#161b22] border border-gray-700 w-full max-w-sm rounded-xl p-4 shadow-2xl flex flex-col max-h-[80vh]" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                <div class="flex items-center space-x-1.5">
+                    <span>🏷️</span>
+                    <h3 class="text-xs font-bold text-white">技術標籤庫 (Tag Cloud)</h3>
+                </div>
+                <button onclick="closeTagCloudModal()" class="text-gray-400 hover:text-white text-lg font-bold px-1">&times;</button>
+            </div>
+            
+            <div class="my-2.5">
+                <input type="text" id="modal-tag-search" oninput="filterModalTags()" placeholder="過濾標籤名稱..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+            </div>
+
+            <div id="modal-tag-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-1.5 p-1 content-start max-h-[50vh]"></div>
+
+            <div class="pt-2.5 mt-2 border-t border-gray-800 flex justify-between items-center text-[10px] text-gray-500">
+                <span id="modal-tag-stats">共計 0 個分類標籤</span>
+                <span>點擊自動篩選文獻</span>
+            </div>
+        </div>
+    </div>
+
     <!-- 零件大圖燈箱 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col justify-center items-center p-4 cursor-pointer transition-opacity duration-200 opacity-0">
-        <div class="w-full max-h-[65vh] flex items-center justify-center p-2" onclick="event.stopPropagation()">
-            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[60vh] object-contain rounded-lg">
+        <div class="w-full max-h-[60vh] flex items-center justify-center p-2" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[55vh] object-contain rounded-lg shadow-2xl">
         </div>
-        <div class="mt-3 text-center w-full px-4" onclick="event.stopPropagation()">
+        <div class="mt-2 text-center w-full px-4" onclick="event.stopPropagation()">
             <p id="lightbox-part-id" class="text-xs text-amber-500 font-mono tracking-widest"></p>
             <h3 id="lightbox-title" class="text-sm font-bold text-white mt-0.5"></h3>
-            <div id="lightbox-desc-container" class="mt-2 p-2.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-300 text-xs hidden text-left leading-relaxed">
+            <div id="lightbox-desc-container" class="mt-2 p-2.5 bg-amber-950/50 border border-amber-900/60 rounded text-amber-300 text-xs hidden text-left leading-relaxed">
+                <span class="font-bold text-[10px] text-amber-400 block mb-0.5 uppercase tracking-wider">⚠️ 維護技術備註 NOTE</span>
                 <span id="lightbox-desc-text"></span>
             </div>
-            <button onclick="closeLightbox()" class="mt-4 px-6 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xs font-bold border border-gray-700">關閉預覽</button>
+            <button onclick="closeLightbox()" class="mt-4 px-6 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xs font-bold border border-gray-700 shadow">關閉預覽</button>
         </div>
     </div>
 
     <script>
-        // 請將此處替換為你 Apps Script Web App 的真實佈署網址
-        const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/YOUR_GAS_EXEC_URL/exec";
+        // 沿用桌機版 Apps Script 部署 URL
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
+
+        // 品牌主題映射表
+        const BRAND_THEMES = {
+            "JEEP": {
+                border: "#16a34a",
+                activeTab: "bg-green-600 border-green-500",
+                cardBg: "#0e2416",
+                cardBorder: "#16a34a",
+                tipBg: "#07150c",
+                tipBorder: "#16a34a"
+            },
+            "PEUGEOT": {
+                border: "#0284c7",
+                activeTab: "bg-sky-600 border-sky-500",
+                cardBg: "#0a1c33",
+                cardBorder: "#0284c7",
+                tipBg: "#04101e",
+                tipBorder: "#0284c7"
+            },
+            "ALFA ROMEO": {
+                border: "#dc2626",
+                activeTab: "bg-red-700 border-red-600",
+                cardBg: "#28080f",
+                cardBorder: "#991b1b",
+                tipBg: "#170408",
+                tipBorder: "#991b1b"
+            },
+            "CITROËN": {
+                border: "#ec4899",
+                activeTab: "bg-pink-600 border-pink-500",
+                cardBg: "#2c0b20",
+                cardBorder: "#ec4899",
+                tipBg: "#1a0613",
+                tipBorder: "#ec4899"
+            },
+            "PROJECT": {
+                border: "#f59e0b",
+                activeTab: "bg-amber-600 border-amber-500",
+                cardBg: "#291907",
+                cardBorder: "#d97706",
+                tipBg: "#170e03",
+                tipBorder: "#d97706"
+            }
+        };
 
         const CACHE_SHEET_DATA = new Map();
+        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = []; 
-        let allParsedPackages = {}; 
+        let dynamicModelsData = [];
+        let allParsedPackages = {};
         let currentPackageKey = "";
         let selectedModelObj = null;
         let rawLaborSum = 0;
@@ -185,12 +279,13 @@
 
         async function initializeDynamicSheets(force = false) {
             try {
-                // 1. 向後端 GAS 請求分頁清單 (action 預設走第 3 部分)
-                const res = await fetch(`${GAS_ENDPOINT_URL}${force ? '?_t=' + Date.now() : ''}`);
-                const sheetsList = await res.json();
-                
-                if (Array.isArray(sheetsList) && sheetsList.length > 0) {
-                    dynamicModelsData = sheetsList;
+                if (!force && CACHE_MODELS_DATA) {
+                    dynamicModelsData = CACHE_MODELS_DATA;
+                } else {
+                    const res = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
+                    if (!res.ok) throw new Error("API 回應失敗");
+                    dynamicModelsData = await res.json();
+                    CACHE_MODELS_DATA = dynamicModelsData;
                 }
                 
                 renderBrandSelect();
@@ -204,6 +299,7 @@
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
+                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
             }
             initializeDynamicSheets(force);
@@ -231,7 +327,7 @@
             if (matchedModels.length > 0) {
                 let defaultTarget = matchedModels[0].sheetName;
                 if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("PROJECT_通用專案") || item.sheetName.includes("通用專案"));
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
                     if (foundPrj) defaultTarget = foundPrj.sheetName;
                 }
                 modelSelect.value = defaultTarget;
@@ -245,22 +341,30 @@
 
             const brandLogo = document.getElementById('brand-logo');
             const brand = selectedModelObj.brand;
+            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
 
             if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
-                brandLogo.className = "w-8 h-8 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#1a0613] border border-[#ec4899] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else if (brand === "PROJECT") {
                 brandLogo.innerText = "CANN";
                 brandLogo.className = "w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else if (brand === "ALFA ROMEO") {
                 brandLogo.innerText = "ALFA";
-                brandLogo.className = "w-8 h-8 bg-[#1f0808] border border-[#dc2626] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#200508] border border-[#991b1b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else if (brand === "JEEP") {
                 brandLogo.innerText = "JEEP";
-                brandLogo.className = "w-8 h-8 bg-[#131b14] border border-[#16a34a] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#07150c] border border-[#16a34a] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else {
                 brandLogo.innerText = "PEUG";
-                brandLogo.className = "w-8 h-8 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#04101e] border border-[#0284c7] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
+            }
+
+            // 更新提示卡片邊框色
+            const tipEl = document.getElementById('mobile-panel-tip');
+            if (tipEl) {
+                tipEl.style.backgroundColor = theme.tipBg;
+                tipEl.style.borderColor = theme.tipBorder;
             }
 
             fetchSheetData();
@@ -278,8 +382,7 @@
             document.getElementById('package-tabs-scroll').innerHTML = '<span class="text-xs text-gray-500">⚡ 載入中...</span>';
 
             try {
-                // 2. 向後端 GAS 請求指定分頁的純 CSV (action=getSheetCsv)
-                const targetUrl = `${GAS_ENDPOINT_URL}?action=getSheetCsv&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
+                const targetUrl = `${GAS_API_URL}?action=getSheetCsv&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
                 const response = await fetch(targetUrl);
                 const csvText = await response.text();
                 
@@ -361,6 +464,9 @@
         function switchPackage(key) {
             if (!allParsedPackages[key]) return;
 
+            const brand = selectedModelObj ? selectedModelObj.brand : "PROJECT";
+            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
+
             if (currentPackageKey) {
                 const prevTab = document.getElementById(`tab-${currentPackageKey}`);
                 if (prevTab) prevTab.className = "px-3 py-1 rounded-full text-xs font-bold transition-all bg-[#161b22] text-gray-400 border border-gray-800 whitespace-nowrap shrink-0";
@@ -368,14 +474,14 @@
             
             const activeTab = document.getElementById(`tab-${key}`);
             if (activeTab) {
-                activeTab.className = "px-3 py-1 rounded-full text-xs font-bold transition-all bg-amber-600 text-white border border-amber-500 whitespace-nowrap shrink-0 shadow-lg";
+                activeTab.className = `px-3 py-1 rounded-full text-xs font-bold transition-all text-white border whitespace-nowrap shrink-0 shadow-lg ${theme.activeTab}`;
                 activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
             
-            let titleHTML = `<span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span>${pkg.name}`;
+            let titleHTML = `<span class="w-2 h-3.5 inline-block mr-1.5 rounded-sm shrink-0" style="background-color: ${theme.border};"></span>${pkg.name}`;
             if (pkg.pdfUrl) {
                 titleHTML += `
                     <a href="${pkg.pdfUrl}" target="_blank" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800 rounded-md">
@@ -433,6 +539,7 @@
                     stock: item.stock !== "" ? item.stock : ''
                 }));
 
+                // 清單視圖 (List View)
                 listHTML += `
                     <div class="bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow-md flex flex-col space-y-2 relative">
                         <div class="flex items-start justify-between gap-2">
@@ -458,7 +565,7 @@
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-xs font-semibold text-white leading-snug break-words">${item.name}</h3>
                                 <div class="flex items-center justify-between mt-1 text-[11px] text-gray-400 font-mono">
-                                    <span>$${displayPrice} × ${displayQty}</span>
+                                    <span>$${displayPrice.toLocaleString()} × ${displayQty}</span>
                                     <span class="text-xs font-bold text-green-400">$ ${lineSubtotal.toLocaleString()}</span>
                                 </div>
                             </div>
@@ -466,9 +573,10 @@
                     </div>
                 `;
 
+                // 網格視圖 (Grid View) - 帶入品牌專屬色彩
                 if (!isLabor && item.partId) {
                     gridHTML += `
-                        <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2.5 flex flex-col justify-between shadow active:border-amber-500 transition-all cursor-pointer" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                        <div style="background-color: ${theme.cardBg}; border: 1px solid ${theme.cardBorder};" class="rounded-xl p-2.5 flex flex-col justify-between shadow active:scale-[0.98] transition-transform cursor-pointer" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                             <div class="w-full h-28 bg-[#0d1117] rounded-lg flex items-center justify-center overflow-hidden relative">
                                 <img src="${imgUrlPng}" alt="" loading="lazy" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="w-full h-full object-contain p-1.5">
                                 <div class="absolute bottom-1 right-1 bg-black/60 px-1 py-0.5 rounded text-[9px] text-amber-400">🔍 看大圖</div>
@@ -527,11 +635,11 @@ ${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
 💵【標準單價】$ ${item.price.toLocaleString()}
 🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
 💰【加總金額】$ ${item.subtotal.toLocaleString()}
-📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
+📍【儲位層架】${item.location || '未設定 / 依現場動線'}
 ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
 ━━━━━━━━━━━━━━━━━━━━
 ⏱️ 查詢時間：${timeStr}
-🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
+🏢 尚鵬內湖品牌旗艦 ‧ 專業售後服務`;
 
                 navigator.clipboard.writeText(formattedText).then(() => {
                     showCopyToast(`已複製 [${item.partId}] 明細！`);
@@ -566,9 +674,17 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
             const grandTotal = rawLaborSum + discountedPartsSum;
 
-            document.getElementById('labor-subtotal').innerText = `$${rawLaborSum.toLocaleString()}`;
-            document.getElementById('parts-subtotal').innerText = `$${discountedPartsSum.toLocaleString()}`;
+            document.getElementById('labor-subtotal').innerText = `$ ${rawLaborSum.toLocaleString()}`;
+            document.getElementById('parts-subtotal').innerText = `$ ${discountedPartsSum.toLocaleString()}`;
             document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
+
+            const badge = document.getElementById('discount-badge-label');
+            if (discountRate < 100) {
+                badge.innerText = `(${discountRate}折)`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
         }
 
         function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
@@ -604,7 +720,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統 (對接 GAS action=getDocs)
+            技術文獻系統 (對接 GAS action=getDocs)
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -640,8 +756,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 if (!force && CACHE_DOCS_DATA) {
                     rawDocsData = CACHE_DOCS_DATA;
                 } else {
-                    // 3. 向後端 GAS 請求技術文獻 JSON (action=getDocs)
-                    const docsUrl = `${GAS_ENDPOINT_URL}?action=getDocs&t=${Date.now()}`;
+                    const docsUrl = `${GAS_API_URL}?action=getDocs&t=${Date.now()}`;
                     const res = await fetch(docsUrl);
                     if (!res.ok) return;
                     const parsedDocs = await res.json();
@@ -682,7 +797,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         function renderDocTags() {
             const container = document.getElementById('doc-tags-container');
             let tagsHTML = `
-                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${activeDocTag === 'ALL' ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
+                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
                     全部 (${rawDocsData.length})
                 </button>
             `;
@@ -690,7 +805,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             sortedTagsList.forEach(item => {
                 const isActive = activeDocTag === item.tag;
                 tagsHTML += `
-                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${isActive ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
+                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
                         ${item.tag} (${item.count})
                     </button>
                 `;
@@ -703,6 +818,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             activeDocTag = tag;
             renderDocTags();
             filterDocs();
+            closeTagCloudModal();
         }
 
         function filterDocs() {
@@ -713,6 +829,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 const matchSearch = !searchKeyword || 
                     (doc.title && doc.title.toLowerCase().includes(searchKeyword)) ||
                     (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
+                    (doc.keyword && doc.keyword.toLowerCase().includes(searchKeyword)) ||
                     (doc.date && doc.date.toLowerCase().includes(searchKeyword));
                 return matchTag && matchSearch;
             });
@@ -730,8 +847,13 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             }
 
             listContainer.innerHTML = docs.map((doc) => {
+                let targetUrl = doc.url || '#';
+                if (targetUrl.includes('drive.google.com') && targetUrl.includes('/view')) {
+                    targetUrl = targetUrl.replace('/view', '/preview');
+                }
+
                 return `
-                    <a href="${doc.url || '#'}" target="_blank" class="block bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow active:border-red-500 transition-colors">
+                    <a href="${targetUrl}" target="_blank" class="block bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow active:border-red-500 transition-colors">
                         <div class="flex items-center justify-between gap-2">
                             <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate">
                                 📑 ${doc.category || '未分類'}
@@ -740,13 +862,75 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                         </div>
                         <h4 class="text-xs font-semibold text-white mt-1.5 leading-snug line-clamp-2">${doc.title}</h4>
                         <div class="flex justify-end items-center mt-2 text-[10px] text-red-400 font-medium">
-                            <span>點擊開啟 PDF</span> <span class="ml-1 text-[8px]">▶</span>
+                            <span>開啟技術手冊 PDF</span> <span class="ml-1 text-[8px]">▶</span>
                         </div>
                     </a>
                 `;
             }).join('');
         }
 
+        /* -------------------------------------------------------------
+            Obsidian 標籤雲彈出視窗 (Modal) 控制
+        ------------------------------------------------------------- */
+        function openTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            const searchInput = document.getElementById('modal-tag-search');
+            searchInput.value = '';
+            
+            renderModalTagGrid(sortedTagsList);
+            document.getElementById('modal-tag-stats').innerText = `共計 ${sortedTagsList.length} 個分類標籤`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+            searchInput.focus();
+        }
+
+        function closeTagCloudModal() {
+            const modal = document.getElementById('tag-cloud-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        function filterModalTags() {
+            const query = document.getElementById('modal-tag-search').value.trim().toLowerCase();
+            const filtered = sortedTagsList.filter(item => item.tag.toLowerCase().includes(query));
+            renderModalTagGrid(filtered);
+        }
+
+        function renderModalTagGrid(list) {
+            const grid = document.getElementById('modal-tag-grid');
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="text-xs text-gray-500 py-4 w-full text-center">找不到匹配的標籤</div>';
+                return;
+            }
+
+            let html = `
+                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded text-xs font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 border border-gray-700'}">
+                    # 全部 (${rawDocsData.length})
+                </button>
+            `;
+
+            list.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                html += `
+                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded text-xs font-bold transition-all flex items-center space-x-1 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 border border-gray-700'}">
+                        <span># ${item.tag}</span>
+                        <span class="text-[9px] ${isActive ? 'text-white/80' : 'text-gray-500 font-mono'}">(${item.count})</span>
+                    </button>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+                closeTagCloudModal();
+            }
+        });
+
+        // 啟動加載
         initializeDynamicSheets();
     </script>
 </body>
