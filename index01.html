@@ -19,7 +19,7 @@
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
+            <div id="brand-logo" class="w-10 h-10 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all">PEUG</div>
             <div>
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
@@ -48,7 +48,7 @@
         </div>
         
         <div id="package-tabs" class="flex flex-wrap gap-1.5 max-w-2xl justify-start lg:justify-center">
-            <span class="text-xs text-gray-500">正在同步試算表分頁...</span>
+            <span class="text-xs text-gray-500">正在載入套餐項目...</span>
         </div>
 
         <button onclick="reloadAllData(true)" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-lg transition-all border border-gray-700 flex items-center space-x-1 shrink-0">
@@ -65,7 +65,7 @@
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>載入中...
                     </h2>
-                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
+                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">直連極速模式</span>
                 </div>
 
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
@@ -127,11 +127,10 @@
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (極致緊湊優化版) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                 
-                <!-- 頂部標題與標籤雲按鈕並列，空間不浪費 -->
                 <div class="flex justify-between items-center mb-2.5 shrink-0">
                     <h2 class="text-sm font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm"></span>原廠 TSB 與技術手冊
@@ -144,15 +143,12 @@
                     </div>
                 </div>
 
-                <!-- 搜尋列完全展寬 -->
                 <div class="relative mb-2 shrink-0">
                     <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
                 </div>
 
-                <!-- 標籤列：自適應緊湊高度 (不灌水、最高兩行、超過優雅折疊) -->
                 <div id="doc-tags-container" class="flex flex-wrap gap-1 mb-2.5 max-h-[58px] overflow-hidden shrink-0 border-b border-gray-800/80 pb-2"></div>
 
-                <!-- 文獻卡片列表 -->
                 <div id="docs-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                     <div class="text-center py-8 text-gray-500 text-xs">正在載入文獻...</div>
                 </div>
@@ -212,13 +208,83 @@
     </div>
 
     <script>
+        // =========================================================================
+        // 固化鎖定車型與獨立 CSV 發佈連結矩陣 (不可動)
+        // =========================================================================
+        const FIXED_MODELS_DATA = [
+
+ {
+                brand: "PROJECT_通用套餐",
+                model: "PROJECT_通用套餐",
+                sheetName: "PROJECT_通用套餐",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=2064791486&single=true&output=csv"
+            },
+
+
+            
+            {
+                brand: "PEUGEOT",
+                model: "P_408H",
+                sheetName: "P_408H",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1525555317&single=true&output=csv"
+            },
+            {
+                brand: "PEUGEOT",
+                model: "P_3008H",
+                sheetName: "P_3008H",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1074672360&single=true&output=csv"
+            },
+            {
+                brand: "PEUGEOT",
+                model: "P_5008H",
+                sheetName: "P_5008H",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1080538&single=true&output=csv"
+            },
+            {
+                brand: "CITROËN",
+                model: "C_新 Berlingo",
+                sheetName: "C_新 Berlingo",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=934233668&single=true&output=csv"
+            },
+            {
+                brand: "PEUGEOT",
+                model: "P_408Y",
+                sheetName: "P_408Y",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=555416694&single=true&output=csv"
+            },
+            {
+                brand: "ALFA ROMEO",
+                model: "ALFA_STELVIO INTENSA_2.0",
+                sheetName: "ALFA_STELVIO INTENSA_2.0",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1863556503&single=true&output=csv"
+            },
+            {
+                brand: "ALFA ROMEO",
+                model: "ALFA_GIULIA SPRINT_2.0",
+                sheetName: "ALFA_GIULIA SPRINT_2.0",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=272988726&single=true&output=csv"
+            },
+            {
+                brand: "ALFA ROMEO",
+                model: "ALFA_GIULIA QUADRIFOGLIO",
+                sheetName: "ALFA_GIULIA QUADRIFOGLIO",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=1179522210&single=true&output=csv"
+            },
+            {
+                brand: "ALFA ROMEO",
+                model: "ALFA_JUNIOR IBRIDA Q2",
+                sheetName: "ALFA_JUNIOR IBRIDA Q2",
+                csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?gid=293336719&single=true&output=csv"
+            }
+        ];
+
+        // GAS API 網址 (保留予技術文獻系統讀取)
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
 
         const CACHE_SHEET_DATA = new Map();
-        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = []; 
+        let dynamicModelsData = FIXED_MODELS_DATA; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
@@ -229,37 +295,22 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        async function initializeDynamicSheets(force = false) {
-            const tabsContainer = document.getElementById('package-tabs');
+        function initializeDynamicSheets(force = false) {
             const statusBadge = document.getElementById('status-badge');
             
-            try {
-                if (!force && CACHE_MODELS_DATA) {
-                    dynamicModelsData = CACHE_MODELS_DATA;
-                } else {
-                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
-                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
-                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
-                    dynamicModelsData = await response.json();
-                    CACHE_MODELS_DATA = dynamicModelsData;
-                }
+            // 本機直接綁定車型陣列，完全不走網路等待
+            dynamicModelsData = FIXED_MODELS_DATA;
 
-                statusBadge.innerText = "連線正常 (極速模式)";
-                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
-                
-                renderBrandSelect();
-                loadTechnicalDocs(force);
-            } catch (error) {
-                console.error("載入失敗:", error);
-                statusBadge.innerText = "連線失敗";
-                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
-            }
+            statusBadge.innerText = "直連極速模式 (已固化)";
+            statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
+            
+            renderBrandSelect();
+            loadTechnicalDocs(force);
         }
 
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
-                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
             }
             initializeDynamicSheets(force);
@@ -271,8 +322,9 @@
 
             brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
 
-            if (availableBrands.includes("PROJECT")) {
-                brandSelect.value = "PROJECT";
+            // 預設選中第一個品牌
+            if (availableBrands.length > 0) {
+                brandSelect.value = availableBrands[0];
             }
 
             updateModelOptions(true);
@@ -289,12 +341,6 @@
 
             if (matchedModels.length > 0) {
                 let defaultTarget = matchedModels[0].sheetName;
-
-                if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
-                    if (foundPrj) defaultTarget = foundPrj.sheetName;
-                }
-
                 modelSelect.value = defaultTarget;
                 executeModelSwitch(defaultTarget);
             } else {
@@ -312,9 +358,6 @@
             if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-10 h-10 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
-            } else if (brand === "PROJECT") {
-                brandLogo.innerText = "CANN";
-                brandLogo.className = "w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
             } else if (brand === "ALFA ROMEO") {
                 brandLogo.innerText = "ALFA";
                 brandLogo.className = "w-10 h-10 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
@@ -332,24 +375,28 @@
         async function fetchSheetData() {
             if (!selectedModelObj) return;
             const sheetName = selectedModelObj.sheetName;
+            const csvUrl = selectedModelObj.csvUrl;
 
+            // 記憶體快取秒開
             if (CACHE_SHEET_DATA.has(sheetName)) {
                 parseExcelCSV(CACHE_SHEET_DATA.get(sheetName));
                 return;
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 直連試算表載入中...</span>';
 
             try {
-                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
+                // 直接向 Google 試算表發佈連結請求 CSV
+                const targetUrl = csvUrl + (csvUrl.includes('?') ? '&' : '?') + "t=" + Date.now();
                 const response = await fetch(targetUrl);
+                if (!response.ok) throw new Error("CSV 回應異常: " + response.status);
                 const csvText = await response.text();
                 
                 CACHE_SHEET_DATA.set(sheetName, csvText);
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("載入失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
+                document.getElementById('current-package-title').innerText = "❌ 試算表直連載入失敗";
                 clearDisplay();
             }
         }
@@ -419,9 +466,9 @@
             const tabsContainer = document.getElementById('package-tabs');
             const brand = selectedModelObj ? selectedModelObj.brand : "";
             const isCitroen = brand === "CITROËN";
-            const isProject = brand === "PROJECT";
+            const isAlfa = brand === "ALFA ROMEO";
             
-            let activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : (isProject ? "bg-[#f59e0b] border-[#d97706]" : "bg-emerald-600 border-emerald-500");
+            let activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : (isAlfa ? "bg-[#8b0000] border-[#500000]" : "bg-emerald-600 border-emerald-500");
 
             tabsContainer.innerHTML = keys.map(key => `
                 <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
@@ -448,8 +495,8 @@
             const pkg = allParsedPackages[key];
             const brand = selectedModelObj ? selectedModelObj.brand : "";
             const isCitroen = brand === "CITROËN";
-            const isProject = brand === "PROJECT";
-            let indicatorColor = isCitroen ? "bg-[#da291c]" : (isProject ? "bg-[#f59e0b]" : "bg-[#48bb78]");
+            const isAlfa = brand === "ALFA ROMEO";
+            let indicatorColor = isCitroen ? "bg-[#da291c]" : (isAlfa ? "bg-[#8b0000]" : "bg-[#48bb78]");
 
             let titleHTML = `<span class="w-2 h-4 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             if (pkg.pdfUrl) {
@@ -494,7 +541,7 @@
 
                 let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
-                if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
+                if (!isLabor && isAlfa) attrBadgeClass = "bg-rose-950/60 text-rose-400 border border-rose-900/50";
 
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
@@ -521,7 +568,7 @@
                             <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
+                                    <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isAlfa ? 'bg-rose-700/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full">
@@ -609,7 +656,7 @@
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統
+           技術文獻系統 (保留與 GAS 連線)
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -770,9 +817,6 @@
             iframe.src = embedUrl;
         }
 
-        /* -------------------------------------------------------------
-           Obsidian 標籤雲 Modal 控制
-        ------------------------------------------------------------- */
         function openTagCloudModal() {
             const modal = document.getElementById('tag-cloud-modal');
             const searchInput = document.getElementById('modal-tag-search');
@@ -831,6 +875,7 @@
             }
         });
 
+        // 啟動直連
         initializeDynamicSheets();
     </script>
 </body>
