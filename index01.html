@@ -73,7 +73,7 @@
                         <thead>
                             <tr class="border-b border-gray-700 text-gray-400 bg-[#0d1117] sticky top-0 z-10">
                                 <th class="p-2.5 rounded-l-md">屬性</th>
-                                <th class="p-2.5">料號 (點擊複製)</th>
+                                <th class="p-2.5">料號</th>
                                 <th class="p-2.5">項目名稱</th>
                                 <th class="p-2.5 text-right">單價</th>
                                 <th class="p-2.5 text-right">數量</th>
@@ -127,33 +127,39 @@
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 -->
+        <!-- 視圖二：技術文獻資料庫 (極致緊湊優化版) -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
-            <div class="w-[420px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
+            <div class="w-[380px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
+                
+                <!-- 頂部標題與標籤雲按鈕並列，空間不浪費 -->
                 <div class="flex justify-between items-center mb-2.5 shrink-0">
-                    <h2 class="text-sm font-bold text-gray-100 flex items-center whitespace-nowrap">
-                        <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm shrink-0"></span>原廠 TSB 與技術手冊
+                    <h2 class="text-sm font-bold text-gray-100 flex items-center">
+                        <span class="w-2 h-4 bg-red-600 inline-block mr-2 rounded-sm"></span>原廠 TSB 與技術手冊
                     </h2>
-                    <div class="flex items-center space-x-1.5 shrink-0">
-                        <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold whitespace-nowrap">0 份文件</span>
-                        <button onclick="openTagCloudModal()" title="開啟完整標籤雲" class="px-2 py-0.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 hover:border-red-500 text-gray-300 hover:text-white rounded text-[11px] font-semibold flex items-center space-x-1 transition-colors shadow whitespace-nowrap">
+                    <div class="flex items-center space-x-1.5">
+                        <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份文件</span>
+                        <button onclick="openTagCloudModal()" title="開啟完整標籤雲" class="px-2 py-0.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 hover:border-red-500 text-gray-300 hover:text-white rounded text-[11px] font-semibold flex items-center space-x-1 transition-colors shadow">
                             <span>🏷️</span><span>標籤雲</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- 搜尋列完全展寬 -->
                 <div class="relative mb-2 shrink-0">
-                    <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+                    <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
                 </div>
 
-                <div id="doc-tags-container" class="flex flex-wrap gap-1.5 mb-2.5 max-h-[64px] overflow-y-auto custom-scrollbar shrink-0 border-b border-gray-800/80 pb-2"></div>
+                <!-- 標籤列：自適應緊湊高度 (不灌水、最高兩行、超過優雅折疊) -->
+                <div id="doc-tags-container" class="flex flex-wrap gap-1 mb-2.5 max-h-[58px] overflow-hidden shrink-0 border-b border-gray-800/80 pb-2"></div>
 
+                <!-- 文獻卡片列表 -->
                 <div id="docs-list-container" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                     <div class="text-center py-8 text-gray-500 text-xs">正在載入文獻...</div>
                 </div>
             </div>
 
-            <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative min-w-0">
+            <!-- 右側 PDF 預覽 -->
+            <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-2 flex flex-col overflow-hidden shadow-2xl relative">
                 <div id="pdf-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-500">
                     <div class="text-4xl mb-2 opacity-40">📄</div>
                     <p class="text-sm font-bold text-gray-300">請選擇左側文件進行預覽</p>
@@ -164,12 +170,6 @@
         </section>
 
     </main>
-
-    <!-- 剪貼簿複製提示浮窗 (Toast) -->
-    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-[#161b22] border border-amber-500/80 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
-        <span class="text-amber-400 text-sm">📋</span>
-        <span id="copy-toast-msg">已複製項目段落明細！</span>
-    </div>
 
     <!-- Obsidian 標籤雲彈出視窗 -->
     <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
@@ -212,29 +212,13 @@
     </div>
 
     <script>
-        /* -------------------------------------------------------------
-           Google 試算表極速直連配置 (直連 Google CDN，完全告別 GAS 延遲)
-        ------------------------------------------------------------- */
-        const GOOGLE_PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?output=csv";
-        const DOCS_GID = "283344252"; // 技術文獻專用 GID
-
-        // 車型分頁對照表（名稱完全對齊工作表分頁）
-        const MODELS_CONFIG = [
-            { brand: "PROJECT", model: "PROJECT_通用專案", sheetName: "PROJECT_通用專案", gid: "2064791486" },
-            { brand: "PEUGEOT", model: "P_408H", sheetName: "P_408H", gid: "1525555317" },
-            { brand: "PEUGEOT", model: "P_3008H", sheetName: "P_3008H", gid: "1074672360" },
-            { brand: "PEUGEOT", model: "P_5008H", sheetName: "P_5008H", gid: "1080538" },
-            { brand: "CITROËN", model: "C_新Berlingo", sheetName: "C_新Berlingo", gid: "934233668" }
-// 👇 直接加入這行
-    { brand: "ALFA ROMEO", model: "STELVIO INTENSA 2.0", sheetName: "ALFA_STELVIO INTENSA_2.0", gid: "1863556503" }
-];
-            
-        ];
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
 
         const CACHE_SHEET_DATA = new Map();
+        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = MODELS_CONFIG; 
+        let dynamicModelsData = []; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
@@ -245,33 +229,26 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        function parseCSVLineRobust(str) {
-            const arr = [];
-            let quote = false;
-            let col = '';
-            for (let c = 0; c < str.length; c++) {
-                let cc = str[c], nc = str[c+1];
-                if (cc === '"') {
-                    if (quote && nc === '"') { col += '"'; c++; }
-                    else { quote = !quote; }
-                } else if (cc === ',' && !quote) {
-                    arr.push(col); col = '';
-                } else {
-                    col += cc;
-                }
-            }
-            arr.push(col);
-            return arr.map(item => item.trim());
-        }
-
         async function initializeDynamicSheets(force = false) {
+            const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
             
             try {
+                if (!force && CACHE_MODELS_DATA) {
+                    dynamicModelsData = CACHE_MODELS_DATA;
+                } else {
+                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
+                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
+                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
+                    dynamicModelsData = await response.json();
+                    CACHE_MODELS_DATA = dynamicModelsData;
+                }
+
+                statusBadge.innerText = "連線正常 (極速模式)";
+                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
+                
                 renderBrandSelect();
                 loadTechnicalDocs(force);
-                statusBadge.innerText = "直連模式 (瞬開)";
-                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
             } catch (error) {
                 console.error("載入失敗:", error);
                 statusBadge.innerText = "連線失敗";
@@ -282,6 +259,7 @@
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
+                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
             }
             initializeDynamicSheets(force);
@@ -313,7 +291,7 @@
                 let defaultTarget = matchedModels[0].sheetName;
 
                 if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("PROJECT_通用專案") || item.model.includes("PROJECT_通用專案"));
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
                     if (foundPrj) defaultTarget = foundPrj.sheetName;
                 }
 
@@ -360,10 +338,10 @@
                 return;
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速直連載入中...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
 
             try {
-                const targetUrl = `${GOOGLE_PUB_BASE}&gid=${selectedModelObj.gid}&single=true&t=${Date.now()}`;
+                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
                 const response = await fetch(targetUrl);
                 const csvText = await response.text();
                 
@@ -382,7 +360,7 @@
             let currentPackageName = ""; 
 
             lines.forEach((line) => {
-                const cols = parseCSVLineRobust(line);
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
                 if (cols.length < 3) return;
 
                 const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
@@ -518,28 +496,10 @@
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
                 if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
-                const rowInfoData = encodeURIComponent(JSON.stringify({
-                    attr: item.attr,
-                    partId: item.partId,
-                    name: item.name,
-                    price: displayPrice,
-                    qty: displayQty,
-                    subtotal: lineSubtotal,
-                    location: item.location || '',
-                    stock: item.stock !== "" ? item.stock : ''
-                }));
-
                 tableHTML += `
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
                         <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
-                        
-                        <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
-                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目圖文格式明細">
-                                ${item.partId}
-                                <span class="text-[10px] text-amber-500/80">📋</span>
-                            </span>
-                        </td>
-                        
+                        <td class="p-2.5 font-mono text-gray-300">${item.partId}</td>
                         <td class="p-2.5 text-white font-medium">${item.name}</td>
                         <td class="p-2.5 text-right font-mono text-gray-300">${displayPrice}</td>
                         <td class="p-2.5 text-right font-mono text-gray-300">${displayQty}</td>
@@ -559,7 +519,7 @@
                     gridHTML += `
                         <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
                             <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
-                                <img src="${imgUrlPng}" alt="${item.name}" loading="lazy" decoding="async" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                                <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
                                     <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
                                 </div>
@@ -576,80 +536,6 @@
             document.getElementById('table-rows').innerHTML = tableHTML;
             document.getElementById('image-grid').innerHTML = gridHTML;
             calculateTotalsWithDiscount();
-        }
-
-        function copyRowInfo(event, encodedData) {
-            event.stopPropagation();
-            try {
-                const item = JSON.parse(decodeURIComponent(encodedData));
-                const isLabor = item.attr === "工資";
-                
-                let stockStatus = "🟢 庫存正常";
-                let stockDisplay = item.stock || "0";
-                if (!isLabor && item.stock !== "") {
-                    const num = parseFloat(item.stock);
-                    if (isNaN(num) || num <= 0) {
-                        stockStatus = "🔴 缺料中 (0 件)";
-                        stockDisplay = "0 件 (⚠️ 現場缺料)";
-                    } else if (num <= 2) {
-                        stockStatus = `🟡 庫存告急 (${num} 件)`;
-                        stockDisplay = `${num} 件 (⚠️ 庫存告急)`;
-                    } else {
-                        stockStatus = `🟢 充足 (${num} 件)`;
-                        stockDisplay = `${num} 件 (充足)`;
-                    }
-                } else if (isLabor) {
-                    stockDisplay = "不適用 (標準工時項目)";
-                }
-
-                const now = new Date();
-                const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                
-                const formattedText = 
-`┏━━━━━━━━━━━━━━━━━━━━┓
-   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
-┗━━━━━━━━━━━━━━━━━━━━┛
-🔹【${isLabor ? '工項代碼' : '零件料號'}】${item.partId}
-${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
-💵【標準單價】$ ${item.price.toLocaleString()}
-🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
-💰【加總金額】$ ${item.subtotal.toLocaleString()}
-📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
-${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
-━━━━━━━━━━━━━━━━━━━━
-⏱️ 查詢時間：${timeStr}
-🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
-
-                navigator.clipboard.writeText(formattedText).then(() => {
-                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
-                }).catch(() => {
-                    const textarea = document.createElement('textarea');
-                    textarea.value = formattedText;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
-                });
-            } catch (e) {
-                console.error("複製失敗:", e);
-            }
-        }
-
-        let toastTimer = null;
-        function showCopyToast(msg) {
-            const toast = document.getElementById('copy-toast');
-            const toastMsg = document.getElementById('copy-toast-msg');
-            toastMsg.innerText = msg;
-
-            toast.classList.remove('opacity-0', 'translate-y-2');
-            toast.classList.add('opacity-100', 'translate-y-0');
-
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-2');
-            }, 1800);
         }
 
         function calculateTotalsWithDiscount() {
@@ -723,7 +609,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統 (智慧欄位辨識＋防破版排版)
+           技術文獻系統
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -753,38 +639,11 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 if (!force && CACHE_DOCS_DATA) {
                     rawDocsData = CACHE_DOCS_DATA;
                 } else {
-                    const docsCsvUrl = `${GOOGLE_PUB_BASE}&gid=${DOCS_GID}&single=true&t=${Date.now()}`;
-                    const res = await fetch(docsCsvUrl);
+                    const res = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
                     if (!res.ok) return;
-                    const csvText = await res.text();
+                    const data = await res.json();
                     
-                    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-                    if (lines.length <= 1) return;
-
-                    const header = parseCSVLineRobust(lines[0]);
-                    let idxCategory = header.findIndex(h => h.includes("分類") || h.toLowerCase().includes("cat"));
-                    let idxTitle = header.findIndex(h => h.includes("標題") || h.includes("名稱") || h.toLowerCase().includes("title"));
-                    let idxUrl = header.findIndex(h => h.includes("網址") || h.includes("連結") || h.toLowerCase().includes("url") || h.toLowerCase().includes("link"));
-                    let idxDate = header.findIndex(h => h.includes("日期") || h.toLowerCase().includes("date"));
-                    let idxKeyword = header.findIndex(h => h.includes("關鍵字") || h.toLowerCase().includes("key"));
-
-                    const parsedDocs = [];
-                    for (let i = 1; i < lines.length; i++) {
-                        const cols = parseCSVLineRobust(lines[i]);
-                        if (cols.length < 2) continue;
-
-                        // 自動識別網址與日期，避免任何欄位錯位
-                        let url = (idxUrl !== -1 ? cols[idxUrl] : "") || cols.find(c => c.startsWith("http")) || "";
-                        let date = (idxDate !== -1 ? cols[idxDate] : "") || cols.find(c => /^\d{4}[-\/\.]\d{1,2}/.test(c)) || "";
-                        
-                        let nonUrlCols = cols.filter(c => c && !c.startsWith("http") && c !== date);
-                        let category = (idxCategory !== -1 && !cols[idxCategory].startsWith("http")) ? cols[idxCategory] : (nonUrlCols[0] || "未分類");
-                        let title = (idxTitle !== -1 && !cols[idxTitle].startsWith("http")) ? cols[idxTitle] : (nonUrlCols[1] || nonUrlCols[0] || "未命名文件");
-
-                        parsedDocs.push({ category, title, url, date, keyword: (idxKeyword !== -1 ? cols[idxKeyword] : "") });
-                    }
-
-                    rawDocsData = parsedDocs.sort((a, b) => {
+                    rawDocsData = data.sort((a, b) => {
                         const dateA = new Date(a.date || '1970-01-01').getTime();
                         const dateB = new Date(b.date || '1970-01-01').getTime();
                         return dateB - dateA;
@@ -873,16 +732,16 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
 
             listContainer.innerHTML = docs.map((doc, index) => {
                 return `
-                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group overflow-hidden">
-                        <div class="flex items-center justify-between gap-2 overflow-hidden">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate max-w-[200px] shrink inline-block" title="${doc.category}">
-                                📑 ${doc.category || '未分類'}
+                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
+                        <div class="flex items-center justify-between">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
+                                ${doc.category || '未分類'}
                             </span>
-                            <span class="text-[10px] text-gray-500 font-mono shrink-0 whitespace-nowrap">${doc.date || ''}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date}</span>
                         </div>
-                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors break-words">${doc.title}</h4>
+                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
                         <div class="flex justify-end pt-1">
-                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center shrink-0">
+                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
                                 預覽 <span class="ml-1 text-[8px]">▶</span>
                             </span>
                         </div>
