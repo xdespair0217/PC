@@ -127,7 +127,7 @@
             </div>
         </section>
 
-        <!-- 視圖二：技術文獻資料庫 (加寬並防止被擠壓) -->
+        <!-- 視圖二：技術文獻資料庫 -->
         <section id="docs-view" class="hidden flex-1 flex flex-row space-x-4 overflow-hidden w-full h-full">
             <div class="w-[420px] shrink-0 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2.5 shrink-0">
@@ -719,7 +719,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統 (排版強化：防止被壓縮、完整保留欄位寬度)
+           技術文獻系統 (智慧欄位辨識＋防破版排版)
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -758,24 +758,26 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                     if (lines.length <= 1) return;
 
                     const header = parseCSVLineRobust(lines[0]);
-                    const idxCategory = header.findIndex(h => h.includes("分類") || h.includes("category"));
-                    const idxTitle = header.findIndex(h => h.includes("標題") || h.includes("title"));
-                    const idxUrl = header.findIndex(h => h.includes("網址") || h.includes("url") || h.includes("連結"));
-                    const idxDate = header.findIndex(h => h.includes("日期") || h.includes("date"));
-                    const idxKeyword = header.findIndex(h => h.includes("關鍵字") || h.includes("keyword") || h.includes("料號"));
+                    let idxCategory = header.findIndex(h => h.includes("分類") || h.toLowerCase().includes("cat"));
+                    let idxTitle = header.findIndex(h => h.includes("標題") || h.includes("名稱") || h.toLowerCase().includes("title"));
+                    let idxUrl = header.findIndex(h => h.includes("網址") || h.includes("連結") || h.toLowerCase().includes("url") || h.toLowerCase().includes("link"));
+                    let idxDate = header.findIndex(h => h.includes("日期") || h.toLowerCase().includes("date"));
+                    let idxKeyword = header.findIndex(h => h.includes("關鍵字") || h.toLowerCase().includes("key"));
 
                     const parsedDocs = [];
                     for (let i = 1; i < lines.length; i++) {
                         const cols = parseCSVLineRobust(lines[i]);
                         if (cols.length < 2) continue;
 
-                        parsedDocs.push({
-                            category: cols[idxCategory !== -1 ? idxCategory : 0] || '未分類',
-                            title: cols[idxTitle !== -1 ? idxTitle : 1] || '未命名文件',
-                            url: cols[idxUrl !== -1 ? idxUrl : 2] || '',
-                            date: cols[idxDate !== -1 ? idxDate : 3] || '',
-                            keyword: cols[idxKeyword !== -1 ? idxKeyword : 4] || ''
-                        });
+                        // 自動識別網址與日期，避免任何欄位錯位
+                        let url = (idxUrl !== -1 ? cols[idxUrl] : "") || cols.find(c => c.startsWith("http")) || "";
+                        let date = (idxDate !== -1 ? cols[idxDate] : "") || cols.find(c => /^\d{4}[-\/\.]\d{1,2}/.test(c)) || "";
+                        
+                        let nonUrlCols = cols.filter(c => c && !c.startsWith("http") && c !== date);
+                        let category = (idxCategory !== -1 && !cols[idxCategory].startsWith("http")) ? cols[idxCategory] : (nonUrlCols[0] || "未分類");
+                        let title = (idxTitle !== -1 && !cols[idxTitle].startsWith("http")) ? cols[idxTitle] : (nonUrlCols[1] || nonUrlCols[0] || "未命名文件");
+
+                        parsedDocs.push({ category, title, url, date, keyword: (idxKeyword !== -1 ? cols[idxKeyword] : "") });
                     }
 
                     rawDocsData = parsedDocs.sort((a, b) => {
@@ -867,16 +869,16 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
 
             listContainer.innerHTML = docs.map((doc, index) => {
                 return `
-                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate max-w-[200px]">
-                                ${doc.category || '未分類'}
+                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group overflow-hidden">
+                        <div class="flex items-center justify-between gap-2 overflow-hidden">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate max-w-[200px] shrink inline-block" title="${doc.category}">
+                                📑 ${doc.category || '未分類'}
                             </span>
-                            <span class="text-[10px] text-gray-500 font-mono shrink-0">${doc.date}</span>
+                            <span class="text-[10px] text-gray-500 font-mono shrink-0 whitespace-nowrap">${doc.date || ''}</span>
                         </div>
-                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
+                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors break-words">${doc.title}</h4>
                         <div class="flex justify-end pt-1">
-                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
+                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center shrink-0">
                                 預覽 <span class="ml-1 text-[8px]">▶</span>
                             </span>
                         </div>
