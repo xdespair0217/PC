@@ -212,13 +212,25 @@
     </div>
 
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
+        /* -------------------------------------------------------------
+           Google 試算表極速直連配置 (直連 Google CDN，完全告別 GAS 延遲)
+        ------------------------------------------------------------- */
+        const GOOGLE_PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?output=csv";
+        const DOCS_GID = "283344252"; // 技術文獻專用 GID
+
+        // 車型分頁對照表
+        const MODELS_CONFIG = [
+            { brand: "PROJECT", model: "通用專案套餐", sheetName: "PROJECT_通用專案", gid: "2064791486" },
+            { brand: "PEUGEOT", model: "408 (P_408H)", sheetName: "P_408H", gid: "1525555317" },
+            { brand: "PEUGEOT", model: "3008 (P_3008H)", sheetName: "P_3008H", gid: "1074672360" },
+            { brand: "PEUGEOT", model: "5008 (P_5008H)", sheetName: "P_5008H", gid: "1080538" },
+            { brand: "CITROËN", model: "新 Berlingo", sheetName: "C_新Berlingo", gid: "934233668" }
+        ];
 
         const CACHE_SHEET_DATA = new Map();
-        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = []; 
+        let dynamicModelsData = MODELS_CONFIG; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
@@ -229,107 +241,45 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        /* --- 核心網路連線優化模組：超時防卡死、自動重試 --- */
-        async function fetchWithTimeout(url, options = {}, timeout = 8000, retries = 1) {
-            for (let i = 0; i <= retries; i++) {
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), timeout);
-                try {
-                    const res = await fetch(url, { ...options, credentials: 'omit', signal: controller.signal });
-                    clearTimeout(timer);
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res;
-                } catch (err) {
-                    clearTimeout(timer);
-                    if (i === retries) throw err;
-                    await new Promise(r => setTimeout(r, 800)); // 間隔重試
+        // 工具：精準解析含有換行與引號的標準 CSV
+        function parseCSVLineRobust(str) {
+            const arr = [];
+            let quote = false;
+            let col = '';
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                if (cc === '"') {
+                    if (quote && nc === '"') { col += '"'; c++; }
+                    else { quote = !quote; }
+                } else if (cc === ',' && !quote) {
+                    arr.push(col); col = '';
+                } else {
+                    col += cc;
                 }
             }
+            arr.push(col);
+            return arr.map(item => item.trim());
         }
 
         async function initializeDynamicSheets(force = false) {
-            const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
             
-            // 優先讀取 LocalStorage 快顯 (瞬開體驗)
-            if (!force && !CACHE_MODELS_DATA) {
-                try {
-                    const localModels = localStorage.getItem('CACHE_MODELS_V1');
-                    const localDocs = localStorage.getItem('CACHE_DOCS_V1');
-                    if (localModels) {
-                        dynamicModelsData = JSON.parse(localModels);
-                        CACHE_MODELS_DATA = dynamicModelsData;
-                        renderBrandSelect();
-                    }
-                    if (localDocs) {
-                        rawDocsData = JSON.parse(localDocs);
-                        CACHE_DOCS_DATA = rawDocsData;
-                        calculateTagStatistics();
-                        renderDocTags();
-                        filterDocs();
-                    }
-                } catch (e) {
-                    console.warn("本機快取讀取略過", e);
-                }
-            }
-
             try {
-                if (!CACHE_MODELS_DATA) {
-                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
-                }
-
-                const modelsUrl = GAS_API_URL + (force ? "?t=" + Date.now() : "");
-                const docsUrl = GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : "");
-
-                // 並行抓取 (Parallel Fetching)，徹底終結等待卡頓
-                const [modelsRes, docsRes] = await Promise.allSettled([
-                    (!force && CACHE_MODELS_DATA) ? Promise.resolve(null) : fetchWithTimeout(modelsUrl, {}, 9000, 1).then(r => r.json()),
-                    (!force && CACHE_DOCS_DATA) ? Promise.resolve(null) : fetchWithTimeout(docsUrl, {}, 9000, 1).then(r => r.json())
-                ]);
-
-                if (modelsRes.status === "fulfilled" && modelsRes.value) {
-                    dynamicModelsData = modelsRes.value;
-                    CACHE_MODELS_DATA = dynamicModelsData;
-                    try { localStorage.setItem('CACHE_MODELS_V1', JSON.stringify(dynamicModelsData)); } catch(e){}
-                    renderBrandSelect();
-                }
-
-                if (docsRes.status === "fulfilled" && docsRes.value) {
-                    rawDocsData = docsRes.value.sort((a, b) => {
-                        const dateA = new Date(a.date || '1970-01-01').getTime();
-                        const dateB = new Date(b.date || '1970-01-01').getTime();
-                        return dateB - dateA;
-                    });
-                    CACHE_DOCS_DATA = rawDocsData;
-                    try { localStorage.setItem('CACHE_DOCS_V1', JSON.stringify(rawDocsData)); } catch(e){}
-                    calculateTagStatistics();
-                    renderDocTags();
-                    filterDocs();
-                }
-
-                statusBadge.innerText = "連線正常 (極速模式)";
+                renderBrandSelect();
+                loadTechnicalDocs(force);
+                statusBadge.innerText = "直連模式 (瞬開)";
                 statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
             } catch (error) {
-                console.error("載入異常:", error);
-                if (dynamicModelsData.length > 0) {
-                    statusBadge.innerText = "快取運作中 (離線模式)";
-                    statusBadge.className = "text-[10px] bg-amber-950 text-amber-400 border border-amber-900 px-2 py-0.5 rounded-full font-semibold";
-                } else {
-                    statusBadge.innerText = "連線逾時，重試中";
-                    statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
-                }
+                console.error("載入失敗:", error);
+                statusBadge.innerText = "連線失敗";
+                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
             }
         }
 
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
-                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
-                try {
-                    localStorage.removeItem('CACHE_MODELS_V1');
-                    localStorage.removeItem('CACHE_DOCS_V1');
-                } catch(e){}
             }
             initializeDynamicSheets(force);
         }
@@ -407,26 +357,18 @@
                 return;
             }
 
-            const localCsv = sessionStorage.getItem('CSV_' + sheetName);
-            if (localCsv) {
-                CACHE_SHEET_DATA.set(sheetName, localCsv);
-                parseExcelCSV(localCsv);
-                return;
-            }
-
-            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速直連載入中...</span>';
 
             try {
-                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
-                const response = await fetchWithTimeout(targetUrl, {}, 8000, 1);
+                const targetUrl = `${GOOGLE_PUB_BASE}&gid=${selectedModelObj.gid}&single=true&t=${Date.now()}`;
+                const response = await fetch(targetUrl);
                 const csvText = await response.text();
                 
                 CACHE_SHEET_DATA.set(sheetName, csvText);
-                try { sessionStorage.setItem('CSV_' + sheetName, csvText); } catch(e){}
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("載入失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗 (請點選上方重試)";
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
                 clearDisplay();
             }
         }
@@ -437,7 +379,7 @@
             let currentPackageName = ""; 
 
             lines.forEach((line) => {
-                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
+                const cols = parseCSVLineRobust(line);
                 if (cols.length < 3) return;
 
                 const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
@@ -778,7 +720,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統
+           技術文獻系統 (直讀 TECHNICAL_DOCS CSV)
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -800,6 +742,56 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
                 btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
                 pkgTabs.classList.remove('invisible');
+            }
+        }
+
+        async function loadTechnicalDocs(force = false) {
+            try {
+                if (!force && CACHE_DOCS_DATA) {
+                    rawDocsData = CACHE_DOCS_DATA;
+                } else {
+                    const docsCsvUrl = `${GOOGLE_PUB_BASE}&gid=${DOCS_GID}&single=true&t=${Date.now()}`;
+                    const res = await fetch(docsCsvUrl);
+                    if (!res.ok) return;
+                    const csvText = await res.text();
+                    
+                    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+                    if (lines.length <= 1) return;
+
+                    const header = parseCSVLineRobust(lines[0]);
+                    const idxCategory = header.findIndex(h => h.includes("分類") || h.includes("category"));
+                    const idxTitle = header.findIndex(h => h.includes("標題") || h.includes("title"));
+                    const idxUrl = header.findIndex(h => h.includes("網址") || h.includes("url") || h.includes("連結"));
+                    const idxDate = header.findIndex(h => h.includes("日期") || h.includes("date"));
+                    const idxKeyword = header.findIndex(h => h.includes("關鍵字") || h.includes("keyword") || h.includes("料號"));
+
+                    const parsedDocs = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = parseCSVLineRobust(lines[i]);
+                        if (cols.length < 2) continue;
+
+                        parsedDocs.push({
+                            category: cols[idxCategory !== -1 ? idxCategory : 0] || '未分類',
+                            title: cols[idxTitle !== -1 ? idxTitle : 1] || '未命名文件',
+                            url: cols[idxUrl !== -1 ? idxUrl : 2] || '',
+                            date: cols[idxDate !== -1 ? idxDate : 3] || '',
+                            keyword: cols[idxKeyword !== -1 ? idxKeyword : 4] || ''
+                        });
+                    }
+
+                    rawDocsData = parsedDocs.sort((a, b) => {
+                        const dateA = new Date(a.date || '1970-01-01').getTime();
+                        const dateB = new Date(b.date || '1970-01-01').getTime();
+                        return dateB - dateA;
+                    });
+                    CACHE_DOCS_DATA = rawDocsData;
+                }
+
+                calculateTagStatistics();
+                renderDocTags();
+                filterDocs();
+            } catch (err) {
+                console.error("文獻載入異常:", err);
             }
         }
 
@@ -975,6 +967,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             }
         });
 
+        // 啟動直連程序
         initializeDynamicSheets();
     </script>
 </body>
