@@ -3,247 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業保養套餐與技術文獻 (行動頂部結算版)</title>
+    <title>專業保養看板與技術文獻 (手機版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        html, body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-            -webkit-overflow-scrolling: touch;
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
-        
-        main {
-            overscroll-behavior-y: contain;
-        }
-
-        .part-copy-btn {
-            cursor: pointer;
-            transition: transform 0.1s ease, opacity 0.1s ease;
-        }
-        .part-copy-btn:active {
-            transform: scale(0.95);
-            opacity: 0.8;
-        }
     </style>
 </head>
-<body class="flex flex-col h-[100dvh] overflow-hidden relative">
+<body class="flex flex-col min-h-screen bg-[#0d1117] pb-8 select-none">
 
-    <!-- 頂部複製提示 Toast -->
-    <div id="copy-toast" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-[#161b22]/95 border border-emerald-500 text-emerald-400 px-4 py-2 rounded-xl text-xs font-bold shadow-2xl flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-3">
-        <span class="text-sm">📋</span>
-        <span id="copy-toast-msg">料號明細已複製到剪貼簿</span>
-    </div>
-
-    <!-- 頂部操控與常駐結算面板 (釘頂) -->
-    <header class="bg-[#161b22] border-b border-gray-800 px-3 pt-2 pb-1.5 shrink-0 z-30 shadow-md flex flex-col gap-2">
-        <!-- 列一：品牌與型號 + 重新整理 -->
+    <!-- 手機頂部固定區 -->
+    <header class="sticky top-0 z-30 bg-[#161b22]/95 backdrop-blur-md border-b border-gray-800 px-3 pt-2.5 pb-2 shadow-lg">
+        
+        <!-- 第一列：品牌與總模式切換 -->
         <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center space-x-2 min-w-0 flex-1">
-                <div id="brand-logo" class="w-7 h-7 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shrink-0">CANN</div>
-                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 text-xs min-w-0 flex-1">
-                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer border-r border-gray-700 pr-1.5 text-xs">
-                        <option value="">品牌...</option>
+            <div class="flex items-center space-x-2">
+                <div id="brand-logo" class="w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0">CANN</div>
+                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1">
+                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white text-xs font-bold focus:outline-none pr-1">
+                        <option value="">載入中...</option>
                     </select>
-                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer pl-1.5 text-xs truncate flex-1">
+                    <span class="text-gray-600 text-xs">/</span>
+                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white text-xs font-bold focus:outline-none pl-1 max-w-[130px] truncate">
                     </select>
                 </div>
             </div>
 
-            <button onclick="reloadAllData(true)" class="p-1.5 bg-[#0d1117] hover:bg-gray-800 border border-gray-700 rounded-lg text-xs text-gray-300 active:scale-95 shrink-0" title="強制重新整理">
-                🔄
-            </button>
+            <div class="flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-700 shrink-0">
+                <button id="btn-mode-package" onclick="switchMainMode('package')" class="px-2.5 py-1 rounded text-xs font-bold bg-[#161b22] text-white shadow">
+                    🛠️ 套餐
+                </button>
+                <button id="btn-mode-docs" onclick="switchMainMode('docs')" class="px-2.5 py-1 rounded text-xs font-bold text-gray-400">
+                    📚 文獻
+                </button>
+            </div>
         </div>
 
-        <!-- 列二：模式切換 (套餐 / 文獻) -->
-        <div class="flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-700 shrink-0">
-            <button id="btn-mode-package" onclick="switchMainMode('package')" class="flex-1 py-1 rounded-md text-xs font-bold transition-all bg-[#161b22] text-white shadow">
-                🛠️ 保養套餐看板
-            </button>
-            <button id="btn-mode-docs" onclick="switchMainMode('docs')" class="flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400">
-                📚 技術文獻資料庫
-            </button>
+        <!-- 第二列：水平滑動分頁標籤 -->
+        <div id="package-tabs-scroll" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1.5 items-center">
+            <span class="text-xs text-gray-500">同步雲端分頁中...</span>
         </div>
 
-        <!-- 列三：頂部常駐結算橫幅 (工資 / 零件 / 折扣 / 總額) -->
-        <div id="top-summary-bar" class="bg-[#0d1117] border border-gray-700 rounded-xl px-2.5 py-1.5 flex items-center justify-between shadow-inner">
-            <div class="flex flex-col min-w-0">
-                <div class="flex items-center space-x-2 text-[11px] text-gray-400">
-                    <span>工資: <b id="labor-subtotal" class="text-gray-200 font-mono font-bold">$ 0</b></span>
+        <!-- 第三列：頂部金額看板 -->
+        <div id="top-price-banner" class="mt-1 bg-[#0d1117] border border-gray-800 rounded-lg px-3 py-1.5 flex items-center justify-between shadow-inner">
+            <div class="flex flex-col">
+                <div class="flex items-center space-x-2 text-[10px] text-gray-400 font-mono">
+                    <span>工資: <b id="labor-subtotal" class="text-gray-200 font-normal">$0</b></span>
                     <span class="text-gray-600">|</span>
-                    <span>零件: <b id="parts-subtotal" class="text-amber-500 font-mono font-bold">$ 0</b></span>
+                    <span>零件: <b id="parts-subtotal" class="text-amber-500 font-normal">$0</b></span>
                 </div>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                    <span class="text-gray-400 text-[11px] font-semibold">應付總額:</span>
+                <div class="flex items-baseline space-x-1 mt-0.5">
+                    <span class="text-[11px] text-gray-400 font-medium">總計應付</span>
                     <span id="package-total" class="text-lg font-black text-green-400 font-mono tracking-tight">$ 0</span>
-                    <span id="discount-note" class="text-[9px] text-amber-500 font-medium hidden"></span>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-1 bg-[#161b22] border border-gray-700 rounded-lg px-2 py-1 shrink-0">
-                <span class="text-[10px] text-gray-400 font-bold">折</span>
-                <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" onchange="calculateTotalsWithDiscount()" class="w-9 bg-transparent text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
-                <span class="text-[10px] text-gray-300 font-bold">%</span>
+            <div class="flex items-center space-x-1.5 bg-[#161b22] border border-gray-700 rounded-md px-2 py-1">
+                <span class="text-[10px] text-gray-400 font-bold">折讓</span>
+                <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-8 bg-transparent text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
+                <span class="text-[10px] text-gray-400">%</span>
             </div>
         </div>
 
-        <!-- 列四：套餐橫向滑動分頁列 -->
-        <div id="package-tabs-bar" class="flex items-center">
-            <div id="package-tabs" class="flex space-x-2 overflow-x-auto hide-scrollbar py-0.5 w-full">
-                <span class="text-[11px] text-gray-500">同步分頁中...</span>
-            </div>
+        <!-- 第四列：像 PC/index03.html 一樣的「項目明細 / 零件圖解」切換開關 -->
+        <div id="sub-mode-switch" class="mt-2 flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-800">
+            <button id="btn-sub-list" onclick="switchSubView('list')" class="flex-1 py-1 text-xs font-bold rounded-md bg-[#161b22] text-amber-400 shadow transition-all flex items-center justify-center space-x-1">
+                <span>📋</span><span>工項明細清單</span>
+            </button>
+            <button id="btn-sub-grid" onclick="switchSubView('grid')" class="flex-1 py-1 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all flex items-center justify-center space-x-1">
+                <span>🔧</span><span>零件圖解清單</span>
+                <span id="sub-grid-badge" class="ml-1 text-[10px] bg-gray-800 px-1.5 py-0.2 rounded-full text-gray-300">0</span>
+            </button>
         </div>
     </header>
 
-    <!-- 中間主要滾動內容區 (不再受底部干擾) -->
-    <main class="flex-1 overflow-y-auto custom-scrollbar relative p-3">
+    <!-- 主體內容區 -->
+    <main class="flex-1 p-3 space-y-3">
         
-        <!-- 視圖一：保養套餐看板 -->
-        <section id="package-view" class="space-y-3">
-            
-            <!-- 套餐標題與顯示切換 (清單 / 圖解) -->
-            <div class="flex items-center justify-between bg-[#161b22] p-2.5 rounded-xl border border-gray-800">
-                <div class="flex items-center min-w-0 pr-2">
-                    <h2 id="current-package-title" class="text-xs font-bold text-gray-100 truncate">載入中...</h2>
-                </div>
-                <div class="flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-700 shrink-0 text-[11px]">
-                    <button id="btn-subview-list" onclick="switchPackageSubView('list')" class="px-2 py-1 rounded bg-[#161b22] text-white font-bold">清單</button>
-                    <button id="btn-subview-grid" onclick="switchPackageSubView('grid')" class="px-2 py-1 rounded text-gray-400 font-bold">圖解</button>
-                </div>
-            </div>
-
-            <!-- 清單卡片視圖 -->
-            <div id="mobile-items-list" class="space-y-2">
-                <!-- 動態注入零件卡片 -->
-            </div>
-
-            <!-- 縮圖格狀視圖 -->
-            <div id="mobile-image-grid" class="hidden grid grid-cols-2 gap-2.5">
-                <!-- 動態注入零件圖片卡片 -->
-            </div>
-
-            <!-- 維護提示面板 -->
-            <div class="bg-[#161b22] border border-gray-800 rounded-xl p-3">
-                <div class="flex items-center text-xs font-bold text-amber-400 mb-1">
-                    <span class="mr-1">💡</span> 現場維護提示
-                </div>
-                <p class="text-[11px] text-gray-400 leading-relaxed">
-                    請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
-                </p>
-            </div>
-        </section>
-
-        <!-- 視圖二：技術文獻資料庫 -->
-        <section id="docs-view" class="hidden space-y-3">
-            <div class="flex gap-1.5">
-                <div class="relative flex-1">
-                    <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、關鍵字、料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 placeholder-gray-500">
-                </div>
-                <button onclick="openTagCloudModal()" class="px-2.5 py-1.5 bg-[#161b22] border border-gray-700 rounded-lg text-xs font-semibold text-gray-300 flex items-center shrink-0">
-                    🏷️ 標籤
+        <!-- 視圖一：保養套餐區塊 -->
+        <section id="package-view" class="flex flex-col space-y-3">
+            <div class="flex items-center justify-between px-1">
+                <h2 id="current-package-title" class="text-sm font-bold text-gray-100 flex items-center truncate">
+                    <span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span>載入中...
+                </h2>
+                <button onclick="reloadAllData(true)" class="text-[11px] bg-[#161b22] border border-gray-700 hover:border-amber-500 text-gray-300 px-2 py-0.5 rounded-md flex items-center space-x-1 shrink-0">
+                    <span>🔄</span><span>更新</span>
                 </button>
             </div>
 
-            <div id="doc-tags-container" class="flex space-x-1.5 overflow-x-auto hide-scrollbar py-1"></div>
+            <!-- 子視圖 A：項目明細清單 (預設顯示) -->
+            <div id="sub-view-list" class="space-y-2.5"></div>
+
+            <!-- 子視圖 B：零件圖解雙欄網格 (點擊切換時顯示) -->
+            <div id="sub-view-grid" class="hidden grid grid-cols-2 gap-2.5"></div>
+        </section>
+
+        <!-- 視圖二：技術文獻資料庫 -->
+        <section id="docs-view" class="hidden flex flex-col space-y-3">
+            <div class="flex items-center justify-between px-1">
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2 h-3.5 bg-red-600 inline-block rounded-sm"></span>
+                    <h2 class="text-sm font-bold text-gray-100">原廠技術手冊 (TSB)</h2>
+                </div>
+                <span id="docs-count-badge" class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-0.5 rounded-full font-mono font-bold">0 份</span>
+            </div>
+
+            <div class="relative">
+                <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
+            </div>
+
+            <div id="doc-tags-container" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
 
             <div id="docs-list-container" class="space-y-2">
-                <div class="text-center py-8 text-gray-500 text-xs">載入文獻中...</div>
+                <div class="text-center py-10 text-gray-500 text-xs">正在載入文獻...</div>
             </div>
         </section>
+
     </main>
 
-    <!-- 行動版文獻預覽 Modal -->
-    <div id="pdf-modal" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col">
-        <div class="p-3 bg-[#161b22] border-b border-gray-800 flex items-center justify-between">
-            <h4 id="pdf-modal-title" class="text-xs font-bold text-white truncate max-w-[70%]">文件預覽</h4>
-            <div class="flex items-center space-x-2">
-                <a id="pdf-external-link" href="#" target="_blank" class="px-2 py-1 bg-amber-600/80 text-white rounded text-[10px] font-bold">新分頁開</a>
-                <button onclick="closePdfModal()" class="px-2 py-1 bg-gray-800 text-gray-300 rounded text-xs font-bold">關閉</button>
-            </div>
-        </div>
-        <div class="flex-1 bg-[#0d1117] relative">
-            <iframe id="pdf-modal-iframe" class="w-full h-full border-0" src=""></iframe>
-        </div>
-    </div>
-
-    <!-- 標籤雲彈出視窗 -->
-    <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#161b22] border border-gray-700 w-full max-h-[80vh] rounded-xl p-4 shadow-2xl flex flex-col" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center pb-2 border-b border-gray-800">
-                <span class="text-xs font-bold text-white">🏷️ 選擇文獻標籤</span>
-                <button onclick="closeTagCloudModal()" class="text-gray-400 text-lg">&times;</button>
-            </div>
-            <div class="my-2">
-                <input type="text" id="modal-tag-search" oninput="filterModalTags()" placeholder="快速過濾標籤..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
-            </div>
-            <div id="modal-tag-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-1.5 p-1 content-start"></div>
-        </div>
+    <!-- 剪貼簿提示 -->
+    <div id="copy-toast" class="fixed top-28 left-1/2 -translate-x-1/2 z-50 bg-[#161b22] border border-amber-500 text-white px-4 py-2 rounded-full shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none">
+        <span class="text-amber-400 text-sm">📋</span>
+        <span id="copy-toast-msg">已複製項目明細！</span>
     </div>
 
     <!-- 零件大圖燈箱 -->
-    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4">
-        <div class="max-w-xs w-full bg-[#161b22] p-3 rounded-xl border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
-            <div class="w-full h-52 bg-[#0d1117] rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-800">
-                <img id="lightbox-img" src="" class="w-full h-full object-contain p-2">
+    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/95 z-50 flex flex-col justify-center items-center p-4 cursor-pointer transition-opacity duration-200 opacity-0">
+        <div class="w-full max-h-[65vh] flex items-center justify-center p-2" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[60vh] object-contain rounded-lg">
+        </div>
+        <div class="mt-3 text-center w-full px-4" onclick="event.stopPropagation()">
+            <p id="lightbox-part-id" class="text-xs text-amber-500 font-mono tracking-widest"></p>
+            <h3 id="lightbox-title" class="text-sm font-bold text-white mt-0.5"></h3>
+            <div id="lightbox-desc-container" class="mt-2 p-2.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-300 text-xs hidden text-left leading-relaxed">
+                <span id="lightbox-desc-text"></span>
             </div>
-            <div class="text-center">
-                <p id="lightbox-part-id" class="text-[10px] text-gray-500 font-mono"></p>
-                <h3 id="lightbox-title" class="text-xs font-bold text-white mt-0.5"></h3>
-                <div id="lightbox-desc-container" class="mt-2 p-2 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-[10px] text-left hidden leading-relaxed">
-                    <span id="lightbox-desc-text"></span>
-                </div>
-            </div>
-            <button onclick="closeLightbox()" class="w-full mt-3 py-1.5 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-gray-300 rounded-lg text-xs font-bold transition-all">關閉</button>
+            <button onclick="closeLightbox()" class="mt-4 px-6 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full text-xs font-bold border border-gray-700">關閉預覽</button>
         </div>
     </div>
 
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
+        const GOOGLE_PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?output=csv";
+        const DOCS_GID = "283344252";
+
+        const MODELS_CONFIG = [
+            { brand: "PROJECT", model: "PROJECT_通用專案", sheetName: "PROJECT_通用專案", gid: "2064791486" },
+            { brand: "PEUGEOT", model: "P_408H", sheetName: "P_408H", gid: "1525555317" },
+            { brand: "PEUGEOT", model: "P_3008H", sheetName: "P_3008H", gid: "1074672360" },
+            { brand: "PEUGEOT", model: "P_5008H", sheetName: "P_5008H", gid: "1080538" },
+            { brand: "CITROËN", model: "C_新Berlingo", sheetName: "C_新Berlingo", gid: "934233668" }
+        ];
 
         const CACHE_SHEET_DATA = new Map();
-        let CACHE_MODELS_DATA = null;
         let CACHE_DOCS_DATA = null;
 
-        let dynamicModelsData = []; 
+        let dynamicModelsData = MODELS_CONFIG; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
         let rawLaborSum = 0;
         let rawPartsSum = 0;
+        let currentSubView = "list"; // 'list' 或 'grid'
 
         let rawDocsData = [];
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        // 強效數值清理：移除 $、逗號、空格等非數字字元
-        function cleanNumber(val, defaultVal = 0) {
-            if (val === null || val === undefined) return defaultVal;
-            const cleaned = String(val).replace(/[^0-9.-]/g, '');
-            const parsed = parseFloat(cleaned);
-            return isNaN(parsed) ? defaultVal : parsed;
+        function parseCSVLineRobust(str) {
+            const arr = [];
+            let quote = false;
+            let col = '';
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                if (cc === '"') {
+                    if (quote && nc === '"') { col += '"'; c++; }
+                    else { quote = !quote; }
+                } else if (cc === ',' && !quote) {
+                    arr.push(col); col = '';
+                } else {
+                    col += cc;
+                }
+            }
+            arr.push(col);
+            return arr.map(item => item.trim());
         }
 
         async function initializeDynamicSheets(force = false) {
             try {
-                if (!force && CACHE_MODELS_DATA) {
-                    dynamicModelsData = CACHE_MODELS_DATA;
-                } else {
-                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
-                    if (!response.ok) throw new Error("API 異常");
-                    dynamicModelsData = await response.json();
-                    CACHE_MODELS_DATA = dynamicModelsData;
-                }
                 renderBrandSelect();
                 loadTechnicalDocs(force);
             } catch (error) {
@@ -254,7 +203,6 @@
         function reloadAllData(force = false) {
             if (force) {
                 CACHE_SHEET_DATA.clear();
-                CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
             }
             initializeDynamicSheets(force);
@@ -263,7 +211,7 @@
         function renderBrandSelect() {
             const brandSelect = document.getElementById('brand-select');
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
-            brandSelect.innerHTML = availableBrands.map(b => `<option value="${b}">${b}</option>`).join('');
+            brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
 
             if (availableBrands.includes("PROJECT")) {
                 brandSelect.value = "PROJECT";
@@ -275,14 +223,14 @@
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
-            const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
 
-            modelSelect.innerHTML = matchedModels.map(m => `<option value="${m.sheetName}">${m.model}</option>`).join('');
+            const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
+            modelSelect.innerHTML = matchedModels.map(item => `<option value="${item.sheetName}">${item.model}</option>`).join('');
 
             if (matchedModels.length > 0) {
                 let defaultTarget = matchedModels[0].sheetName;
                 if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("PROJECT_通用專案"));
                     if (foundPrj) defaultTarget = foundPrj.sheetName;
                 }
                 modelSelect.value = defaultTarget;
@@ -299,16 +247,13 @@
 
             if (brand === "CITROËN") {
                 brandLogo.innerText = "CITR";
-                brandLogo.className = "w-7 h-7 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else if (brand === "PROJECT") {
                 brandLogo.innerText = "CANN";
-                brandLogo.className = "w-7 h-7 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
-            } else if (brand === "ALFA ROMEO") {
-                brandLogo.innerText = "ALFA";
-                brandLogo.className = "w-7 h-7 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             } else {
                 brandLogo.innerText = "PEUG";
-                brandLogo.className = "w-7 h-7 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[9px] shrink-0";
+                brandLogo.className = "w-8 h-8 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0";
             }
 
             fetchSheetData();
@@ -323,16 +268,18 @@
                 return;
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-[11px] text-gray-500">載入中...</span>';
+            document.getElementById('package-tabs-scroll').innerHTML = '<span class="text-xs text-gray-500">⚡ 載入中...</span>';
 
             try {
-                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
+                const targetUrl = `${GOOGLE_PUB_BASE}&gid=${selectedModelObj.gid}&single=true&t=${Date.now()}`;
                 const response = await fetch(targetUrl);
                 const csvText = await response.text();
+                
                 CACHE_SHEET_DATA.set(sheetName, csvText);
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("載入失敗:", error);
+                document.getElementById('current-package-title').innerText = "❌ 資料載入失敗";
             }
         }
 
@@ -342,18 +289,14 @@
             let currentPackageName = ""; 
 
             lines.forEach((line) => {
-                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
+                const cols = parseCSVLineRobust(line);
                 if (cols.length < 3) return;
 
                 const foundPackageCell = cols.find(cell => cell && (cell.includes("套餐") || cell.includes("專案")));
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
-                    packages[currentPackageName] = {
-                        name: currentPackageName,
-                        pdfUrl: "",
-                        items: []
-                    };
+                    packages[currentPackageName] = { name: currentPackageName, pdfUrl: "", items: [] };
                     const rawLCol = cols[11] || "";
                     if (rawLCol.startsWith("http")) packages[currentPackageName].pdfUrl = rawLCol;
                     return;
@@ -393,17 +336,15 @@
                 switchPackage(keys[0]);
             } else {
                 document.getElementById('current-package-title').innerText = "⚠️ 查無套餐項目";
-                resetTotalsDisplay();
+                document.getElementById('sub-view-list').innerHTML = '';
+                document.getElementById('sub-view-grid').innerHTML = '';
             }
         }
 
         function renderTabs(keys) {
-            const tabsContainer = document.getElementById('package-tabs');
-            const brand = selectedModelObj ? selectedModelObj.brand : "";
-            let activeBg = brand === "CITROËN" ? "bg-[#da291c] text-white" : (brand === "PROJECT" ? "bg-[#f59e0b] text-black" : "bg-emerald-600 text-white");
-
+            const tabsContainer = document.getElementById('package-tabs-scroll');
             tabsContainer.innerHTML = keys.map(key => `
-                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBg}" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#0d1117] text-gray-400 whitespace-nowrap shrink-0 border border-gray-800">
+                <button onclick="switchPackage('${key}')" id="tab-${key}" class="px-3 py-1 rounded-full text-xs font-bold transition-all bg-[#161b22] text-gray-400 border border-gray-800 whitespace-nowrap shrink-0">
                     ${key}
                 </button>
             `).join('');
@@ -414,288 +355,328 @@
 
             if (currentPackageKey) {
                 const prevTab = document.getElementById(`tab-${currentPackageKey}`);
-                if (prevTab) prevTab.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#0d1117] text-gray-400 whitespace-nowrap shrink-0 border border-gray-800";
+                if (prevTab) prevTab.className = "px-3 py-1 rounded-full text-xs font-bold transition-all bg-[#161b22] text-gray-400 border border-gray-800 whitespace-nowrap shrink-0";
             }
             
             const activeTab = document.getElementById(`tab-${key}`);
             if (activeTab) {
-                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 text-white";
-                activeTab.className = `px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap shrink-0 ${targetBg} shadow`;
+                activeTab.className = "px-3 py-1 rounded-full text-xs font-bold transition-all bg-amber-600 text-white border border-amber-500 whitespace-nowrap shrink-0 shadow-lg";
+                activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
             
-            let titleHTML = `${pkg.name}`;
+            let titleHTML = `<span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span>${pkg.name}`;
             if (pkg.pdfUrl) {
-                titleHTML += ` <a href="${pkg.pdfUrl}" target="_blank" class="ml-1.5 text-[10px] px-1.5 py-0.5 bg-amber-950 text-amber-300 border border-amber-800 rounded">📄 PDF</a>`;
+                titleHTML += `
+                    <a href="${pkg.pdfUrl}" target="_blank" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800 rounded-md">
+                        <span>📄</span><span>技術PDF</span>
+                    </a>
+                `;
             }
             document.getElementById('current-package-title').innerHTML = titleHTML;
 
             let listHTML = '';
             let gridHTML = '';
+            let partCount = 0;
             rawLaborSum = 0;
             rawPartsSum = 0;
 
-            pkg.items.forEach((item) => {
-                const isLabor = (item.attr && (item.attr.includes("工資") || item.attr.includes("工時")));
-                const price = cleanNumber(item.price, 0);
-                const qty = cleanNumber(item.qty, 1);
-                
-                let itemDisc = cleanNumber(item.discount, 1);
-                if (itemDisc > 1) itemDisc = itemDisc / 100;
-
-                let subtotal = cleanNumber(item.subtotal, 0);
-                if (subtotal === 0 && price > 0) {
-                    subtotal = Math.round(price * qty * itemDisc);
-                }
+            pkg.items.forEach(item => {
+                const isLabor = item.attr === "工資";
+                const displayPrice = parseFloat(item.price) || 0;
+                const displayQty = parseFloat(item.qty) || 1;
+                const displayDiscount = parseFloat(item.discount) || 1;
+                const lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
 
                 if (isLabor) {
-                    rawLaborSum += subtotal;
+                    rawLaborSum += lineSubtotal;
                 } else {
-                    rawPartsSum += subtotal;
+                    rawPartsSum += lineSubtotal;
+                    partCount++;
                 }
 
-                let stockLabel = '';
-                let stockStatusDesc = '庫存充足';
-
+                let stockBadge = '';
                 if (!isLabor && item.stock !== "") {
-                    const num = cleanNumber(item.stock, 0);
-                    if (num <= 0) {
-                        stockLabel = '<span class="text-rose-400 font-bold">缺料</span>';
-                        stockStatusDesc = '缺料斷貨';
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-900 animate-pulse">缺料(0)</span>';
                     } else if (num <= 2) {
-                        stockLabel = `<span class="text-amber-400 font-bold">${num}(急)</span>`;
-                        stockStatusDesc = '庫存告急';
+                        stockBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-900">${num}(告急)</span>`;
                     } else {
-                        stockLabel = `<span class="text-emerald-400 font-bold">${num}</span>`;
-                        stockStatusDesc = '庫存充足';
+                        stockBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-900">存:${num}</span>`;
                     }
                 }
 
-                let attrBadgeClass = isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/60 text-amber-400';
-                if (item.attr.includes('1.2')) attrBadgeClass = 'bg-amber-900/60 text-amber-400 border border-amber-700/50';
-                if (item.attr.includes('油品')) attrBadgeClass = 'bg-orange-950/80 text-orange-400 border border-orange-800/50';
+                const imgUrlPng = `${item.partId}.png`;
+                const imgUrlJpg = `${item.partId}.jpg`;
+                const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
+                const safeDesc = encodeURIComponent(item.description || "");
 
-                // 清單卡片
+                const rowInfoData = encodeURIComponent(JSON.stringify({
+                    attr: item.attr,
+                    partId: item.partId,
+                    name: item.name,
+                    price: displayPrice,
+                    qty: displayQty,
+                    subtotal: lineSubtotal,
+                    location: item.location || '',
+                    stock: item.stock !== "" ? item.stock : ''
+                }));
+
+                // 1. 列表檢視 (清單卡片)
                 listHTML += `
-                    <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2.5 flex flex-col space-y-1 shadow-sm">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow-md flex flex-col space-y-2 relative">
+                        <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center space-x-1.5">
-                                <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${attrBadgeClass}">${item.attr || '零件'}</span>
-                                <span onclick="copyMobilePartDetails('${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${price}', '${qty}', '${subtotal}', '${item.location}', '${item.stock}', '${stockStatusDesc}', '${item.attr}')" class="part-copy-btn text-xs font-mono text-blue-400 font-bold bg-blue-950/40 border border-blue-900/50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                    <span>${item.partId}</span>
-                                    <span class="text-[9px] text-gray-400">📋</span>
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/70 text-amber-400 border border-amber-900/60'}">${item.attr}</span>
+                                <span onclick="copyRowInfo(event, '${rowInfoData}')" class="font-mono text-xs font-bold text-gray-200 bg-[#0d1117] border border-gray-700 px-2 py-0.5 rounded flex items-center gap-1 active:scale-95 transition-transform" title="點擊複製明細">
+                                    ${item.partId}
+                                    <span class="text-[10px] text-amber-500">📋</span>
                                 </span>
                             </div>
-                            <span class="text-xs font-mono font-bold text-green-400">$ ${subtotal.toLocaleString()}</span>
+                            <div class="flex items-center space-x-1">
+                                ${stockBadge}
+                                ${item.location ? `<span class="text-[10px] font-mono text-amber-500 font-semibold bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-800">${item.location}</span>` : ''}
+                            </div>
                         </div>
-                        <div class="text-xs font-semibold text-gray-200">${item.name}</div>
-                        <div class="flex items-center justify-between text-[10px] text-gray-500 pt-0.5 border-t border-gray-800/60 font-mono">
-                            <span>單價:$${price.toLocaleString()} × ${qty}</span>
-                            <span>架位: <b class="text-amber-500 font-normal">${item.location || '-'}</b> | 庫存: ${stockLabel || '-'}</span>
+
+                        <div class="flex gap-2.5 items-center">
+                            ${!isLabor ? `
+                                <div class="w-12 h-12 bg-[#0d1117] rounded-lg border border-gray-800 flex items-center justify-center shrink-0 overflow-hidden" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                                    <img src="${imgUrlPng}" alt="" loading="lazy" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="w-full h-full object-contain p-1">
+                                </div>
+                            ` : ''}
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-xs font-semibold text-white leading-snug break-words">${item.name}</h3>
+                                <div class="flex items-center justify-between mt-1 text-[11px] text-gray-400 font-mono">
+                                    <span>$${displayPrice} × ${displayQty}</span>
+                                    <span class="text-xs font-bold text-green-400">$ ${lineSubtotal.toLocaleString()}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
 
-                // 圖解縮圖卡片
+                // 2. 圖解檢視 (雙欄純圖片大卡片)
                 if (!isLabor && item.partId) {
-                    const imgUrlPng = `${item.partId}.png`;
-                    const imgUrlJpg = `${item.partId}.jpg`;
-                    const defaultImg = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
-                    const safeDesc = encodeURIComponent(item.description || "");
-
                     gridHTML += `
-                        <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2 flex flex-col items-center justify-between shadow-sm">
-                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openLightboxFromImg(this.querySelector('img'), '${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${safeDesc}')">
-                                <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1">
+                        <div class="bg-[#161b22] border border-gray-800 rounded-xl p-2.5 flex flex-col justify-between shadow active:border-amber-500 transition-all cursor-pointer" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                            <div class="w-full h-28 bg-[#0d1117] rounded-lg flex items-center justify-center overflow-hidden relative">
+                                <img src="${imgUrlPng}" alt="" loading="lazy" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="w-full h-full object-contain p-1.5">
+                                <div class="absolute bottom-1 right-1 bg-black/60 px-1 py-0.5 rounded text-[9px] text-amber-400">🔍 看大圖</div>
                             </div>
-                            <div class="text-center w-full">
-                                <div onclick="copyMobilePartDetails('${item.partId}', '${item.name.replace(/'/g, "\\'")}', '${price}', '${qty}', '${subtotal}', '${item.location}', '${item.stock}', '${stockStatusDesc}', '${item.attr}')" class="part-copy-btn inline-flex items-center justify-center gap-1 text-[10px] text-blue-400 font-mono font-bold bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700">
-                                    <span>${item.partId}</span>
-                                    <span class="text-[8px] text-gray-400">📋</span>
-                                </div>
-                                <p class="text-[11px] text-white font-medium truncate mt-0.5">${item.name}</p>
+                            <div class="mt-2 text-center">
+                                <p class="text-[10px] text-amber-500/90 font-mono">${item.partId}</p>
+                                <h4 class="text-xs text-white font-medium truncate mt-0.5">${item.name}</h4>
                             </div>
                         </div>
                     `;
                 }
             });
 
-            document.getElementById('mobile-items-list').innerHTML = listHTML;
-            document.getElementById('mobile-image-grid').innerHTML = gridHTML;
+            document.getElementById('sub-view-list').innerHTML = listHTML;
+            document.getElementById('sub-view-grid').innerHTML = gridHTML || '<div class="col-span-2 text-center py-12 text-gray-500 text-xs">此套餐無實體零件圖解</div>';
+            document.getElementById('sub-grid-badge').innerText = partCount;
             calculateTotalsWithDiscount();
         }
 
-        /* ---------------- 頂部金額結算函式 ---------------- */
+        /* 明細清單 vs 零件圖解 切換函式 */
+        function switchSubView(view) {
+            currentSubView = view;
+            const btnList = document.getElementById('btn-sub-list');
+            const btnGrid = document.getElementById('btn-sub-grid');
+            const viewList = document.getElementById('sub-view-list');
+            const viewGrid = document.getElementById('sub-view-grid');
+
+            if (view === 'grid') {
+                viewList.classList.add('hidden');
+                viewGrid.classList.remove('hidden');
+                btnList.className = "flex-1 py-1 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all flex items-center justify-center space-x-1";
+                btnGrid.className = "flex-1 py-1 text-xs font-bold rounded-md bg-[#161b22] text-amber-400 shadow transition-all flex items-center justify-center space-x-1";
+            } else {
+                viewGrid.classList.add('hidden');
+                viewList.classList.remove('hidden');
+                btnGrid.className = "flex-1 py-1 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all flex items-center justify-center space-x-1";
+                btnList.className = "flex-1 py-1 text-xs font-bold rounded-md bg-[#161b22] text-amber-400 shadow transition-all flex items-center justify-center space-x-1";
+            }
+        }
+
+        function copyRowInfo(event, encodedData) {
+            event.stopPropagation();
+            try {
+                const item = JSON.parse(decodeURIComponent(encodedData));
+                const isLabor = item.attr === "工資";
+                let stockDisplay = item.stock ? `${item.stock} 件` : (isLabor ? "不適用" : "0 件");
+                
+                const now = new Date();
+                const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                const formattedText = 
+`┏━━━━━━━━━━━━━━━━━━━━┓
+   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
+┗━━━━━━━━━━━━━━━━━━━━┛
+🔹【${isLabor ? '工項代碼' : '零件料號'}】${item.partId}
+${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
+💵【標準單價】$ ${item.price.toLocaleString()}
+🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
+💰【加總金額】$ ${item.subtotal.toLocaleString()}
+📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
+${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
+━━━━━━━━━━━━━━━━━━━━
+⏱️ 查詢時間：${timeStr}
+🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
+
+                navigator.clipboard.writeText(formattedText).then(() => {
+                    showCopyToast(`已複製 [${item.partId}] 明細！`);
+                }).catch(() => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = formattedText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showCopyToast(`已複製 [${item.partId}] 明細！`);
+                });
+            } catch (e) {}
+        }
+
+        function showCopyToast(msg) {
+            const toast = document.getElementById('copy-toast');
+            document.getElementById('copy-toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 1600);
+        }
+
         function calculateTotalsWithDiscount() {
             const discountInput = document.getElementById('part-discount-input');
-            let discountRate = cleanNumber(discountInput.value, 100);
-            
-            if (discountRate < 0) discountRate = 0;
-            if (discountRate > 100) discountRate = 100;
+            let discountRate = parseFloat(discountInput.value);
+            if (isNaN(discountRate) || discountRate < 0) discountRate = 100;
 
             const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
             const grandTotal = rawLaborSum + discountedPartsSum;
 
-            document.getElementById('labor-subtotal').innerText = `$ ${rawLaborSum.toLocaleString()}`;
-            document.getElementById('parts-subtotal').innerText = `$ ${discountedPartsSum.toLocaleString()}`;
+            document.getElementById('labor-subtotal').innerText = `$${rawLaborSum.toLocaleString()}`;
+            document.getElementById('parts-subtotal').innerText = `$${discountedPartsSum.toLocaleString()}`;
             document.getElementById('package-total').innerText = `$ ${grandTotal.toLocaleString()}`;
-
-            const discountNote = document.getElementById('discount-note');
-            if (discountRate < 100) {
-                discountNote.innerText = `(${discountRate}折)`;
-                discountNote.classList.remove('hidden');
-            } else {
-                discountNote.classList.add('hidden');
-            }
         }
 
-        function resetTotalsDisplay() {
-            document.getElementById('labor-subtotal').innerText = '$ 0';
-            document.getElementById('parts-subtotal').innerText = '$ 0';
-            document.getElementById('package-total').innerText = '$ 0';
-            document.getElementById('mobile-items-list').innerHTML = '';
-            document.getElementById('mobile-image-grid').innerHTML = '';
-        }
-
-        /* ---------------- 一鍵複製料號明細 ---------------- */
-        function copyMobilePartDetails(partId, name, price, qty, subtotal, location, stock, stockStatusDesc, attr) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const formattedTime = `${year}-${month}-${day} ${hours}:${minutes}`;
-
-            const displayStock = (stock !== undefined && stock !== "") ? `${stock} 件 (${stockStatusDesc})` : `無庫存標註`;
-            const displayAttr = attr ? ` (${attr})` : ``;
-
-            const copyContent = 
-`┏━━━━━━━━━━━━━━━━━━━━┓
-   🛠️ 原廠保養零件資訊明細
-┗━━━━━━━━━━━━━━━━━━━━┛
-🔹【零件料號】${partId}
-📦【項目品名】${name}${displayAttr}
-💵【標準單價】$ ${cleanNumber(price).toLocaleString()}
-🔢【更換數量】${qty} 件
-💰【合計金額】$ ${cleanNumber(subtotal).toLocaleString()}
-📍【儲位層架】${location || '未標註'}
-🟢【即時庫存】${displayStock}
-━━━━━━━━━━━━━━━━━━━━
-⏱️ 查詢時間：${formattedTime}
-🏢 尚鵬汽車服務體系 ‧ 專業整備`;
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(copyContent).then(() => {
-                    showMobileToast(`料號 ${partId} 明細已複製`);
-                }).catch(() => fallbackMobileCopy(copyContent, partId));
-            } else {
-                fallbackMobileCopy(copyContent, partId);
-            }
-        }
-
-        function fallbackMobileCopy(text, partId) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.top = "-9999px";
-            textArea.style.left = "-9999px";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showMobileToast(`料號 ${partId} 明細已複製`);
-            } catch (err) {
-                showMobileToast(`複製失敗，請手動長按選取`);
-            }
-            document.body.removeChild(textArea);
-        }
-
-        let toastTimer = null;
-        function showMobileToast(msg) {
-            const toast = document.getElementById('copy-toast');
-            const toastMsg = document.getElementById('copy-toast-msg');
-            toastMsg.innerText = msg;
+        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxPartId = document.getElementById('lightbox-part-id');
+            const lightboxTitle = document.getElementById('lightbox-title');
             
-            toast.classList.remove('opacity-0', '-translate-y-3');
-            toast.classList.add('opacity-100', 'translate-y-0');
+            const description = decodeURIComponent(encodedDesc).trim();
+            const descContainer = document.getElementById('lightbox-desc-container');
+            const descText = document.getElementById('lightbox-desc-text');
 
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-3');
-            }, 2000);
-        }
+            lightboxImg.src = imgSrc;
+            lightboxImg.onerror = function() { this.src = defaultImg; };
+            lightboxPartId.innerText = partId;
+            lightboxTitle.innerText = title;
 
-        function switchPackageSubView(view) {
-            const btnList = document.getElementById('btn-subview-list');
-            const btnGrid = document.getElementById('btn-subview-grid');
-            const listView = document.getElementById('mobile-items-list');
-            const gridView = document.getElementById('mobile-image-grid');
-
-            if (view === 'grid') {
-                listView.classList.add('hidden');
-                gridView.classList.remove('hidden');
-                btnGrid.className = "px-2 py-1 rounded bg-[#161b22] text-white font-bold";
-                btnList.className = "px-2 py-1 rounded text-gray-400 font-bold";
+            if (description) {
+                descText.innerText = description;
+                descContainer.classList.remove('hidden');
             } else {
-                gridView.classList.add('hidden');
-                listView.classList.remove('hidden');
-                btnList.className = "px-2 py-1 rounded bg-[#161b22] text-white font-bold";
-                btnGrid.className = "px-2 py-1 rounded text-gray-400 font-bold";
+                descContainer.classList.add('hidden');
             }
+
+            lightbox.classList.remove('hidden');
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); }, 10);
         }
 
-        /* ---------------- 頂部主模式切換 ---------------- */
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => { lightbox.classList.add('hidden'); }, 200);
+        }
+
+        /* -------------------------------------------------------------
+           技術文獻系統 (手機版)
+        ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
             const docsView = document.getElementById('docs-view');
-            const topSummaryBar = document.getElementById('top-summary-bar');
-            const tabsBar = document.getElementById('package-tabs-bar');
             const btnPackage = document.getElementById('btn-mode-package');
             const btnDocs = document.getElementById('btn-mode-docs');
+            const pkgTabs = document.getElementById('package-tabs-scroll');
+            const topPriceBanner = document.getElementById('top-price-banner');
+            const subModeSwitch = document.getElementById('sub-mode-switch');
 
             if (mode === 'docs') {
                 packageView.classList.add('hidden');
-                topSummaryBar.classList.add('hidden');
-                tabsBar.classList.add('hidden');
                 docsView.classList.remove('hidden');
-                
-                btnPackage.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400";
-                btnDocs.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all bg-red-600 text-white shadow";
+                topPriceBanner.classList.add('hidden');
+                subModeSwitch.classList.add('hidden');
+                pkgTabs.classList.add('hidden');
+                btnPackage.className = "px-2.5 py-1 rounded text-xs font-bold text-gray-400";
+                btnDocs.className = "px-2.5 py-1 rounded text-xs font-bold bg-red-600 text-white shadow";
                 filterDocs();
             } else {
                 docsView.classList.add('hidden');
                 packageView.classList.remove('hidden');
-                topSummaryBar.classList.remove('hidden');
-                tabsBar.classList.remove('hidden');
-
-                btnDocs.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all text-gray-400";
-                btnPackage.className = "flex-1 py-1 rounded-md text-xs font-bold transition-all bg-[#161b22] text-white shadow";
-                calculateTotalsWithDiscount();
+                topPriceBanner.classList.remove('hidden');
+                subModeSwitch.classList.remove('hidden');
+                pkgTabs.classList.remove('hidden');
+                btnDocs.className = "px-2.5 py-1 rounded text-xs font-bold text-gray-400";
+                btnPackage.className = "px-2.5 py-1 rounded text-xs font-bold bg-[#161b22] text-white shadow";
             }
         }
 
-        /* ---------------- 技術文獻模組 ---------------- */
         async function loadTechnicalDocs(force = false) {
             try {
                 if (!force && CACHE_DOCS_DATA) {
                     rawDocsData = CACHE_DOCS_DATA;
                 } else {
-                    const res = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
+                    const docsCsvUrl = `${GOOGLE_PUB_BASE}&gid=${DOCS_GID}&single=true&t=${Date.now()}`;
+                    const res = await fetch(docsCsvUrl);
                     if (!res.ok) return;
-                    rawDocsData = await res.json();
+                    const csvText = await res.text();
+                    
+                    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+                    if (lines.length <= 1) return;
+
+                    const header = parseCSVLineRobust(lines[0]);
+                    let idxCategory = header.findIndex(h => h.includes("分類") || h.toLowerCase().includes("cat"));
+                    let idxTitle = header.findIndex(h => h.includes("標題") || h.includes("名稱") || h.toLowerCase().includes("title"));
+                    let idxUrl = header.findIndex(h => h.includes("網址") || h.includes("連結") || h.toLowerCase().includes("url") || h.toLowerCase().includes("link"));
+                    let idxDate = header.findIndex(h => h.includes("日期") || h.toLowerCase().includes("date"));
+                    let idxKeyword = header.findIndex(h => h.includes("關鍵字") || h.toLowerCase().includes("key"));
+
+                    const parsedDocs = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = parseCSVLineRobust(lines[i]);
+                        if (cols.length < 2) continue;
+
+                        let url = (idxUrl !== -1 ? cols[idxUrl] : "") || cols.find(c => c.startsWith("http")) || "";
+                        let date = (idxDate !== -1 ? cols[idxDate] : "") || cols.find(c => /^\d{4}[-\/\.]\d{1,2}/.test(c)) || "";
+                        
+                        let nonUrlCols = cols.filter(c => c && !c.startsWith("http") && c !== date);
+                        let category = (idxCategory !== -1 && !cols[idxCategory].startsWith("http")) ? cols[idxCategory] : (nonUrlCols[0] || "未分類");
+                        let title = (idxTitle !== -1 && !cols[idxTitle].startsWith("http")) ? cols[idxTitle] : (nonUrlCols[1] || nonUrlCols[0] || "未命名文件");
+
+                        parsedDocs.push({ category, title, url, date, keyword: (idxKeyword !== -1 ? cols[idxKeyword] : "") });
+                    }
+
+                    rawDocsData = parsedDocs.sort((a, b) => {
+                        const dateA = new Date(a.date || '1970-01-01').getTime();
+                        const dateB = new Date(b.date || '1970-01-01').getTime();
+                        return dateB - dateA;
+                    });
                     CACHE_DOCS_DATA = rawDocsData;
                 }
+
                 calculateTagStatistics();
                 renderDocTags();
                 filterDocs();
-            } catch (err) {
-                console.error("文獻載入異常:", err);
-            }
+            } catch (err) {}
         }
 
         function calculateTagStatistics() {
@@ -708,137 +689,79 @@
                     });
                 }
             });
-            sortedTagsList = Object.keys(counts).map(t => ({ tag: t, count: counts[t] })).sort((a, b) => b.count - a.count);
+
+            sortedTagsList = Object.keys(counts).map(tag => ({
+                tag: tag,
+                count: counts[tag]
+            })).sort((a, b) => b.count - a.count);
         }
 
         function renderDocTags() {
             const container = document.getElementById('doc-tags-container');
-            let html = `
-                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap ${activeDocTag === 'ALL' ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
+            let tagsHTML = `
+                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${activeDocTag === 'ALL' ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
                     全部 (${rawDocsData.length})
                 </button>
             `;
+
             sortedTagsList.forEach(item => {
                 const isActive = activeDocTag === item.tag;
-                html += `
-                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded-md text-[10px] font-bold whitespace-nowrap ${isActive ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
+                tagsHTML += `
+                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${isActive ? 'bg-red-600 text-white' : 'bg-[#161b22] text-gray-400 border border-gray-800'}">
                         ${item.tag} (${item.count})
                     </button>
                 `;
             });
-            container.innerHTML = html;
+
+            container.innerHTML = tagsHTML;
         }
 
         function setDocTag(tag) {
             activeDocTag = tag;
             renderDocTags();
             filterDocs();
-            closeTagCloudModal();
         }
 
         function filterDocs() {
-            const query = document.getElementById('doc-search-input').value.trim().toLowerCase();
+            const searchKeyword = document.getElementById('doc-search-input').value.trim().toLowerCase();
+
             const filtered = rawDocsData.filter(doc => {
                 const matchTag = (activeDocTag === "ALL") || (doc.category && doc.category.includes(activeDocTag));
-                const matchSearch = !query || 
-                    (doc.title && doc.title.toLowerCase().includes(query)) ||
-                    (doc.category && doc.category.toLowerCase().includes(query)) ||
-                    (doc.keyword && doc.keyword.toLowerCase().includes(query)) ||
-                    (doc.date && doc.date.toLowerCase().includes(query));
+                const matchSearch = !searchKeyword || 
+                    (doc.title && doc.title.toLowerCase().includes(searchKeyword)) ||
+                    (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
+                    (doc.date && doc.date.toLowerCase().includes(searchKeyword));
                 return matchTag && matchSearch;
             });
+
             renderDocsList(filtered);
         }
 
         function renderDocsList(docs) {
-            const container = document.getElementById('docs-list-container');
+            const listContainer = document.getElementById('docs-list-container');
+            document.getElementById('docs-count-badge').innerText = `${docs.length} 份`;
+
             if (docs.length === 0) {
-                container.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">查無相關文獻</div>';
+                listContainer.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs">查無符合條件的技術文獻</div>';
                 return;
             }
-            container.innerHTML = docs.map((doc) => `
-                <div onclick="openPdfModal('${doc.url}', '${doc.title.replace(/'/g, "\\'")}')" class="bg-[#161b22] border border-gray-800 rounded-xl p-3 flex flex-col space-y-1.5 active:bg-gray-800">
-                    <div class="flex items-center justify-between">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-950 text-red-400 border border-red-900">${doc.category || '手冊'}</span>
-                        <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
-                    </div>
-                    <h4 class="text-xs font-semibold text-white leading-snug">${doc.title}</h4>
-                    <div class="flex justify-end text-[10px] text-red-400 font-bold">點擊預覽 ▶</div>
-                </div>
-            `).join('');
-        }
 
-        function openPdfModal(url, title) {
-            if (!url) return;
-            let embedUrl = url;
-            if (url.includes('drive.google.com') && url.includes('/view')) {
-                embedUrl = url.replace('/view', '/preview');
-            }
-            document.getElementById('pdf-modal-title').innerText = title;
-            document.getElementById('pdf-external-link').href = url;
-            document.getElementById('pdf-modal-iframe').src = embedUrl;
-            document.getElementById('pdf-modal').classList.remove('hidden');
-        }
-
-        function closePdfModal() {
-            document.getElementById('pdf-modal').classList.add('hidden');
-            document.getElementById('pdf-modal-iframe').src = '';
-        }
-
-        /* ---------------- 標籤 Modal ---------------- */
-        function openTagCloudModal() {
-            document.getElementById('tag-cloud-modal').classList.remove('hidden');
-            filterModalTags();
-        }
-        function closeTagCloudModal() {
-            document.getElementById('tag-cloud-modal').classList.add('hidden');
-        }
-        function filterModalTags() {
-            const q = document.getElementById('modal-tag-search').value.trim().toLowerCase();
-            const list = sortedTagsList.filter(t => t.tag.toLowerCase().includes(q));
-            let html = `
-                <button onclick="setDocTag('ALL')" class="px-2.5 py-1 rounded text-xs font-bold ${activeDocTag === 'ALL' ? 'bg-red-600 text-white' : 'bg-[#0d1117] text-gray-300 border border-gray-700'}">
-                    # 全部 (${rawDocsData.length})
-                </button>
-            `;
-            list.forEach(item => {
-                const isActive = activeDocTag === item.tag;
-                html += `
-                    <button onclick="setDocTag('${item.tag}')" class="px-2.5 py-1 rounded text-xs font-bold flex items-center space-x-1 ${isActive ? 'bg-red-600 text-white' : 'bg-[#0d1117] text-gray-300 border border-gray-700'}">
-                        <span># ${item.tag}</span>
-                        <span class="text-[9px] text-gray-500 font-mono">(${item.count})</span>
-                    </button>
+            listContainer.innerHTML = docs.map((doc) => {
+                return `
+                    <a href="${doc.url || '#'}" target="_blank" class="block bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow active:border-red-500 transition-colors">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate">
+                                📑 ${doc.category || '未分類'}
+                            </span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
+                        </div>
+                        <h4 class="text-xs font-semibold text-white mt-1.5 leading-snug line-clamp-2">${doc.title}</h4>
+                        <div class="flex justify-end items-center mt-2 text-[10px] text-red-400 font-medium">
+                            <span>點擊開啟 PDF</span> <span class="ml-1 text-[8px]">▶</span>
+                        </div>
+                    </a>
                 `;
-            });
-            document.getElementById('modal-tag-grid').innerHTML = html;
-        }
-
-        /* ---------------- 燈箱大圖 ---------------- */
-        function openLightboxFromImg(imgEl, partId, title, encodedDesc) {
-            const lightbox = document.getElementById('lightbox');
-            const img = document.getElementById('lightbox-img');
-            
-            img.src = imgEl ? imgEl.src : `${partId}.png`;
-            img.onerror = function() {
-                this.src = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
-            };
-
-            document.getElementById('lightbox-part-id').innerText = partId;
-            document.getElementById('lightbox-title').innerText = title;
-            
-            const desc = decodeURIComponent(encodedDesc).trim();
-            const descContainer = document.getElementById('lightbox-desc-container');
-            if (desc) {
-                document.getElementById('lightbox-desc-text').innerText = desc;
-                descContainer.classList.remove('hidden');
-            } else {
-                descContainer.classList.add('hidden');
-            }
-            lightbox.classList.remove('hidden');
-        }
-
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.add('hidden');
+            }).join('');
         }
 
         initializeDynamicSheets();
