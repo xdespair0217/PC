@@ -229,30 +229,95 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
+        /* --- 核心網路連線優化模組：超時防卡死、自動重試 --- */
+        async function fetchWithTimeout(url, options = {}, timeout = 8000, retries = 1) {
+            for (let i = 0; i <= retries; i++) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeout);
+                try {
+                    const res = await fetch(url, { ...options, credentials: 'omit', signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res;
+                } catch (err) {
+                    clearTimeout(timer);
+                    if (i === retries) throw err;
+                    await new Promise(r => setTimeout(r, 800)); // 間隔重試
+                }
+            }
+        }
+
         async function initializeDynamicSheets(force = false) {
             const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
             
+            // 優先讀取 LocalStorage 快顯 (瞬開體驗)
+            if (!force && !CACHE_MODELS_DATA) {
+                try {
+                    const localModels = localStorage.getItem('CACHE_MODELS_V1');
+                    const localDocs = localStorage.getItem('CACHE_DOCS_V1');
+                    if (localModels) {
+                        dynamicModelsData = JSON.parse(localModels);
+                        CACHE_MODELS_DATA = dynamicModelsData;
+                        renderBrandSelect();
+                    }
+                    if (localDocs) {
+                        rawDocsData = JSON.parse(localDocs);
+                        CACHE_DOCS_DATA = rawDocsData;
+                        calculateTagStatistics();
+                        renderDocTags();
+                        filterDocs();
+                    }
+                } catch (e) {
+                    console.warn("本機快取讀取略過", e);
+                }
+            }
+
             try {
-                if (!force && CACHE_MODELS_DATA) {
-                    dynamicModelsData = CACHE_MODELS_DATA;
-                } else {
+                if (!CACHE_MODELS_DATA) {
                     tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
-                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
-                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
-                    dynamicModelsData = await response.json();
+                }
+
+                const modelsUrl = GAS_API_URL + (force ? "?t=" + Date.now() : "");
+                const docsUrl = GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : "");
+
+                // 並行抓取 (Parallel Fetching)，徹底終結等待卡頓
+                const [modelsRes, docsRes] = await Promise.allSettled([
+                    (!force && CACHE_MODELS_DATA) ? Promise.resolve(null) : fetchWithTimeout(modelsUrl, {}, 9000, 1).then(r => r.json()),
+                    (!force && CACHE_DOCS_DATA) ? Promise.resolve(null) : fetchWithTimeout(docsUrl, {}, 9000, 1).then(r => r.json())
+                ]);
+
+                if (modelsRes.status === "fulfilled" && modelsRes.value) {
+                    dynamicModelsData = modelsRes.value;
                     CACHE_MODELS_DATA = dynamicModelsData;
+                    try { localStorage.setItem('CACHE_MODELS_V1', JSON.stringify(dynamicModelsData)); } catch(e){}
+                    renderBrandSelect();
+                }
+
+                if (docsRes.status === "fulfilled" && docsRes.value) {
+                    rawDocsData = docsRes.value.sort((a, b) => {
+                        const dateA = new Date(a.date || '1970-01-01').getTime();
+                        const dateB = new Date(b.date || '1970-01-01').getTime();
+                        return dateB - dateA;
+                    });
+                    CACHE_DOCS_DATA = rawDocsData;
+                    try { localStorage.setItem('CACHE_DOCS_V1', JSON.stringify(rawDocsData)); } catch(e){}
+                    calculateTagStatistics();
+                    renderDocTags();
+                    filterDocs();
                 }
 
                 statusBadge.innerText = "連線正常 (極速模式)";
                 statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
-                
-                renderBrandSelect();
-                loadTechnicalDocs(force);
             } catch (error) {
-                console.error("載入失敗:", error);
-                statusBadge.innerText = "連線失敗";
-                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
+                console.error("載入異常:", error);
+                if (dynamicModelsData.length > 0) {
+                    statusBadge.innerText = "快取運作中 (離線模式)";
+                    statusBadge.className = "text-[10px] bg-amber-950 text-amber-400 border border-amber-900 px-2 py-0.5 rounded-full font-semibold";
+                } else {
+                    statusBadge.innerText = "連線逾時，重試中";
+                    statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
+                }
             }
         }
 
@@ -261,6 +326,10 @@
                 CACHE_SHEET_DATA.clear();
                 CACHE_MODELS_DATA = null;
                 CACHE_DOCS_DATA = null;
+                try {
+                    localStorage.removeItem('CACHE_MODELS_V1');
+                    localStorage.removeItem('CACHE_DOCS_V1');
+                } catch(e){}
             }
             initializeDynamicSheets(force);
         }
@@ -338,18 +407,26 @@
                 return;
             }
 
+            const localCsv = sessionStorage.getItem('CSV_' + sheetName);
+            if (localCsv) {
+                CACHE_SHEET_DATA.set(sheetName, localCsv);
+                parseExcelCSV(localCsv);
+                return;
+            }
+
             document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
 
             try {
                 const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
-                const response = await fetch(targetUrl);
+                const response = await fetchWithTimeout(targetUrl, {}, 8000, 1);
                 const csvText = await response.text();
                 
                 CACHE_SHEET_DATA.set(sheetName, csvText);
+                try { sessionStorage.setItem('CSV_' + sheetName, csvText); } catch(e){}
                 parseExcelCSV(csvText);
             } catch (error) {
                 console.error("載入失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
+                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗 (請點選上方重試)";
                 clearDisplay();
             }
         }
@@ -496,7 +573,6 @@
                 if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
                 if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
-                // 將完整資訊物件編碼，點擊料號時供快速複製
                 const rowInfoData = encodeURIComponent(JSON.stringify({
                     attr: item.attr,
                     partId: item.partId,
@@ -512,7 +588,6 @@
                     <tr id="row-${item.partId}" class="border-b border-gray-800 hover:bg-[#1f242c] transition-colors cursor-pointer text-xs" onclick="syncHighlight('${item.partId}')">
                         <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
                         
-                        <!-- 料號欄位：點擊觸發精美圖示排版段落複製 -->
                         <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
                             <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目圖文格式明細">
                                 ${item.partId}
@@ -539,7 +614,7 @@
                     gridHTML += `
                         <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
                             <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
-                                <img src="${imgUrlPng}" alt="${item.name}" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                                <img src="${imgUrlPng}" alt="${item.name}" loading="lazy" decoding="async" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
                                     <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
                                 </div>
@@ -558,16 +633,12 @@
             calculateTotalsWithDiscount();
         }
 
-        /* -------------------------------------------------------------
-           升級版：圖示化段落排版複製模組 (工單/LINE 最佳化)
-        ------------------------------------------------------------- */
         function copyRowInfo(event, encodedData) {
             event.stopPropagation();
             try {
                 const item = JSON.parse(decodeURIComponent(encodedData));
                 const isLabor = item.attr === "工資";
                 
-                // 動態判斷庫存燈號與文字
                 let stockStatus = "🟢 庫存正常";
                 let stockDisplay = item.stock || "0";
                 if (!isLabor && item.stock !== "") {
@@ -586,11 +657,9 @@
                     stockDisplay = "不適用 (標準工時項目)";
                 }
 
-                // 產出當下時間戳記
                 const now = new Date();
                 const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                 
-                // 精美圖示段落排版 (含邊框標頭與清晰項目圖示)
                 const formattedText = 
 `┏━━━━━━━━━━━━━━━━━━━━┓
    ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
@@ -731,31 +800,6 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
                 btnPackage.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
                 pkgTabs.classList.remove('invisible');
-            }
-        }
-
-        async function loadTechnicalDocs(force = false) {
-            try {
-                if (!force && CACHE_DOCS_DATA) {
-                    rawDocsData = CACHE_DOCS_DATA;
-                } else {
-                    const res = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    
-                    rawDocsData = data.sort((a, b) => {
-                        const dateA = new Date(a.date || '1970-01-01').getTime();
-                        const dateB = new Date(b.date || '1970-01-01').getTime();
-                        return dateB - dateA;
-                    });
-                    CACHE_DOCS_DATA = rawDocsData;
-                }
-
-                calculateTagStatistics();
-                renderDocTags();
-                filterDocs();
-            } catch (err) {
-                console.error("文獻載入異常:", err);
             }
         }
 
