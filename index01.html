@@ -3,73 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業多品牌保養看板與技術文獻 (動態主題旗艦版)</title>
+    <title>專業多車型保養看板與技術文獻</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            /* 預設動態主題變數 (CANN / PROJECT 琥珀黃) */
-            --theme-primary: #f59e0b;
-            --theme-primary-hover: #d97706;
-            --theme-glow: rgba(245, 158, 11, 0.25);
-            --theme-bg-soft: rgba(245, 158, 11, 0.1);
-            --theme-border-soft: rgba(245, 158, 11, 0.3);
-        }
-
-        body { 
-            background-color: #0d1117; 
-            color: #c9d1d9; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-        }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #161b22; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-        
-        /* 動態品牌高亮樣式 */
-        .active-row { 
-            background-color: #1f242c !important; 
-            border-left: 4px solid var(--theme-primary) !important; 
-        }
-        .active-card { 
-            border-color: var(--theme-primary) !important; 
-            background-color: #21262d !important; 
-            transform: scale(1.02); 
-            box-shadow: 0 0 15px var(--theme-glow);
-        }
-        .active-doc { 
-            border-color: #dc2626 !important; 
-            background-color: #1c1917 !important; 
-            border-left: 4px solid #ef4444 !important; 
-        }
-
-        .theme-accent-border {
-            border-color: var(--theme-primary) !important;
-        }
-        .theme-accent-text {
-            color: var(--theme-primary) !important;
-        }
-        .theme-accent-bg {
-            background-color: var(--theme-primary) !important;
-        }
+        .active-row { background-color: #1f242c !important; border-left: 4px solid #f59e0b !important; }
+        .active-card { border-color: #f59e0b !important; background-color: #21262d !important; transform: scale(1.02); }
+        .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
     </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col p-4 relative">
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <!-- 動態品牌 Logo 徽章 -->
-            <div id="brand-logo" class="w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md transition-all duration-300">CANN</div>
+            <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
             <div>
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
-                        <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none cursor-pointer">
+                        <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
                             <option value="">載入中...</option>
                         </select>
                     </div>
                     <div class="h-4 border-l border-gray-700"></div>
                     <div class="flex items-center space-x-1">
                         <label for="car-model-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">車系與型號：</label>
-                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none cursor-pointer min-w-[150px]">
+                        <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer min-w-[150px]">
                         </select>
                     </div>
                 </div>
@@ -101,7 +63,7 @@
             <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2 shrink-0">
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
-                        <span id="title-indicator" class="w-2 h-4 inline-block mr-2 rounded-sm theme-accent-bg transition-colors duration-300"></span>載入中...
+                        <span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>載入中...
                     </h2>
                     <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
                 </div>
@@ -129,12 +91,12 @@
                     <div class="flex flex-wrap space-x-4">
                         <div>工資小計：<span id="labor-subtotal" class="font-bold text-gray-200 font-mono">$ 0</span></div>
                         <div class="border-l border-gray-800 pl-4">零件原價：<span id="parts-original-total" class="font-bold text-gray-200 font-mono">$ 0</span></div>
-                        <div class="border-l border-gray-800 pl-4">零件折後：<span id="parts-subtotal" class="font-bold font-mono theme-accent-text transition-colors duration-300">$ 0</span></div>
+                        <div class="border-l border-gray-800 pl-4">零件折後：<span id="parts-subtotal" class="font-bold text-amber-500 font-mono">$ 0</span></div>
                     </div>
 
                     <div class="flex items-center space-x-2 bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 shrink-0">
                         <span class="text-[11px] text-gray-400 font-bold">零件折扣：</span>
-                        <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b theme-accent-border font-mono transition-colors duration-300">
+                        <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-10 bg-[#161b22] text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
                         <span class="text-[11px] text-gray-300 font-bold">%</span>
                     </div>
                 </div>
@@ -142,7 +104,7 @@
                 <div class="border-t border-gray-800 pt-2 mt-2 flex justify-between items-center shrink-0">
                     <div class="flex flex-col">
                         <span class="text-gray-400 text-xs font-medium">套餐應付總金額</span>
-                        <span id="discount-note" class="text-[10px] theme-accent-text font-medium hidden">＊已套用零件折扣</span>
+                        <span id="discount-note" class="text-[10px] text-amber-500/80 font-medium hidden">＊已套用零件折扣</span>
                     </div>
                     <span id="package-total" class="text-2xl font-black text-green-400 font-mono tracking-tight">$ 0</span>
                 </div>
@@ -151,15 +113,13 @@
             <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
                 <div class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl">
                     <h3 class="text-xs font-semibold text-gray-400 mb-3 tracking-wider flex items-center shrink-0">
-                        <span class="mr-1.5 theme-accent-text">🔧</span>套餐内含零件圖解
+                        <span class="mr-1.5">🔧</span>套餐内含零件圖解
                     </h3>
                     <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start"></div>
                 </div>
 
                 <div class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0">
-                    <h4 id="guide-brand-title" class="text-xs font-bold theme-accent-text mb-1 flex items-center gap-1">
-                        <span>💡</span> 現場維護提示
-                    </h4>
+                    <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
                     <p class="text-[11px] text-gray-400 leading-relaxed">
                         請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
                     </p>
@@ -206,12 +166,12 @@
     </main>
 
     <!-- 剪貼簿複製提示浮窗 (Toast) -->
-    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-[#161b22] border theme-accent-border text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
-        <span class="text-sm">📋</span>
+    <div id="copy-toast" class="fixed bottom-8 right-8 z-50 bg-[#161b22] border border-amber-500/80 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+        <span class="text-amber-400 text-sm">📋</span>
         <span id="copy-toast-msg">已複製項目段落明細！</span>
     </div>
 
-    <!-- 標籤雲彈出視窗 -->
+    <!-- Obsidian 標籤雲彈出視窗 -->
     <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
         <div class="bg-[#161b22] border border-gray-700 w-full max-w-xl rounded-xl p-5 shadow-2xl flex flex-col max-h-[75vh]" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center pb-3 border-b border-gray-800">
@@ -235,103 +195,41 @@
         </div>
     </div>
 
-    <!-- 零件大圖燈箱 (雙重容錯防破圖) -->
+    <!-- 零件大圖燈箱 -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-3xl font-light focus:outline-none">&times;</button>
-        <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border theme-accent-border shadow-2xl" onclick="event.stopPropagation()">
+        <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
             <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[75vh] object-contain rounded">
         </div>
         <div class="mt-3 text-center max-w-xl" onclick="event.stopPropagation()">
-            <p id="lightbox-part-id" class="text-xs font-mono tracking-widest theme-accent-text"></p>
+            <p id="lightbox-part-id" class="text-xs text-gray-500 font-mono tracking-widest"></p>
             <h3 id="lightbox-title" class="text-base font-bold text-white mt-0.5"></h3>
-            <div id="lightbox-desc-container" class="mt-2 px-3 py-1.5 bg-gray-900/60 border theme-accent-border rounded text-xs hidden leading-relaxed text-left">
-                <span class="font-bold block theme-accent-text text-[10px] tracking-wider uppercase mb-0.5">⚠️ 現場維護說明 NOTE</span>
-                <span id="lightbox-desc-text" class="text-gray-300"></span>
+            <div id="lightbox-desc-container" class="mt-2 px-3 py-1.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-xs hidden leading-relaxed">
+                <span class="font-bold block text-amber-500 text-[10px] tracking-wider uppercase mb-0.5">⚠️ 現場維護說明 NOTE</span>
+                <span id="lightbox-desc-text"></span>
             </div>
         </div>
     </div>
 
     <script>
         /* -------------------------------------------------------------
-           Google 試算表極速直連配置
+           Google 試算表極速直連配置 (直連 Google CDN，完全告別 GAS 延遲)
         ------------------------------------------------------------- */
         const GOOGLE_PUB_BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSibAtR9uloggQKe6GI3k0jd8jUIs5wV3kQorwHuS9yCF6l4DT3N_J-2sA2m9DJzDxF0pJvlPBbLQbW/pub?output=csv";
         const DOCS_GID = "283344252"; // 技術文獻專用 GID
 
-        // 包含五大品牌的對照表[cite: 3]
+        // 車型分頁對照表（名稱完全對齊工作表分頁）
         const MODELS_CONFIG = [
             { brand: "PROJECT", model: "PROJECT_通用專案", sheetName: "PROJECT_通用專案", gid: "2064791486" },
             { brand: "PEUGEOT", model: "P_408H", sheetName: "P_408H", gid: "1525555317" },
             { brand: "PEUGEOT", model: "P_3008H", sheetName: "P_3008H", gid: "1074672360" },
             { brand: "PEUGEOT", model: "P_5008H", sheetName: "P_5008H", gid: "1080538" },
-            { brand: "CITROËN", model: "C_新Berlingo", sheetName: "C_新Berlingo", gid: "934233668" },
-            // 日後新增 Alfa 與 Jeep 直接補在下方填入 GID 即可
-   
-            { brand: "ALFA ROMEO", model: "STELVIO INTENSA 2.0", sheetName: "ALFA_STELVIO INTENSA_2.0", gid: "1863556503" }
+            { brand: "CITROËN", model: "C_新Berlingo", sheetName: "C_新Berlingo", gid: "934233668" }
+// 👇 直接加入這行
+    { brand: "ALFA ROMEO", model: "STELVIO INTENSA 2.0", sheetName: "ALFA_STELVIO INTENSA_2.0", gid: "1863556503" }
 ];
-            { brand: "JEEP", model: "JEEP_WRANGLER", sheetName: "JEEP_WRANGLER", gid: "填入GID" }
+            
         ];
-
-        /* -------------------------------------------------------------
-           五大品牌專屬色彩矩陣 (精確校正版)
-        ------------------------------------------------------------- */
-        const BRAND_THEMES = {
-            // 1. JEEP：軍規野戰綠
-            "JEEP": {
-                logoText: "JEEP",
-                logoBg: "bg-[#0b1a10] border-[#16a34a] shadow-green-950/60",
-                primary: "#22c55e",
-                primaryHover: "#16a34a",
-                glow: "rgba(34, 197, 94, 0.35)",
-                activeTabBg: "bg-emerald-600 border-emerald-500 text-white shadow-emerald-900/50",
-                badgeClass: "bg-emerald-950/70 text-emerald-400 border-emerald-900",
-                guideTitle: "⛰️ JEEP TRAIL-RATED 軍規野戰整備"
-            },
-            // 2. PEUGEOT：法國賽事特調電光藍
-            "PEUGEOT": {
-                logoText: "PEUG",
-                logoBg: "bg-[#041122] border-[#0284c7] shadow-sky-950/60",
-                primary: "#06b6d4",
-                primaryHover: "#0284c7",
-                glow: "rgba(6, 182, 212, 0.35)",
-                activeTabBg: "bg-cyan-600 border-cyan-500 text-white shadow-cyan-900/50",
-                badgeClass: "bg-cyan-950/70 text-cyan-300 border-cyan-800",
-                guideTitle: "🦁 PEUGEOT 法國原廠電氣整備規範"
-            },
-            // 3. ALFA ROMEO：義式熱血競技紅
-            "ALFA ROMEO": {
-                logoText: "ALFA",
-                logoBg: "bg-[#200508] border-[#8b0000] shadow-red-950/60",
-                primary: "#dc2626",
-                primaryHover: "#b91c1c",
-                glow: "rgba(220, 38, 38, 0.35)",
-                activeTabBg: "bg-red-600 border-red-500 text-white shadow-red-900/50",
-                badgeClass: "bg-red-950/70 text-red-400 border-red-900",
-                guideTitle: "🍀 ALFA ROMEO 賽道競技維護規範"
-            },
-            // 4. CITROËN：新潮法式珊瑚粉
-            "CITROËN": {
-                logoText: "CITR",
-                logoBg: "bg-[#210914] border-[#ec4899] shadow-pink-950/60",
-                primary: "#f43f5e",
-                primaryHover: "#e11d48",
-                glow: "rgba(244, 63, 94, 0.35)",
-                activeTabBg: "bg-rose-500 border-rose-400 text-white shadow-rose-900/50",
-                badgeClass: "bg-rose-950/70 text-rose-300 border-rose-800",
-                guideTitle: "⚡ CITROËN 法式新潮工藝指示"
-            },
-            // 5. PROJECT / CANN：經典工程琥珀黃
-            "PROJECT": {
-                logoText: "CANN",
-                logoBg: "bg-[#2a1b08] border-[#f59e0b] shadow-amber-950/60",
-                primary: "#f59e0b",
-                primaryHover: "#d97706",
-                glow: "rgba(245, 158, 11, 0.25)",
-                activeTabBg: "bg-[#f59e0b] border-amber-600 text-black shadow-amber-900/50",
-                badgeClass: "bg-amber-950/70 text-amber-400 border-amber-900",
-                guideTitle: "💡 廠內標準維護提示"
-            }
-        };
 
         const CACHE_SHEET_DATA = new Map();
         let CACHE_DOCS_DATA = null;
@@ -368,6 +266,7 @@
 
         async function initializeDynamicSheets(force = false) {
             const statusBadge = document.getElementById('status-badge');
+            
             try {
                 renderBrandSelect();
                 loadTechnicalDocs(force);
@@ -391,11 +290,13 @@
         function renderBrandSelect() {
             const brandSelect = document.getElementById('brand-select');
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
+
             brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
 
             if (availableBrands.includes("PROJECT")) {
                 brandSelect.value = "PROJECT";
             }
+
             updateModelOptions(true);
         }
 
@@ -403,16 +304,19 @@
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
+
             const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
 
             modelSelect.innerHTML = matchedModels.map(item => `<option value="${item.sheetName}">${item.model}</option>`).join('');
 
             if (matchedModels.length > 0) {
                 let defaultTarget = matchedModels[0].sheetName;
+
                 if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("PROJECT_通用專案"));
+                    const foundPrj = matchedModels.find(item => item.sheetName.includes("PROJECT_通用專案") || item.model.includes("PROJECT_通用專案"));
                     if (foundPrj) defaultTarget = foundPrj.sheetName;
                 }
+
                 modelSelect.value = defaultTarget;
                 executeModelSwitch(defaultTarget);
             } else {
@@ -420,28 +324,26 @@
             }
         }
 
-        /* -------------------------------------------------------------
-           動態切換五大品牌主題與 Logo
-        ------------------------------------------------------------- */
         function executeModelSwitch(sheetName) {
             selectedModelObj = dynamicModelsData.find(item => item.sheetName === sheetName);
             if (!selectedModelObj) return;
 
-            const brand = selectedModelObj.brand;
-            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
-
-            // 1. 切換 CSS 根變數 (所有色調跟著換)
-            document.documentElement.style.setProperty('--theme-primary', theme.primary);
-            document.documentElement.style.setProperty('--theme-primary-hover', theme.primaryHover);
-            document.documentElement.style.setProperty('--theme-glow', theme.glow);
-
-            // 2. 切換圓形 Logo 徽章樣式
             const brandLogo = document.getElementById('brand-logo');
-            brandLogo.innerText = theme.logoText;
-            brandLogo.className = `w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md transition-all duration-300 border ${theme.logoBg}`;
+            const brand = selectedModelObj.brand;
 
-            // 3. 切換提示指南標題
-            document.getElementById('guide-brand-title').innerHTML = `<span>💡</span> ${theme.guideTitle}`;
+            if (brand === "CITROËN") {
+                brandLogo.innerText = "CITR";
+                brandLogo.className = "w-10 h-10 bg-[#1a1a1a] border border-[#da291c] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-900/30 transition-all";
+            } else if (brand === "PROJECT") {
+                brandLogo.innerText = "CANN";
+                brandLogo.className = "w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
+            } else if (brand === "ALFA ROMEO") {
+                brandLogo.innerText = "ALFA";
+                brandLogo.className = "w-10 h-10 bg-[#200508] border border-[#8b0000] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
+            } else {
+                brandLogo.innerText = "PEUG";
+                brandLogo.className = "w-10 h-10 bg-[#041122] border border-[#48bb78] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-emerald-900/30 transition-all";
+            }
 
             fetchSheetData();
             if (!document.getElementById('docs-view').classList.contains('hidden')) {
@@ -537,11 +439,14 @@
 
         function renderTabs(keys) {
             const tabsContainer = document.getElementById('package-tabs');
-            const brand = selectedModelObj ? selectedModelObj.brand : "PROJECT";
-            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
+            
+            let activeBgClass = isCitroen ? "bg-[#da291c] border-[#da291c]" : (isProject ? "bg-[#f59e0b] border-[#d97706]" : "bg-emerald-600 border-emerald-500");
 
             tabsContainer.innerHTML = keys.map(key => `
-                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${theme.activeTabBg}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
+                <button onclick="switchPackage('${key}')" id="tab-${key}" data-active-class="${activeBgClass}" class="px-2.5 py-1 rounded text-xs font-bold transition-all bg-[#161b22] text-gray-400 hover:bg-gray-800 border border-gray-800 whitespace-nowrap">
                     ${key}
                 </button>
             `).join('');
@@ -556,17 +461,19 @@
             }
             
             const activeTab = document.getElementById(`tab-${key}`);
-            const brand = selectedModelObj ? selectedModelObj.brand : "PROJECT";
-            const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
-
             if (activeTab) {
-                activeTab.className = `px-2.5 py-1 rounded text-xs font-bold transition-all whitespace-nowrap border ${theme.activeTabBg}`;
+                const targetBg = activeTab.getAttribute('data-active-class') || "bg-emerald-600 border-emerald-500";
+                activeTab.className = `px-2.5 py-1 rounded text-xs font-bold transition-all text-white shadow-lg border whitespace-nowrap ${targetBg}`;
             }
 
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
+            const brand = selectedModelObj ? selectedModelObj.brand : "";
+            const isCitroen = brand === "CITROËN";
+            const isProject = brand === "PROJECT";
+            let indicatorColor = isCitroen ? "bg-[#da291c]" : (isProject ? "bg-[#f59e0b]" : "bg-[#48bb78]");
 
-            let titleHTML = `<span class="w-2 h-4 inline-block mr-2 rounded-sm theme-accent-bg transition-colors duration-300"></span>${pkg.name}`;
+            let titleHTML = `<span class="w-2 h-4 ${indicatorColor} inline-block mr-2 rounded-sm"></span>${pkg.name}`;
             if (pkg.pdfUrl) {
                 titleHTML += `
                     <a href="${pkg.pdfUrl}" target="_blank" rel="noopener noreferrer" class="ml-2.5 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-amber-300 bg-amber-950/60 border border-amber-800/80 rounded hover:bg-amber-900/80 hover:text-white transition-all shadow-sm">
@@ -583,16 +490,11 @@
             rawPartsSum = 0;
 
             pkg.items.forEach(item => {
-                const isLabor = (item.attr && (item.attr.includes("工資") || item.attr.includes("工時")));
-                const displayPrice = parseFloat(item.price.toString().replace(/[^0-9.-]/g, '')) || 0;
-                const displayQty = parseFloat(item.qty.toString().replace(/[^0-9.-]/g, '')) || 1;
-                let displayDiscount = parseFloat(item.discount.toString().replace(/[^0-9.-]/g, '')) || 1;
-                if (displayDiscount > 1) displayDiscount = displayDiscount / 100;
-                
-                let lineSubtotal = parseFloat(item.subtotal.toString().replace(/[^0-9.-]/g, '')) || 0;
-                if (lineSubtotal === 0 && displayPrice > 0) {
-                    lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
-                }
+                const isLabor = item.attr === "工資";
+                const displayPrice = parseFloat(item.price) || 0;
+                const displayQty = parseFloat(item.qty) || 1;
+                const displayDiscount = parseFloat(item.discount) || 1;
+                const lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
 
                 if (isLabor) {
                     rawLaborSum += lineSubtotal;
@@ -602,7 +504,7 @@
 
                 let stockBadge = '<span class="text-gray-600">-</span>';
                 if (!isLabor && item.stock !== "") {
-                    const num = parseFloat(item.stock.toString().replace(/[^0-9.-]/g, ''));
+                    const num = parseFloat(item.stock);
                     if (isNaN(num) || num <= 0) {
                         stockBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-400 border border-rose-900 animate-pulse">缺料 (0)</span>';
                     } else if (num <= 2) {
@@ -612,7 +514,9 @@
                     }
                 }
 
-                let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : `${theme.badgeClass} border`;
+                let attrBadgeClass = isLabor ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-emerald-950/60 text-emerald-400 border border-emerald-900/50";
+                if (!isLabor && isCitroen) attrBadgeClass = "bg-red-950/60 text-red-400 border border-red-900/50";
+                if (!isLabor && isProject) attrBadgeClass = "bg-amber-950/60 text-amber-400 border border-amber-900/50";
 
                 const rowInfoData = encodeURIComponent(JSON.stringify({
                     attr: item.attr,
@@ -622,8 +526,7 @@
                     qty: displayQty,
                     subtotal: lineSubtotal,
                     location: item.location || '',
-                    stock: item.stock !== "" ? item.stock : '',
-                    brand: brand
+                    stock: item.stock !== "" ? item.stock : ''
                 }));
 
                 tableHTML += `
@@ -631,18 +534,18 @@
                         <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${attrBadgeClass}">${item.attr}</span></td>
                         
                         <td class="p-2.5 font-mono text-gray-300" onclick="copyRowInfo(event, '${rowInfoData}')">
-                            <span class="hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製明細">
-                                <span class="theme-accent-text font-bold">${item.partId}</span>
-                                <span class="text-[10px] opacity-70">📋</span>
+                            <span class="hover:text-amber-400 hover:underline inline-flex items-center gap-1 bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-700/60 hover:border-amber-500 transition-colors" title="點擊複製此項目圖文格式明細">
+                                ${item.partId}
+                                <span class="text-[10px] text-amber-500/80">📋</span>
                             </span>
                         </td>
                         
                         <td class="p-2.5 text-white font-medium">${item.name}</td>
-                        <td class="p-2.5 text-right font-mono text-gray-300">$ ${displayPrice.toLocaleString()}</td>
+                        <td class="p-2.5 text-right font-mono text-gray-300">${displayPrice}</td>
                         <td class="p-2.5 text-right font-mono text-gray-300">${displayQty}</td>
                         <td class="p-2.5 text-right font-mono text-gray-400">${item.discount}</td>
-                        <td class="p-2.5 text-right font-mono font-bold text-green-400">$ ${lineSubtotal.toLocaleString()}</td>
-                        <td class="p-2.5 text-center font-mono font-semibold theme-accent-text">${item.location || '-'}</td>
+                        <td class="p-2.5 text-right font-mono font-bold text-green-400">${lineSubtotal}</td>
+                        <td class="p-2.5 text-center font-mono text-amber-500 font-semibold">${item.location || '-'}</td>
                         <td class="p-2.5 text-center font-mono">${stockBadge}</td>
                     </tr>
                 `;
@@ -655,14 +558,14 @@
 
                     gridHTML += `
                         <div id="card-${item.partId}" class="bg-[#1f242c] border border-gray-700 rounded-lg p-2.5 flex flex-col items-center justify-between transition-all cursor-pointer hover:border-gray-500 shadow-md" onclick="syncHighlight('${item.partId}')">
-                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img'), '${item.partId}', '${item.name}', '${safeDesc}')">
+                            <div class="w-full h-24 bg-[#0d1117] rounded mb-1.5 flex items-center justify-center overflow-hidden relative group" onclick="openLightbox(this.querySelector('img').src, '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                                 <img src="${imgUrlPng}" alt="${item.name}" loading="lazy" decoding="async" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="object-contain w-full h-full p-1 opacity-85 group-hover:opacity-100 transition-opacity">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                                    <span class="text-[10px] text-white theme-accent-bg px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
+                                    <span class="text-[10px] text-white ${isCitroen ? 'bg-red-600/90' : (isProject ? 'bg-amber-600/90' : 'bg-emerald-600/90')} px-1.5 py-0.5 rounded shadow">🔍 看大圖</span>
                                 </div>
                             </div>
                             <div class="text-center w-full">
-                                <p class="text-[10px] font-mono theme-accent-text font-bold">${item.partId}</p>
+                                <p class="text-[10px] text-gray-500 font-mono">${item.partId}</p>
                                 <p class="text-xs text-white font-medium truncate">${item.name}</p>
                             </div>
                         </div>
@@ -675,23 +578,28 @@
             calculateTotalsWithDiscount();
         }
 
-        /* -------------------------------------------------------------
-           一鍵複製格式化項目明細
-        ------------------------------------------------------------- */
         function copyRowInfo(event, encodedData) {
             event.stopPropagation();
             try {
                 const item = JSON.parse(decodeURIComponent(encodedData));
-                const isLabor = (item.attr && (item.attr.includes("工資") || item.attr.includes("工時")));
+                const isLabor = item.attr === "工資";
                 
+                let stockStatus = "🟢 庫存正常";
                 let stockDisplay = item.stock || "0";
                 if (!isLabor && item.stock !== "") {
-                    const num = parseFloat(item.stock.toString().replace(/[^0-9.-]/g, ''));
-                    if (isNaN(num) || num <= 0) stockDisplay = "0 件 (⚠️ 現場缺料)";
-                    else if (num <= 2) stockDisplay = `${num} 件 (⚠️ 庫存告急)`;
-                    else stockDisplay = `${num} 件 (充足)`;
+                    const num = parseFloat(item.stock);
+                    if (isNaN(num) || num <= 0) {
+                        stockStatus = "🔴 缺料中 (0 件)";
+                        stockDisplay = "0 件 (⚠️ 現場缺料)";
+                    } else if (num <= 2) {
+                        stockStatus = `🟡 庫存告急 (${num} 件)`;
+                        stockDisplay = `${num} 件 (⚠️ 庫存告急)`;
+                    } else {
+                        stockStatus = `🟢 充足 (${num} 件)`;
+                        stockDisplay = `${num} 件 (充足)`;
+                    }
                 } else if (isLabor) {
-                    stockDisplay = "不適用 (標準工時)";
+                    stockDisplay = "不適用 (標準工時項目)";
                 }
 
                 const now = new Date();
@@ -699,18 +607,18 @@
                 
                 const formattedText = 
 `┏━━━━━━━━━━━━━━━━━━━━┓
-   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細 (${item.brand})
+   ${isLabor ? '🔧' : '🛠️'} 原廠保養維護明細
 ┗━━━━━━━━━━━━━━━━━━━━┛
 🔹【${isLabor ? '工項代碼' : '零件料號'}】${item.partId}
 ${isLabor ? '⏱️' : '📦'}【項目品名】${item.name} (${item.attr})
 💵【標準單價】$ ${item.price.toLocaleString()}
 🔢【更換數量】${item.qty} ${isLabor ? '工時/單位' : '件'}
 💰【加總金額】$ ${item.subtotal.toLocaleString()}
-📍【儲位層架】${item.location || '未設定 / 依現場動線'}
+📍【儲位層架】${item.location || '未設定 / 依廠內動線'}
 ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
 ━━━━━━━━━━━━━━━━━━━━
 ⏱️ 查詢時間：${timeStr}
-🏢 尚鵬品牌服務體系 ‧ 專業整備系統`;
+🏢 尚鵬內湖品牌旗艦 ‧ 專業售後系統`;
 
                 navigator.clipboard.writeText(formattedText).then(() => {
                     showCopyToast(`已複製料號 [${item.partId}] 圖文明細！`);
@@ -746,9 +654,8 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
 
         function calculateTotalsWithDiscount() {
             const discountInput = document.getElementById('part-discount-input');
-            let discountRate = parseFloat(discountInput.value) || 100;
-            if (discountRate < 0) discountRate = 0;
-            if (discountRate > 100) discountRate = 100;
+            let discountRate = parseFloat(discountInput.value);
+            if (isNaN(discountRate) || discountRate < 0) discountRate = 100;
 
             const discountedPartsSum = Math.round(rawPartsSum * (discountRate / 100));
             const grandTotal = rawLaborSum + discountedPartsSum;
@@ -777,10 +684,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             if (card) card.classList.add('active-card');
         }
 
-        /* -------------------------------------------------------------
-           雙重容錯防破圖燈箱 (繼承縮圖成功路徑)
-        ------------------------------------------------------------- */
-        function openLightbox(imgEl, partId, title, encodedDesc) {
+        function openLightbox(imgSrc, partId, title, defaultImg, encodedDesc) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
             const lightboxPartId = document.getElementById('lightbox-part-id');
@@ -790,12 +694,8 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
             const descContainer = document.getElementById('lightbox-desc-container');
             const descText = document.getElementById('lightbox-desc-text');
 
-            // 繼承縮圖成功載入的圖片來源
-            lightboxImg.src = imgEl ? imgEl.src : `${partId}.png`;
-            lightboxImg.onerror = function() {
-                this.src = "https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?auto=format&fit=crop&w=300&q=80";
-            };
-
+            lightboxImg.src = imgSrc;
+            lightboxImg.onerror = function() { this.src = defaultImg; };
             lightboxPartId.innerText = partId;
             lightboxTitle.innerText = title;
 
@@ -823,7 +723,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
         }
 
         /* -------------------------------------------------------------
-           技術文獻系統
+           技術文獻系統 (智慧欄位辨識＋防破版排版)
         ------------------------------------------------------------- */
         function switchMainMode(mode) {
             const packageView = document.getElementById('package-view');
@@ -873,6 +773,7 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                         const cols = parseCSVLineRobust(lines[i]);
                         if (cols.length < 2) continue;
 
+                        // 自動識別網址與日期，避免任何欄位錯位
                         let url = (idxUrl !== -1 ? cols[idxUrl] : "") || cols.find(c => c.startsWith("http")) || "";
                         let date = (idxDate !== -1 ? cols[idxDate] : "") || cols.find(c => /^\d{4}[-\/\.]\d{1,2}/.test(c)) || "";
                         
