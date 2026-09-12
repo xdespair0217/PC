@@ -111,16 +111,16 @@
                 </div>
             </div>
 
-            <!-- 右側：獨占動態品牌主題色的零件圖解區 -->
+            <!-- 右側：僅此區變換品牌配色 -->
             <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
-                <div id="right-panel-box" class="flex-1 rounded-xl p-4 flex flex-col overflow-hidden shadow-2xl transition-all duration-300">
+                <div id="right-panel-box" class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl transition-all duration-300">
                     <h3 class="text-xs font-semibold text-gray-300 mb-3 tracking-wider flex items-center shrink-0">
                         <span class="mr-1.5">🔧</span>套餐內含零件圖解
                     </h3>
                     <div id="image-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar p-1 align-content-start"></div>
                 </div>
 
-                <div id="right-panel-tip" class="h-24 rounded-xl p-3 flex flex-col justify-center shrink-0 transition-all duration-300">
+                <div id="right-panel-tip" class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0 transition-all duration-300">
                     <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
                     <p class="text-[11px] text-gray-300 leading-relaxed">
                         請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
@@ -264,10 +264,6 @@
         let sortedTagsList = [];
         let activeDocTag = "ALL";
 
-        window.onload = function() {
-            initializeDynamicSheets();
-        };
-
         async function initializeDynamicSheets(force = false) {
             const tabsContainer = document.getElementById('package-tabs');
             const statusBadge = document.getElementById('status-badge');
@@ -365,9 +361,7 @@
                 brandLogo.className = "w-10 h-10 bg-[#04101e] border border-[#0284c7] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-sky-900/30 transition-all";
             }
 
-            // 更新右側面板主題顏色
             applyRightPanelTheme(brand);
-
             fetchSheetData();
             if (!document.getElementById('docs-view').classList.contains('hidden')) {
                 filterDocs();
@@ -605,6 +599,7 @@
 
             const note = document.getElementById('discount-note');
             if (pct < 100) {
+                note.innerText = `＊已套用 ${pct}% 零件折扣`;
                 note.classList.remove('hidden');
             } else {
                 note.classList.add('hidden');
@@ -612,8 +607,8 @@
         }
 
         function syncHighlight(partId) {
-            document.querySelectorAll('.active-row').forEach(el => el.classList.remove('active-row'));
-            document.querySelectorAll('.active-card').forEach(el => el.classList.remove('active-card'));
+            document.querySelectorAll('tr').forEach(el => el.classList.remove('active-row'));
+            document.querySelectorAll('#image-grid > div').forEach(el => el.classList.remove('active-card'));
 
             const targetRow = document.getElementById(`row-${partId}`);
             if (targetRow) {
@@ -668,135 +663,174 @@
                     rawDocsData = await response.json();
                     CACHE_DOCS_DATA = rawDocsData;
                 }
-                buildTagCloud();
+                calculateTagStatistics();
+                renderDocTags();
                 filterDocs();
             } catch (err) {
                 console.error("載入技術文獻失敗:", err);
             }
         }
 
-        function buildTagCloud() {
-            const tagCounts = {};
+        function calculateTagStatistics() {
+            const counts = {};
             rawDocsData.forEach(doc => {
-                const tags = (doc.tags || "").split(",").map(t => t.trim()).filter(Boolean);
-                tags.forEach(t => {
-                    tagCounts[t] = (tagCounts[t] || 0) + 1;
-                });
+                if (doc.category) {
+                    doc.category.split(/[\/, ]/).forEach(t => {
+                        const trimmed = t.trim();
+                        if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
+                    });
+                }
             });
 
-            sortedTagsList = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
-            renderInlineTags();
+            sortedTagsList = Object.keys(counts).map(tag => ({
+                tag: tag,
+                count: counts[tag]
+            })).sort((a, b) => b.count - a.count);
         }
 
-        function renderInlineTags() {
+        function renderDocTags() {
             const container = document.getElementById('doc-tags-container');
-            let html = `
-                <button onclick="selectDocTag('ALL')" class="px-2 py-0.5 text-[10px] rounded font-bold transition-colors ${activeDocTag === 'ALL' ? 'bg-red-600 text-white' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800'}">
+            let tagsHTML = `
+                <button onclick="setDocTag('ALL')" id="tag-btn-ALL" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all shrink-0 ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
                     全部 (${rawDocsData.length})
                 </button>
             `;
 
-            sortedTagsList.slice(0, 8).forEach(tag => {
-                const count = rawDocsData.filter(d => (d.tags || "").includes(tag)).length;
-                const isActive = activeDocTag === tag;
-                html += `
-                    <button onclick="selectDocTag('${tag}')" class="px-2 py-0.5 text-[10px] rounded font-bold transition-colors ${isActive ? 'bg-red-600 text-white' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800'}">
-                        ${tag} (${count})
+            sortedTagsList.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                tagsHTML += `
+                    <button onclick="setDocTag('${item.tag}')" id="tag-btn-${item.tag}" class="px-2 py-0.5 rounded text-[11px] font-bold transition-all shrink-0 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-400 hover:bg-gray-800 border border-gray-800'}">
+                        ${item.tag} (${item.count})
                     </button>
                 `;
             });
 
-            container.innerHTML = html;
+            container.innerHTML = tagsHTML;
         }
 
-        function selectDocTag(tag) {
+        function setDocTag(tag) {
             activeDocTag = tag;
-            renderInlineTags();
+            renderDocTags();
             filterDocs();
             closeTagCloudModal();
         }
 
         function filterDocs() {
-            const query = document.getElementById('doc-search-input').value.toLowerCase().trim();
-            const listContainer = document.getElementById('docs-list-container');
+            const searchKeyword = document.getElementById('doc-search-input').value.trim().toLowerCase();
 
             const filtered = rawDocsData.filter(doc => {
-                const matchTag = activeDocTag === 'ALL' || (doc.tags || "").includes(activeDocTag);
-                const matchSearch = !query || 
-                    (doc.title || "").toLowerCase().includes(query) || 
-                    (doc.partId || "").toLowerCase().includes(query) || 
-                    (doc.category || "").toLowerCase().includes(query) ||
-                    (doc.tags || "").toLowerCase().includes(query);
+                const matchTag = (activeDocTag === "ALL") || (doc.category && doc.category.includes(activeDocTag));
+                const matchSearch = !searchKeyword || 
+                    (doc.title && doc.title.toLowerCase().includes(searchKeyword)) ||
+                    (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
+                    (doc.keyword && doc.keyword.toLowerCase().includes(searchKeyword)) ||
+                    (doc.date && doc.date.toLowerCase().includes(searchKeyword));
+
                 return matchTag && matchSearch;
             });
 
-            document.getElementById('docs-count-badge').innerText = `${filtered.length} 份文件`;
+            renderDocsList(filtered);
+        }
 
-            if (filtered.length === 0) {
-                listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">無符合條件之文獻</div>';
+        function renderDocsList(docs) {
+            const listContainer = document.getElementById('docs-list-container');
+            const countBadge = document.getElementById('docs-count-badge');
+            countBadge.innerText = `${docs.length} 份文件`;
+
+            if (docs.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">查無符合條件的技術文獻</div>';
                 return;
             }
 
-            listContainer.innerHTML = filtered.map(doc => `
-                <div id="doc-card-${doc.id}" onclick="previewPdf('${doc.pdfUrl}', '${doc.id}')" class="bg-[#0d1117] border border-gray-800 hover:border-red-950 p-3 rounded-lg cursor-pointer transition-all shadow hover:bg-[#161b22]">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-[10px] font-bold text-red-400 bg-red-950/50 border border-red-900/50 px-1.5 py-0.2 rounded">${doc.category || 'TSB'}</span>
-                        <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
+            listContainer.innerHTML = docs.map((doc, index) => {
+                return `
+                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
+                        <div class="flex items-center justify-between">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
+                                ${doc.category || '未分類'}
+                            </span>
+                            <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
+                        </div>
+                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
+                        <div class="flex justify-end pt-1">
+                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
+                                預覽 <span class="ml-1 text-[8px]">▶</span>
+                            </span>
+                        </div>
                     </div>
-                    <h4 class="text-xs font-bold text-white mb-1 leading-snug">${doc.title}</h4>
-                    <p class="text-[11px] text-gray-400 line-clamp-2">${doc.summary || ''}</p>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        function previewPdf(url, id) {
-            document.querySelectorAll('.active-doc').forEach(el => el.classList.remove('active-doc'));
-            const card = document.getElementById(`doc-card-${id}`);
-            if (card) card.classList.add('active-doc');
+        function previewDoc(url, index) {
+            if (!url) return;
 
-            const iframe = document.getElementById('pdf-iframe');
+            document.querySelectorAll('#docs-list-container > div').forEach(el => el.classList.remove('active-doc'));
+            const activeCard = document.getElementById(`doc-card-${index}`);
+            if (activeCard) activeCard.classList.add('active-doc');
+
             const placeholder = document.getElementById('pdf-placeholder');
+            const iframe = document.getElementById('pdf-iframe');
 
-            if (url) {
-                iframe.src = url;
-                iframe.classList.remove('hidden');
-                placeholder.classList.add('hidden');
+            let embedUrl = url;
+            if (url.includes('drive.google.com') && url.includes('/view')) {
+                embedUrl = url.replace('/view', '/preview');
             }
+
+            placeholder.classList.add('hidden');
+            iframe.classList.remove('hidden');
+            iframe.src = embedUrl;
         }
 
         function openTagCloudModal() {
             const modal = document.getElementById('tag-cloud-modal');
+            const searchInput = document.getElementById('modal-tag-search');
+            searchInput.value = '';
+            
+            renderModalTagGrid(sortedTagsList);
+            document.getElementById('modal-tag-stats').innerText = `共計 ${sortedTagsList.length} 個分類標籤`;
+
             modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            renderModalTags();
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+            searchInput.focus();
         }
 
         function closeTagCloudModal() {
             const modal = document.getElementById('tag-cloud-modal');
             modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 200);
-        }
-
-        function renderModalTags() {
-            const grid = document.getElementById('modal-tag-grid');
-            const query = document.getElementById('modal-tag-search').value.toLowerCase().trim();
-
-            const filtered = sortedTagsList.filter(t => !query || t.toLowerCase().includes(query));
-
-            document.getElementById('modal-tag-stats').innerText = `共計 ${filtered.length} 個分類標籤`;
-
-            grid.innerHTML = filtered.map(tag => {
-                const count = rawDocsData.filter(d => (d.tags || "").includes(tag)).length;
-                return `
-                    <button onclick="selectDocTag('${tag}')" class="px-2.5 py-1 text-xs rounded font-medium bg-[#0d1117] hover:bg-red-950 hover:text-red-400 border border-gray-700 transition-all text-gray-300">
-                        🏷️ ${tag} <span class="text-gray-500 font-mono text-[10px]">(${count})</span>
-                    </button>
-                `;
-            }).join('');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
         }
 
         function filterModalTags() {
-            renderModalTags();
+            const query = document.getElementById('modal-tag-search').value.trim().toLowerCase();
+            const filtered = sortedTagsList.filter(item => item.tag.toLowerCase().includes(query));
+            renderModalTagGrid(filtered);
+        }
+
+        function renderModalTagGrid(list) {
+            const grid = document.getElementById('modal-tag-grid');
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="text-xs text-gray-500 py-4 w-full text-center">找不到匹配的標籤</div>';
+                return;
+            }
+
+            let html = `
+                <button onclick="setDocTag('ALL')" class="px-3 py-1 rounded text-xs font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 border border-gray-700'}">
+                    # 全部 (${rawDocsData.length})
+                </button>
+            `;
+
+            list.forEach(item => {
+                const isActive = activeDocTag === item.tag;
+                html += `
+                    <button onclick="setDocTag('${item.tag}')" class="px-3 py-1 rounded text-xs font-bold transition-all flex items-center space-x-1.5 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 hover:border-red-500 border border-gray-700'}">
+                        <span># ${item.tag}</span>
+                        <span class="text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500 font-mono'}">(${item.count})</span>
+                    </button>
+                `;
+            });
+
+            grid.innerHTML = html;
         }
 
         function openLightbox(src, partId, title, defaultImg, safeDesc) {
@@ -808,10 +842,11 @@
             const descText = document.getElementById('lightbox-desc-text');
 
             img.src = src;
+            img.onerror = function() { this.src = defaultImg; };
             pId.innerText = partId;
             pTitle.innerText = title;
 
-            const desc = decodeURIComponent(safeDesc);
+            const desc = decodeURIComponent(safeDesc).trim();
             if (desc) {
                 descText.innerText = desc;
                 descBox.classList.remove('hidden');
@@ -828,6 +863,16 @@
             lightbox.classList.add('opacity-0');
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+                closeTagCloudModal();
+            }
+        });
+
+        // 確保在 script 載入完畢後立即執行啟動[cite: 1]
+        initializeDynamicSheets();
     </script>
 </body>
 </html>
