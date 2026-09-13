@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" class="w-full overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>專業保養看板與技術文獻 (行動版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
         body { 
             background-color: #0d1117; 
             color: #c9d1d9; 
@@ -19,21 +23,21 @@
         .active-doc { border-color: #dc2626 !important; background-color: #1c1917 !important; border-left: 4px solid #ef4444 !important; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen bg-[#0d1117] pb-12 select-none">
+<body class="flex flex-col min-h-screen w-full bg-[#0d1117] pb-12 select-none overflow-x-hidden">
 
     <!-- 手機頂部固定導覽區 -->
-    <header class="sticky top-0 z-30 bg-[#161b22]/95 backdrop-blur-md border-b border-gray-800 px-3 pt-2.5 pb-2 shadow-lg">
+    <header class="sticky top-0 z-30 w-full max-w-full bg-[#161b22]/95 backdrop-blur-md border-b border-gray-800 px-3 pt-2.5 pb-2 shadow-lg box-border">
         
-        <!-- 第一列：品牌切換與主模式開關 -->
-        <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center space-x-2">
+        <!-- 第一列：品牌切換與主模式開關 (加上 min-w-0 避免長文字撐寬) -->
+        <div class="flex items-center justify-between gap-2 w-full">
+            <div class="flex items-center space-x-1.5 min-w-0 flex-1">
                 <div id="brand-logo" class="w-8 h-8 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[9px] tracking-wider shadow shrink-0">CANN</div>
-                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1">
-                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white text-xs font-bold focus:outline-none pr-1">
+                <div class="flex items-center bg-[#0d1117] border border-gray-700 rounded-lg px-2 py-1 min-w-0 flex-1">
+                    <select id="brand-select" onchange="updateModelOptions()" class="bg-transparent text-white text-xs font-bold focus:outline-none pr-1 shrink-0 max-w-[90px] truncate">
                         <option value="">載入中...</option>
                     </select>
-                    <span class="text-gray-600 text-xs">/</span>
-                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white text-xs font-bold focus:outline-none pl-1 max-w-[130px] truncate">
+                    <span class="text-gray-600 text-xs shrink-0">/</span>
+                    <select id="car-model-select" onchange="executeModelSwitch(this.value)" class="bg-transparent text-white text-xs font-bold focus:outline-none pl-1 min-w-0 flex-1 truncate">
                     </select>
                 </div>
             </div>
@@ -49,26 +53,26 @@
         </div>
 
         <!-- 第二列：水平滑動分頁標籤（保養套餐專用） -->
-        <div id="package-tabs-scroll" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1 items-center">
+        <div id="package-tabs-scroll" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1 items-center w-full">
             <span class="text-xs text-gray-500">同步雲端分頁中...</span>
         </div>
 
         <!-- 第三列：頂部金額看板（含折讓計算） -->
-        <div id="top-price-banner" class="mt-1 bg-[#0d1117] border border-gray-800 rounded-lg px-3 py-1.5 flex items-center justify-between shadow-inner">
-            <div class="flex flex-col">
+        <div id="top-price-banner" class="mt-1 bg-[#0d1117] border border-gray-800 rounded-lg px-3 py-1.5 flex items-center justify-between shadow-inner w-full box-border">
+            <div class="flex flex-col min-w-0">
                 <div class="flex items-center space-x-2 text-[10px] text-gray-400 font-mono">
                     <span>工資: <b id="labor-subtotal" class="text-gray-200 font-normal">$ 0</b></span>
                     <span class="text-gray-600">|</span>
                     <span>零件: <b id="parts-subtotal" class="text-amber-500 font-normal">$ 0</b></span>
                 </div>
                 <div class="flex items-baseline space-x-1.5 mt-0.5">
-                    <span class="text-[11px] text-gray-400 font-medium">總計應付</span>
-                    <span id="package-total" class="text-lg font-black text-green-400 font-mono tracking-tight">$ 0</span>
-                    <span id="discount-badge-label" class="text-[9px] text-amber-500 font-mono hidden">(已折)</span>
+                    <span class="text-[11px] text-gray-400 font-medium shrink-0">總計應付</span>
+                    <span id="package-total" class="text-lg font-black text-green-400 font-mono tracking-tight truncate">$ 0</span>
+                    <span id="discount-badge-label" class="text-[9px] text-amber-500 font-mono hidden shrink-0">(已折)</span>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-1.5 bg-[#161b22] border border-gray-700 rounded-md px-2 py-1">
+            <div class="flex items-center space-x-1.5 bg-[#161b22] border border-gray-700 rounded-md px-2 py-1 shrink-0">
                 <span class="text-[10px] text-gray-400 font-bold">折讓</span>
                 <input type="number" id="part-discount-input" value="100" min="0" max="100" step="5" oninput="calculateTotalsWithDiscount()" class="w-8 bg-transparent text-center text-white text-xs font-bold focus:outline-none border-b border-[#f59e0b] font-mono">
                 <span class="text-[10px] text-gray-400">%</span>
@@ -76,7 +80,7 @@
         </div>
 
         <!-- 第四列：工項明細 / 零件圖解 切換開關 -->
-        <div id="sub-mode-switch" class="mt-2 flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-800">
+        <div id="sub-mode-switch" class="mt-2 flex bg-[#0d1117] p-0.5 rounded-lg border border-gray-800 w-full box-border">
             <button id="btn-sub-list" onclick="switchSubView('list')" class="flex-1 py-1 text-xs font-bold rounded-md bg-[#161b22] text-amber-400 shadow transition-all flex items-center justify-center space-x-1">
                 <span>📋</span><span>工項明細清單</span>
             </button>
@@ -88,13 +92,13 @@
     </header>
 
     <!-- 主體內容區 -->
-    <main class="flex-1 p-3 space-y-3">
+    <main class="flex-1 p-3 space-y-3 w-full box-border min-w-0">
         
         <!-- 視圖一：保養套餐區塊 -->
-        <section id="package-view" class="flex flex-col space-y-3">
-            <div class="flex items-center justify-between px-1">
-                <h2 id="current-package-title" class="text-sm font-bold text-gray-100 flex items-center truncate">
-                    <span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span>載入中...
+        <section id="package-view" class="flex flex-col space-y-3 w-full min-w-0">
+            <div class="flex items-center justify-between px-1 gap-2">
+                <h2 id="current-package-title" class="text-sm font-bold text-gray-100 flex items-center truncate min-w-0 flex-1">
+                    <span class="w-2 h-3.5 bg-[#f59e0b] inline-block mr-1.5 rounded-sm shrink-0"></span><span class="truncate">載入中...</span>
                 </h2>
                 <button onclick="reloadAllData(true)" class="text-[11px] bg-[#161b22] border border-gray-700 hover:border-amber-500 text-gray-300 px-2 py-0.5 rounded-md flex items-center space-x-1 shrink-0">
                     <span>🔄</span><span>強制更新</span>
@@ -102,24 +106,24 @@
             </div>
 
             <!-- 子視圖 A：項目明細清單 (卡片結構) -->
-            <div id="sub-view-list" class="space-y-2.5"></div>
+            <div id="sub-view-list" class="space-y-2.5 w-full min-w-0"></div>
 
             <!-- 子視圖 B：零件圖解雙欄網格 -->
-            <div id="sub-view-grid" class="hidden grid grid-cols-2 gap-2.5"></div>
+            <div id="sub-view-grid" class="hidden grid grid-cols-2 gap-2.5 w-full"></div>
 
             <!-- 現場維護提醒卡片 -->
-            <div id="mobile-panel-tip" class="bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shadow-lg transition-all">
+            <div id="mobile-panel-tip" class="bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shadow-lg transition-all w-full box-border">
                 <h4 class="text-xs font-bold text-amber-400 mb-1 flex items-center gap-1">
                     <span>💡</span> 現場維護注意事項
                 </h4>
-                <p class="text-[11px] text-gray-300 leading-relaxed">
+                <p class="text-[11px] text-gray-300 leading-relaxed break-words">
                     請依照原廠手冊標準程序施工。完成機油更換與周邊保養後，務必透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零重設。
                 </p>
             </div>
         </section>
 
         <!-- 視圖二：技術文獻資料庫 -->
-        <section id="docs-view" class="hidden flex flex-col space-y-3">
+        <section id="docs-view" class="hidden flex flex-col space-y-3 w-full min-w-0">
             <div class="flex items-center justify-between px-1">
                 <div class="flex items-center space-x-1.5">
                     <span class="w-2 h-3.5 bg-red-600 inline-block rounded-sm"></span>
@@ -133,15 +137,15 @@
                 </div>
             </div>
 
-            <div class="relative">
-                <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500 shadow-inner">
+            <div class="relative w-full">
+                <input type="text" id="doc-search-input" oninput="filterDocs()" placeholder="🔍 搜尋手冊、分類或料號..." class="w-full bg-[#161b22] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500 shadow-inner box-border">
             </div>
 
             <!-- 水平捲動標籤列 -->
-            <div id="doc-tags-container" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
+            <div id="doc-tags-container" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1 w-full"></div>
 
             <!-- 文獻卡片容器 -->
-            <div id="docs-list-container" class="space-y-2">
+            <div id="docs-list-container" class="space-y-2 w-full min-w-0">
                 <div class="text-center py-10 text-gray-500 text-xs">正在載入文獻...</div>
             </div>
         </section>
@@ -481,10 +485,10 @@
             currentPackageKey = key;
             const pkg = allParsedPackages[key];
             
-            let titleHTML = `<span class="w-2 h-3.5 inline-block mr-1.5 rounded-sm shrink-0" style="background-color: ${theme.border};"></span>${pkg.name}`;
+            let titleHTML = `<span class="w-2 h-3.5 inline-block mr-1.5 rounded-sm shrink-0" style="background-color: ${theme.border};"></span><span class="truncate">${pkg.name}</span>`;
             if (pkg.pdfUrl) {
                 titleHTML += `
-                    <a href="${pkg.pdfUrl}" target="_blank" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800 rounded-md">
+                    <a href="${pkg.pdfUrl}" target="_blank" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800 rounded-md shrink-0">
                         <span>📄</span><span>技術PDF</span>
                     </a>
                 `;
@@ -541,16 +545,16 @@
 
                 // 清單視圖 (List View)
                 listHTML += `
-                    <div class="bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow-md flex flex-col space-y-2 relative">
+                    <div class="bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow-md flex flex-col space-y-2 relative w-full box-border">
                         <div class="flex items-start justify-between gap-2">
-                            <div class="flex items-center space-x-1.5">
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/70 text-amber-400 border border-amber-900/60'}">${item.attr}</span>
-                                <span onclick="copyRowInfo(event, '${rowInfoData}')" class="font-mono text-xs font-bold text-gray-200 bg-[#0d1117] border border-gray-700 px-2 py-0.5 rounded flex items-center gap-1 active:scale-95 transition-transform" title="點擊複製明細">
-                                    ${item.partId}
-                                    <span class="text-[10px] text-amber-500">📋</span>
+                            <div class="flex items-center space-x-1.5 min-w-0">
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${isLabor ? 'bg-slate-800 text-slate-300' : 'bg-amber-950/70 text-amber-400 border border-amber-900/60'}">${item.attr}</span>
+                                <span onclick="copyRowInfo(event, '${rowInfoData}')" class="font-mono text-xs font-bold text-gray-200 bg-[#0d1117] border border-gray-700 px-2 py-0.5 rounded flex items-center gap-1 active:scale-95 transition-transform truncate" title="點擊複製明細">
+                                    <span class="truncate">${item.partId}</span>
+                                    <span class="text-[10px] text-amber-500 shrink-0">📋</span>
                                 </span>
                             </div>
-                            <div class="flex items-center space-x-1">
+                            <div class="flex items-center space-x-1 shrink-0">
                                 ${stockBadge}
                                 ${item.location ? `<span class="text-[10px] font-mono text-amber-500 font-semibold bg-[#0d1117] px-1.5 py-0.5 rounded border border-gray-800">${item.location}</span>` : ''}
                             </div>
@@ -565,8 +569,8 @@
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-xs font-semibold text-white leading-snug break-words">${item.name}</h3>
                                 <div class="flex items-center justify-between mt-1 text-[11px] text-gray-400 font-mono">
-                                    <span>$${displayPrice.toLocaleString()} × ${displayQty}</span>
-                                    <span class="text-xs font-bold text-green-400">$ ${lineSubtotal.toLocaleString()}</span>
+                                    <span class="shrink-0">$${displayPrice.toLocaleString()} × ${displayQty}</span>
+                                    <span class="text-xs font-bold text-green-400 shrink-0">$ ${lineSubtotal.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -576,13 +580,13 @@
                 // 網格視圖 (Grid View) - 帶入品牌專屬色彩
                 if (!isLabor && item.partId) {
                     gridHTML += `
-                        <div style="background-color: ${theme.cardBg}; border: 1px solid ${theme.cardBorder};" class="rounded-xl p-2.5 flex flex-col justify-between shadow active:scale-[0.98] transition-transform cursor-pointer" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
+                        <div style="background-color: ${theme.cardBg}; border: 1px solid ${theme.cardBorder};" class="rounded-xl p-2.5 flex flex-col justify-between shadow active:scale-[0.98] transition-transform cursor-pointer min-w-0" onclick="openLightbox('${imgUrlPng}', '${item.partId}', '${item.name}', '${defaultImg}', '${safeDesc}')">
                             <div class="w-full h-28 bg-[#0d1117] rounded-lg flex items-center justify-center overflow-hidden relative">
                                 <img src="${imgUrlPng}" alt="" loading="lazy" onerror="if(this.src.endsWith('.png')){this.src='${imgUrlJpg}';}else{this.src='${defaultImg}';}" class="w-full h-full object-contain p-1.5">
                                 <div class="absolute bottom-1 right-1 bg-black/60 px-1 py-0.5 rounded text-[9px] text-amber-400">🔍 看大圖</div>
                             </div>
-                            <div class="mt-2 text-center">
-                                <p class="text-[10px] text-amber-500/90 font-mono">${item.partId}</p>
+                            <div class="mt-2 text-center min-w-0">
+                                <p class="text-[10px] text-amber-500/90 font-mono truncate">${item.partId}</p>
                                 <h4 class="text-xs text-white font-medium truncate mt-0.5">${item.name}</h4>
                             </div>
                         </div>
@@ -853,14 +857,14 @@ ${isLabor ? '⚡' : '🏷️'}【即時庫存】${stockDisplay}
                 }
 
                 return `
-                    <a href="${targetUrl}" target="_blank" class="block bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow active:border-red-500 transition-colors">
+                    <a href="${targetUrl}" target="_blank" class="block bg-[#161b22] border border-gray-800 rounded-xl p-3 shadow active:border-red-500 transition-colors w-full box-border min-w-0">
                         <div class="flex items-center justify-between gap-2">
                             <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900 truncate">
                                 📑 ${doc.category || '未分類'}
                             </span>
-                            <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
+                            <span class="text-[10px] text-gray-500 font-mono shrink-0">${doc.date || ''}</span>
                         </div>
-                        <h4 class="text-xs font-semibold text-white mt-1.5 leading-snug line-clamp-2">${doc.title}</h4>
+                        <h4 class="text-xs font-semibold text-white mt-1.5 leading-snug line-clamp-2 break-words">${doc.title}</h4>
                         <div class="flex justify-end items-center mt-2 text-[10px] text-red-400 font-medium">
                             <span>開啟技術手冊 PDF</span> <span class="ml-1 text-[8px]">▶</span>
                         </div>
