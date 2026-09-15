@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業多車型保養看板與技術文獻</title>
+    <title>星聯板橋 - 專業多車型保養看板與技術文獻</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -19,13 +19,18 @@
 
     <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center border-b border-gray-800 pb-3 mb-3 gap-3 shrink-0">
         <div class="flex items-center space-x-3 shrink-0">
-            <div id="brand-logo" class="w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all">CANN</div>
+            <div id="brand-logo" class="w-10 h-10 bg-[#1e1b4b] border border-[#6366f1] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-indigo-900/30 transition-all">星聯</div>
             <div>
                 <div class="flex items-center space-x-2 bg-[#161b22] border border-gray-700 rounded-lg px-2.5 py-1">
                     <div class="flex items-center space-x-1">
                         <label for="brand-select" class="text-xs text-gray-400 font-bold whitespace-nowrap">品牌：</label>
                         <select id="brand-select" onchange="updateModelOptions()" class="bg-[#0d1117] text-white border border-gray-800 rounded px-1.5 py-0.5 text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer">
-                            <option value="">載入中...</option>
+                            <!-- 預載入預設品牌，0 秒呈現 -->
+                            <option value="PROJECT">PROJECT</option>
+                            <option value="PEUGEOT">PEUGEOT</option>
+                            <option value="CITROËN">CITROËN</option>
+                            <option value="ALFA ROMEO">ALFA ROMEO</option>
+                            <option value="JEEP">JEEP</option>
                         </select>
                     </div>
                     <div class="h-4 border-l border-gray-700"></div>
@@ -48,11 +53,11 @@
         </div>
         
         <div id="package-tabs" class="flex flex-wrap gap-1.5 max-w-2xl justify-start lg:justify-center">
-            <span class="text-xs text-gray-500">正在同步試算表分頁...</span>
+            <span class="text-xs text-amber-500 font-mono">載入中...</span>
         </div>
 
         <button onclick="reloadAllData(true)" class="bg-[#161b22] hover:bg-gray-800 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-lg transition-all border border-gray-700 flex items-center space-x-1 shrink-0">
-            <span>🔄</span> <span>強制重新整理</span>
+            <span>🔄</span> <span>清除快取刷新</span>
         </button>
     </header>
 
@@ -60,13 +65,12 @@
         
         <!-- 視圖一：保養套餐看板 -->
         <section id="package-view" class="flex-1 flex space-x-4 overflow-hidden">
-            <!-- 左側：固定為深灰黑經典風格 -->
             <div class="w-7/12 flex flex-col bg-[#161b22] rounded-xl border border-gray-800 p-4 overflow-hidden shadow-2xl">
                 <div class="flex justify-between items-center mb-2 shrink-0">
                     <h2 id="current-package-title" class="text-base font-bold text-gray-100 flex items-center">
                         <span class="w-2 h-4 bg-[#f59e0b] inline-block mr-2 rounded-sm"></span>載入中...
                     </h2>
-                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">連線正常</span>
+                    <span id="status-badge" class="text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold">就緒</span>
                 </div>
 
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
@@ -111,7 +115,7 @@
                 </div>
             </div>
 
-            <!-- 右側：僅此區變換品牌配色 -->
+            <!-- 右側：依品牌切換配色 -->
             <div class="w-5/12 flex flex-col space-y-3 overflow-hidden">
                 <div id="right-panel-box" class="flex-1 bg-[#161b22] rounded-xl border border-gray-800 p-4 flex flex-col overflow-hidden shadow-2xl transition-all duration-300">
                     <h3 class="text-xs font-semibold text-gray-300 mb-3 tracking-wider flex items-center shrink-0">
@@ -121,7 +125,7 @@
                 </div>
 
                 <div id="right-panel-tip" class="h-24 bg-[#161b22] rounded-xl border border-gray-800 p-3 flex flex-col justify-center shrink-0 transition-all duration-300">
-                    <h4 class="text-xs font-bold text-amber-400 mb-1">💡 現場維護提示</h4>
+                    <h4 class="text-xs font-bold text-amber-400 mb-1">💡 星聯板橋 維護提示</h4>
                     <p class="text-[11px] text-gray-300 leading-relaxed">
                         請技師依照原廠技術手冊規範施工。機油添加完畢後，請透過中控儀表或原廠診斷電腦進行油位校正及保養週期歸零。
                     </p>
@@ -167,173 +171,96 @@
 
     </main>
 
-    <!-- Obsidian 標籤雲彈出視窗 -->
-    <div id="tag-cloud-modal" onclick="closeTagCloudModal()" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
-        <div class="bg-[#161b22] border border-gray-700 w-full max-w-xl rounded-xl p-5 shadow-2xl flex flex-col max-h-[75vh]" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center pb-3 border-b border-gray-800">
-                <div class="flex items-center space-x-2">
-                    <span class="text-base">🏷️</span>
-                    <h3 class="text-sm font-bold text-white tracking-wide">文獻標籤庫 (Tag Cloud Matrix)</h3>
-                </div>
-                <button onclick="closeTagCloudModal()" class="text-gray-400 hover:text-white text-xl font-light focus:outline-none">&times;</button>
-            </div>
-            
-            <div class="my-3">
-                <input type="text" id="modal-tag-search" oninput="filterModalTags()" placeholder="過濾標籤名稱..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-sans placeholder-gray-500">
-            </div>
-
-            <div id="modal-tag-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-wrap gap-2 p-1 content-start"></div>
-
-            <div class="pt-3 border-t border-gray-800 flex justify-between items-center text-[11px] text-gray-500">
-                <span id="modal-tag-stats">共計 0 個分類標籤</span>
-                <span>點選標籤即可套用</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 零件大圖燈箱 -->
-    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 bg-black/90 z-50 flex flex-col justify-center items-center p-4 cursor-zoom-out transition-opacity duration-300 opacity-0">
-        <button class="absolute top-6 right-6 text-gray-400 hover:text-white text-3xl font-light focus:outline-none">&times;</button>
-        <div class="max-w-4xl max-h-[80vh] flex items-center justify-center bg-[#161b22] p-2 rounded-lg border border-gray-800 shadow-2xl" onclick="event.stopPropagation()">
-            <img id="lightbox-img" src="" alt="零件大圖" class="max-w-full max-h-[75vh] object-contain rounded">
-        </div>
-        <div class="mt-3 text-center max-w-xl" onclick="event.stopPropagation()">
-            <p id="lightbox-part-id" class="text-xs text-gray-500 font-mono tracking-widest"></p>
-            <h3 id="lightbox-title" class="text-base font-bold text-white mt-0.5"></h3>
-            <div id="lightbox-desc-container" class="mt-2 px-3 py-1.5 bg-amber-950/40 border border-amber-900/50 rounded text-amber-400 text-xs hidden leading-relaxed">
-                <span class="font-bold block text-amber-500 text-[10px] tracking-wider uppercase mb-0.5">⚠️ 現場維護說明 NOTE</span>
-                <span id="lightbox-desc-text"></span>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwgRYKEiCoyWeQkyhmmnZ1rd7ydb7FDqhBEQflBmb_4kGnI-QJ1oLqpGs6mblXBIx1q4w/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7-ZKrCSvmfpkQeeNoSAhxiAhHHLDVFfwlbm93Hv-sK4U0d-c4DXK6-_UPrLx0aEACiw/exec";
 
-        // 右側專屬品牌主題配色表
+        // 【秒開關鍵 1】：將固定分頁預先寫入，開啟網頁瞬間 0 秒就緒！
+        const DEFAULT_MODELS = [
+            { brand: "PROJECT", model: "通用專案", sheetName: "PROJECT_通用專案" },
+            { brand: "PEUGEOT", model: "408H", sheetName: "P_408H" },
+            { brand: "PEUGEOT", model: "3008H", sheetName: "P_3008H" },
+            { brand: "PEUGEOT", model: "5008H", sheetName: "P_5008H" },
+            { brand: "PEUGEOT", model: "408Y", sheetName: "P_408Y" },
+            { brand: "CITROËN", model: "新Berlingo", sheetName: "C_新Berlingo" },
+            { brand: "ALFA ROMEO", model: "STELVIO INTENSA 2.0", sheetName: "ALFA_STELVIO INTENSA_2.0" },
+            { brand: "ALFA ROMEO", model: "GIULIA SPRINT 2.0", sheetName: "ALFA_GIULIA SPRINT_2.0" },
+            { brand: "ALFA ROMEO", model: "GIULIA QUADRIFOGLIO", sheetName: "ALFA_GIULIA QUADRIFOGLIO" },
+            { brand: "ALFA ROMEO", model: "JUNIOR IBRIDA Q2", sheetName: "ALFA_JUNIOR IBRIDA Q2" },
+            { brand: "JEEP", model: "WRANGLER RUBICON", sheetName: "JEEP_WRANGLER RUBICON" }
+        ];
+
         const BRAND_THEMES = {
-            "JEEP": {
-                panelBg: "style='background-color: #07150c; border: 1px solid #16a34a;'",
-                tipBg: "style='background-color: #0e2416; border: 1px solid #22c55e;'",
-                cardBg: "#0e2416",
-                cardBorder: "#16a34a",
-                previewBg: "#07150c"
-            },
-            "PEUGEOT": {
-                panelBg: "style='background-color: #04101e; border: 1px solid #0284c7;'",
-                tipBg: "style='background-color: #0a1c33; border: 1px solid #06b6d4;'",
-                cardBg: "#0a1c33",
-                cardBorder: "#0284c7",
-                previewBg: "#04101e"
-            },
-            "ALFA ROMEO": {
-                panelBg: "style='background-color: #170408; border: 1px solid #991b1b;'",
-                tipBg: "style='background-color: #28080f; border: 1px solid #dc2626;'",
-                cardBg: "#28080f",
-                cardBorder: "#991b1b",
-                previewBg: "#170408"
-            },
-            "CITROËN": {
-                panelBg: "style='background-color: #1a0613; border: 1px solid #ec4899;'",
-                tipBg: "style='background-color: #2c0b20; border: 1px solid #f43f5e;'",
-                cardBg: "#2c0b20",
-                cardBorder: "#ec4899",
-                previewBg: "#1a0613"
-            },
-            "PROJECT": {
-                panelBg: "style='background-color: #170e03; border: 1px solid #d97706;'",
-                tipBg: "style='background-color: #291907; border: 1px solid #f59e0b;'",
-                cardBg: "#291907",
-                cardBorder: "#d97706",
-                previewBg: "#170e03"
-            }
+            "JEEP": { panelBg: "style='background-color: #07150c; border: 1px solid #16a34a;'", tipBg: "style='background-color: #0e2416; border: 1px solid #22c55e;'", cardBg: "#0e2416", cardBorder: "#16a34a", previewBg: "#07150c" },
+            "PEUGEOT": { panelBg: "style='background-color: #04101e; border: 1px solid #0284c7;'", tipBg: "style='background-color: #0a1c33; border: 1px solid #06b6d4;'", cardBg: "#0a1c33", cardBorder: "#0284c7", previewBg: "#04101e" },
+            "ALFA ROMEO": { panelBg: "style='background-color: #170408; border: 1px solid #991b1b;'", tipBg: "style='background-color: #28080f; border: 1px solid #dc2626;'", cardBg: "#28080f", cardBorder: "#991b1b", previewBg: "#170408" },
+            "CITROËN": { panelBg: "style='background-color: #1a0613; border: 1px solid #ec4899;'", tipBg: "style='background-color: #2c0b20; border: 1px solid #f43f5e;'", cardBg: "#2c0b20", cardBorder: "#ec4899", previewBg: "#1a0613" },
+            "PROJECT": { panelBg: "style='background-color: #170e03; border: 1px solid #d97706;'", tipBg: "style='background-color: #291907; border: 1px solid #f59e0b;'", cardBg: "#291907", cardBorder: "#d97706", previewBg: "#170e03" }
         };
 
-        const CACHE_SHEET_DATA = new Map();
-        let CACHE_MODELS_DATA = null;
-        let CACHE_DOCS_DATA = null;
-
-        let dynamicModelsData = []; 
+        let dynamicModelsData = DEFAULT_MODELS; 
         let allParsedPackages = {}; 
         let currentPackageKey = "";
         let selectedModelObj = null;
         let rawLaborSum = 0;
         let rawPartsSum = 0;
-
         let rawDocsData = [];
         let sortedTagsList = [];
         let activeDocTag = "ALL";
+        let isDocsLoaded = false;
 
-        async function initializeDynamicSheets(force = false) {
-            const tabsContainer = document.getElementById('package-tabs');
-            const statusBadge = document.getElementById('status-badge');
-            
+        // 【秒開關鍵 2】：分開獨立啟動，優先載入當前畫面，其他背景非同步處理
+        function initializeApp() {
+            renderBrandSelect();
+            // 在背景偷偷非同步更新遠端車型分頁清單（完全不阻礙目前操作）
+            syncModelsInBackground();
+        }
+
+        async function syncModelsInBackground() {
             try {
-                if (!force && CACHE_MODELS_DATA) {
-                    dynamicModelsData = CACHE_MODELS_DATA;
-                } else {
-                    tabsContainer.innerHTML = '<span class="text-xs text-gray-500">正在同步試算表分頁...</span>';
-                    const response = await fetch(GAS_API_URL + (force ? "?t=" + Date.now() : ""));
-                    if (!response.ok) throw new Error("API 回應異常: " + response.status);
-                    dynamicModelsData = await response.json();
-                    CACHE_MODELS_DATA = dynamicModelsData;
+                const res = await fetch(GAS_API_URL);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        dynamicModelsData = data;
+                        renderBrandSelect(false);
+                    }
                 }
-
-                statusBadge.innerText = "連線正常 (極速模式)";
-                statusBadge.className = "text-[10px] bg-green-950 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-semibold";
-                
-                renderBrandSelect();
-                loadTechnicalDocs(force);
-            } catch (error) {
-                console.error("載入失敗:", error);
-                statusBadge.innerText = "連線失敗";
-                statusBadge.className = "text-[10px] bg-red-950 text-red-400 border border-red-900 px-2 py-0.5 rounded-full font-semibold";
-            }
+            } catch (e) { console.log("背景清單同步完成（保留預設骨架）"); }
         }
 
-        function reloadAllData(force = false) {
+        function reloadAllData(force = true) {
             if (force) {
-                CACHE_SHEET_DATA.clear();
-                CACHE_MODELS_DATA = null;
-                CACHE_DOCS_DATA = null;
+                // 清理所有本機儲存
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith("csv_") || k.startsWith("docs_")) localStorage.removeItem(k);
+                });
             }
-            initializeDynamicSheets(force);
+            fetchSheetData(true);
+            if (isDocsLoaded) loadTechnicalDocs(true);
         }
 
-        function renderBrandSelect() {
+        function renderBrandSelect(switchModel = true) {
             const brandSelect = document.getElementById('brand-select');
             const availableBrands = [...new Set(dynamicModelsData.map(item => item.brand))];
+            const currentVal = brandSelect.value || "PROJECT";
 
             brandSelect.innerHTML = availableBrands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
+            brandSelect.value = availableBrands.includes(currentVal) ? currentVal : availableBrands[0];
 
-            if (availableBrands.includes("PROJECT")) {
-                brandSelect.value = "PROJECT";
-            }
-
-            updateModelOptions(true);
+            updateModelOptions(switchModel);
         }
 
-        function updateModelOptions(isInitial = false) {
+        function updateModelOptions(triggerSwitch = true) {
             const brandSelect = document.getElementById('brand-select');
             const modelSelect = document.getElementById('car-model-select');
             const currentBrand = brandSelect.value;
 
             const matchedModels = dynamicModelsData.filter(item => item.brand === currentBrand);
-
             modelSelect.innerHTML = matchedModels.map(item => `<option value="${item.sheetName}">${item.model}</option>`).join('');
 
-            if (matchedModels.length > 0) {
-                let defaultTarget = matchedModels[0].sheetName;
-
-                if (isInitial && currentBrand === "PROJECT") {
-                    const foundPrj = matchedModels.find(item => item.sheetName.includes("通用專案") || item.model.includes("通用專案"));
-                    if (foundPrj) defaultTarget = foundPrj.sheetName;
-                }
-
-                modelSelect.value = defaultTarget;
-                executeModelSwitch(defaultTarget);
-            } else {
-                clearDisplay();
+            if (matchedModels.length > 0 && triggerSwitch) {
+                modelSelect.value = matchedModels[0].sheetName;
+                executeModelSwitch(matchedModels[0].sheetName);
             }
         }
 
@@ -348,8 +275,8 @@
                 brandLogo.innerText = "CITR";
                 brandLogo.className = "w-10 h-10 bg-[#1a0613] border border-[#ec4899] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-pink-900/30 transition-all";
             } else if (brand === "PROJECT") {
-                brandLogo.innerText = "CANN";
-                brandLogo.className = "w-10 h-10 bg-[#2a1b08] border border-[#f59e0b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-amber-900/30 transition-all";
+                brandLogo.innerText = "星聯";
+                brandLogo.className = "w-10 h-10 bg-[#1e1b4b] border border-[#6366f1] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-indigo-900/30 transition-all";
             } else if (brand === "ALFA ROMEO") {
                 brandLogo.innerText = "ALFA";
                 brandLogo.className = "w-10 h-10 bg-[#200508] border border-[#991b1b] rounded-full flex items-center justify-center font-black text-white text-[10px] tracking-wider shadow-md shadow-red-950 transition-all";
@@ -363,43 +290,60 @@
 
             applyRightPanelTheme(brand);
             fetchSheetData();
-            if (!document.getElementById('docs-view').classList.contains('hidden')) {
-                filterDocs();
-            }
         }
 
         function applyRightPanelTheme(brand) {
             const theme = BRAND_THEMES[brand] || BRAND_THEMES["PROJECT"];
-            const rightBox = document.getElementById('right-panel-box');
-            const rightTip = document.getElementById('right-panel-tip');
-
-            rightBox.setAttribute('style', theme.panelBg.replace("style='", "").replace("'", ""));
-            rightTip.setAttribute('style', theme.tipBg.replace("style='", "").replace("'", ""));
+            document.getElementById('right-panel-box').setAttribute('style', theme.panelBg.replace("style='", "").replace("'", ""));
+            document.getElementById('right-panel-tip').setAttribute('style', theme.tipBg.replace("style='", "").replace("'", ""));
         }
 
-        async function fetchSheetData() {
+        // 【秒開關鍵 3】：獨立抓取單一車型 + 優先讀取 LocalStorage 快取
+        async function fetchSheetData(force = false) {
             if (!selectedModelObj) return;
             const sheetName = selectedModelObj.sheetName;
+            const cacheKey = "csv_" + sheetName;
 
-            if (CACHE_SHEET_DATA.has(sheetName)) {
-                parseExcelCSV(CACHE_SHEET_DATA.get(sheetName));
-                return;
+            // 1. 如果有本機快取且非強制刷新，直接 0.01 秒噴出畫面！
+            if (!force) {
+                const localData = localStorage.getItem(cacheKey);
+                if (localData) {
+                    parseExcelCSV(localData);
+                    document.getElementById('status-badge').innerText = "極速快取模式";
+                    // 偷偷在背景發請求更新快取，完全無感
+                    silentRefreshCsv(sheetName, cacheKey);
+                    return;
+                }
             }
 
-            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-gray-500">⚡ 極速載入中...</span>';
+            document.getElementById('package-tabs').innerHTML = '<span class="text-xs text-amber-500 font-mono animate-pulse">⚡ 正在連線板橋試算表...</span>';
+            document.getElementById('status-badge').innerText = "讀取中...";
 
             try {
-                const targetUrl = GAS_API_URL + "?action=getSheetCsv&sheet=" + encodeURIComponent(sheetName);
+                const cleanKey = encodeURIComponent(sheetName);
+                const targetUrl = `${GAS_API_URL}?action=getSheetCsv&sheet=${cleanKey}${force ? "&t=" + Date.now() : ""}`;
                 const response = await fetch(targetUrl);
                 const csvText = await response.text();
                 
-                CACHE_SHEET_DATA.set(sheetName, csvText);
+                localStorage.setItem(cacheKey, csvText);
                 parseExcelCSV(csvText);
+                document.getElementById('status-badge').innerText = "星聯板橋 連線正常";
             } catch (error) {
                 console.error("載入失敗:", error);
-                document.getElementById('current-package-title').innerText = "❌ 雲端資料載入失敗";
-                clearDisplay();
+                document.getElementById('current-package-title').innerText = "❌ 載入失敗";
+                document.getElementById('status-badge').innerText = "連線異常";
             }
+        }
+
+        async function silentRefreshCsv(sheetName, cacheKey) {
+            try {
+                const targetUrl = `${GAS_API_URL}?action=getSheetCsv&sheet=${encodeURIComponent(sheetName)}`;
+                const response = await fetch(targetUrl);
+                if (response.ok) {
+                    const freshCsv = await response.text();
+                    localStorage.setItem(cacheKey, freshCsv);
+                }
+            } catch(e) {}
         }
 
         function parseExcelCSV(csvText) {
@@ -415,11 +359,7 @@
                 
                 if (foundPackageCell) {
                     currentPackageName = foundPackageCell;
-                    packages[currentPackageName] = {
-                        name: currentPackageName,
-                        pdfUrl: "",
-                        items: []
-                    };
+                    packages[currentPackageName] = { name: currentPackageName, pdfUrl: "", items: [] };
                     const rawLCol = cols[11] || "";
                     if (rawLCol.startsWith("http")) packages[currentPackageName].pdfUrl = rawLCol;
                     return;
@@ -522,11 +462,8 @@
                 const displayDiscount = parseFloat(item.discount) || 1;
                 const lineSubtotal = Math.round(displayPrice * displayQty * displayDiscount);
 
-                if (isLabor) {
-                    rawLaborSum += lineSubtotal;
-                } else {
-                    rawPartsSum += lineSubtotal;
-                }
+                if (isLabor) rawLaborSum += lineSubtotal;
+                else rawPartsSum += lineSubtotal;
 
                 let stockBadge = '<span class="text-gray-600">-</span>';
                 if (!isLabor && item.stock !== "") {
@@ -633,6 +570,7 @@
             document.getElementById('package-total').innerText = '$ 0';
         }
 
+        // 【秒開關鍵 4】：點到「技術文獻」才進行延遲加載（Lazy Loading）
         function switchMainMode(mode) {
             const pkgView = document.getElementById('package-view');
             const docsView = document.getElementById('docs-view');
@@ -649,20 +587,35 @@
                 docsView.classList.remove('hidden');
                 btnDocs.className = "px-3 py-1 rounded text-xs font-bold transition-all bg-[#0d1117] text-white shadow";
                 btnPkg.className = "px-3 py-1 rounded text-xs font-bold transition-all text-gray-400 hover:text-white";
-                filterDocs();
+                
+                // 只有使用者切過來時才抓文獻，絕不在一開始霸佔頻寬
+                if (!isDocsLoaded) {
+                    loadTechnicalDocs();
+                } else {
+                    filterDocs();
+                }
             }
         }
 
         async function loadTechnicalDocs(force = false) {
             try {
-                if (!force && CACHE_DOCS_DATA) {
-                    rawDocsData = CACHE_DOCS_DATA;
-                } else {
-                    const response = await fetch(GAS_API_URL + "?action=getDocs" + (force ? "&t=" + Date.now() : ""));
-                    if (!response.ok) return;
-                    rawDocsData = await response.json();
-                    CACHE_DOCS_DATA = rawDocsData;
+                if (!force) {
+                    const localDocs = localStorage.getItem("docs_data");
+                    if (localDocs) {
+                        rawDocsData = JSON.parse(localDocs);
+                        isDocsLoaded = true;
+                        calculateTagStatistics();
+                        renderDocTags();
+                        filterDocs();
+                        return;
+                    }
                 }
+
+                const response = await fetch(`${GAS_API_URL}?action=getDocs${force ? "&t=" + Date.now() : ""}`);
+                if (!response.ok) return;
+                rawDocsData = await response.json();
+                localStorage.setItem("docs_data", JSON.stringify(rawDocsData));
+                isDocsLoaded = true;
                 calculateTagStatistics();
                 renderDocTags();
                 filterDocs();
@@ -682,10 +635,7 @@
                 }
             });
 
-            sortedTagsList = Object.keys(counts).map(tag => ({
-                tag: tag,
-                count: counts[tag]
-            })).sort((a, b) => b.count - a.count);
+            sortedTagsList = Object.keys(counts).map(tag => ({ tag, count: counts[tag] })).sort((a, b) => b.count - a.count);
         }
 
         function renderDocTags() {
@@ -712,12 +662,10 @@
             activeDocTag = tag;
             renderDocTags();
             filterDocs();
-            closeTagCloudModal();
         }
 
         function filterDocs() {
             const searchKeyword = document.getElementById('doc-search-input').value.trim().toLowerCase();
-
             const filtered = rawDocsData.filter(doc => {
                 const matchTag = (activeDocTag === "ALL") || (doc.category && doc.category.includes(activeDocTag));
                 const matchSearch = !searchKeyword || 
@@ -725,46 +673,40 @@
                     (doc.category && doc.category.toLowerCase().includes(searchKeyword)) ||
                     (doc.keyword && doc.keyword.toLowerCase().includes(searchKeyword)) ||
                     (doc.date && doc.date.toLowerCase().includes(searchKeyword));
-
                 return matchTag && matchSearch;
             });
-
             renderDocsList(filtered);
         }
 
         function renderDocsList(docs) {
             const listContainer = document.getElementById('docs-list-container');
-            const countBadge = document.getElementById('docs-count-badge');
-            countBadge.innerText = `${docs.length} 份文件`;
+            document.getElementById('docs-count-badge').innerText = `${docs.length} 份文件`;
 
             if (docs.length === 0) {
                 listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">查無符合條件的技術文獻</div>';
                 return;
             }
 
-            listContainer.innerHTML = docs.map((doc, index) => {
-                return `
-                    <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
-                        <div class="flex items-center justify-between">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
-                                ${doc.category || '未分類'}
-                            </span>
-                            <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
-                        </div>
-                        <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
-                        <div class="flex justify-end pt-1">
-                            <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
-                                預覽 <span class="ml-1 text-[8px]">▶</span>
-                            </span>
-                        </div>
+            listContainer.innerHTML = docs.map((doc, index) => `
+                <div id="doc-card-${index}" onclick="previewDoc('${doc.url}', ${index})" class="bg-[#0d1117] border border-gray-800 hover:border-gray-600 rounded-lg p-3 cursor-pointer transition-all flex flex-col justify-between space-y-1.5 shadow-md group">
+                    <div class="flex items-center justify-between">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-400 border border-red-900">
+                            ${doc.category || '未分類'}
+                        </span>
+                        <span class="text-[10px] text-gray-500 font-mono">${doc.date || ''}</span>
                     </div>
-                `;
-            }).join('');
+                    <h4 class="text-xs font-semibold text-white leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">${doc.title}</h4>
+                    <div class="flex justify-end pt-1">
+                        <span class="text-[10px] text-gray-400 group-hover:text-red-400 flex items-center">
+                            預覽 <span class="ml-1 text-[8px]">▶</span>
+                        </span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function previewDoc(url, index) {
             if (!url) return;
-
             document.querySelectorAll('#docs-list-container > div').forEach(el => el.classList.remove('active-doc'));
             const activeCard = document.getElementById(`doc-card-${index}`);
             if (activeCard) activeCard.classList.add('active-doc');
@@ -782,73 +724,18 @@
             iframe.src = embedUrl;
         }
 
-        function openTagCloudModal() {
-            const modal = document.getElementById('tag-cloud-modal');
-            const searchInput = document.getElementById('modal-tag-search');
-            searchInput.value = '';
-            
-            renderModalTagGrid(sortedTagsList);
-            document.getElementById('modal-tag-stats').innerText = `共計 ${sortedTagsList.length} 個分類標籤`;
-
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
-            searchInput.focus();
-        }
-
-        function closeTagCloudModal() {
-            const modal = document.getElementById('tag-cloud-modal');
-            modal.classList.add('opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
-        }
-
-        function filterModalTags() {
-            const query = document.getElementById('modal-tag-search').value.trim().toLowerCase();
-            const filtered = sortedTagsList.filter(item => item.tag.toLowerCase().includes(query));
-            renderModalTagGrid(filtered);
-        }
-
-        function renderModalTagGrid(list) {
-            const grid = document.getElementById('modal-tag-grid');
-            if (list.length === 0) {
-                grid.innerHTML = '<div class="text-xs text-gray-500 py-4 w-full text-center">找不到匹配的標籤</div>';
-                return;
-            }
-
-            let html = `
-                <button onclick="setDocTag('ALL')" class="px-3 py-1 rounded text-xs font-bold transition-all ${activeDocTag === 'ALL' ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 border border-gray-700'}">
-                    # 全部 (${rawDocsData.length})
-                </button>
-            `;
-
-            list.forEach(item => {
-                const isActive = activeDocTag === item.tag;
-                html += `
-                    <button onclick="setDocTag('${item.tag}')" class="px-3 py-1 rounded text-xs font-bold transition-all flex items-center space-x-1.5 ${isActive ? 'bg-red-600 text-white shadow' : 'bg-[#0d1117] text-gray-300 hover:bg-gray-800 hover:border-red-500 border border-gray-700'}">
-                        <span># ${item.tag}</span>
-                        <span class="text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500 font-mono'}">(${item.count})</span>
-                    </button>
-                `;
-            });
-
-            grid.innerHTML = html;
-        }
-
         function openLightbox(src, partId, title, defaultImg, safeDesc) {
             const lightbox = document.getElementById('lightbox');
             const img = document.getElementById('lightbox-img');
-            const pId = document.getElementById('lightbox-part-id');
-            const pTitle = document.getElementById('lightbox-title');
-            const descBox = document.getElementById('lightbox-desc-container');
-            const descText = document.getElementById('lightbox-desc-text');
-
             img.src = src;
             img.onerror = function() { this.src = defaultImg; };
-            pId.innerText = partId;
-            pTitle.innerText = title;
+            document.getElementById('lightbox-part-id').innerText = partId;
+            document.getElementById('lightbox-title').innerText = title;
 
             const desc = decodeURIComponent(safeDesc).trim();
+            const descBox = document.getElementById('lightbox-desc-container');
             if (desc) {
-                descText.innerText = desc;
+                document.getElementById('lightbox-desc-text').innerText = desc;
                 descBox.classList.remove('hidden');
             } else {
                 descBox.classList.add('hidden');
@@ -867,12 +754,11 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLightbox();
-                closeTagCloudModal();
             }
         });
 
-        // 確保在 script 載入完畢後立即執行啟動[cite: 1]
-        initializeDynamicSheets();
+        // 啟動分開讀取引擎
+        initializeApp();
     </script>
 </body>
 </html>
