@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>工時打卡記錄編輯與列印</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -55,7 +55,6 @@
         .form-group label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
         .form-group input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
         
-        /* 灰字佔位提示樣式 (Placeholder) */
         input::placeholder {
             color: #aaa;
             font-size: 0.82rem;
@@ -79,7 +78,17 @@
             font-size: 0.85rem;
         }
         .table-input th { background: #f8f9fa; }
-        .table-input input { width: 100%; border: none; padding: 4px; font-size: 0.85rem; }
+        .table-input input, .table-input select { 
+            width: 100%; 
+            border: 1px solid #ddd; 
+            padding: 4px; 
+            font-size: 0.85rem; 
+            border-radius: 3px;
+        }
+        .readonly-cell {
+            background: #f4f6f8;
+            color: #666;
+        }
         
         .btn-group { 
             display: flex; 
@@ -135,6 +144,8 @@
             border-top: 1px dashed #000;
             margin: 12px 0 6px 0;
         }
+
+        /* 統一合併為單一報表表格，對齊表頭與欄位 */
         .report-table {
             width: 100%;
             border-collapse: collapse;
@@ -146,7 +157,12 @@
             text-align: left;
             word-break: break-word;
         }
-        .report-table th { font-weight: bold; }
+        .report-table thead tr th {
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
         .text-right { text-align: right !important; }
         .text-center { text-align: center !important; }
 
@@ -204,7 +220,7 @@
             <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" placeholder="例: VR3KAHPY1SS..." oninput="render()"></div>
             <div class="form-group"><label>車主</label><input type="text" id="owner" placeholder="例: 王修芬 / 租賃公司" oninput="render()"></div>
             <div class="form-group"><label>駕駛</label><input type="text" id="driver" placeholder="例: 王大明" oninput="render()"></div>
-            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" placeholder="例: 張智榮" oninput="render()"></div>
+            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" placeholder="例: 張智榮" oninput="onMechanicChange()"></div>
             <div class="form-group"><label>服務專員</label><input type="text" id="advisor" placeholder="例: 徐漢威 / 周永盛" oninput="render()"></div>
             <div class="form-group"><label>列印時間</label><input type="text" id="printTime" placeholder="例: 2026-09-10 11:30:00" oninput="render()"></div>
             <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" placeholder="例: 1 / 1" oninput="render()"></div>
@@ -213,14 +229,14 @@
         <table class="table-input" id="itemsTable">
             <thead>
                 <tr>
-                    <th style="width: 105px;">打卡日期</th>
-                    <th style="width: 70px;">起始</th>
-                    <th style="width: 70px;">結束</th>
-                    <th style="width: 75px;">打卡原因</th>
-                    <th style="width: 95px;">工作代號</th>
+                    <th style="width: 100px;">打卡日期</th>
+                    <th style="width: 75px;">起始</th>
+                    <th style="width: 75px;">結束</th>
+                    <th style="width: 80px;">打卡原因</th>
+                    <th style="width: 105px;">工作代號</th>
                     <th>工作項目</th>
-                    <th style="width: 70px;">標準工時</th>
-                    <th style="width: 75px;">技師</th>
+                    <th style="width: 75px;">標準工時</th>
+                    <th style="width: 80px;">技師</th>
                     <th style="width: 50px;">操作</th>
                 </tr>
             </thead>
@@ -228,7 +244,7 @@
         </table>
 
         <div class="btn-group">
-            <button class="btn-add" onclick="addRow()">+ 新增工作行</button>
+            <button class="btn-add" onclick="addNewPair()">+ 新增工作代號 (開工/完工組)</button>
             <button class="btn-clear" onclick="clearAllData()">🧹 一鍵清空</button>
             <button class="btn-export" onclick="exportData()">💾 匯出存檔 (JSON)</button>
             <label class="file-label-btn btn-import">
@@ -239,6 +255,7 @@
         </div>
     </div>
 
+    <!-- 列印預覽區域 -->
     <div class="print-preview">
         <div class="doc-title" id="outDocTitle">打卡記錄 - </div>
         
@@ -271,7 +288,7 @@
 
         <hr class="separator">
 
-        <table class="report-table">
+        <table class="report-table" id="outItemsTable">
             <thead>
                 <tr>
                     <th style="width: 4%;">序</th>
@@ -287,10 +304,6 @@
                     <th class="text-right" style="width: 5%;">累計<br>工時</th>
                 </tr>
             </thead>
-        </table>
-        <hr class="separator" style="margin: 4px 0 8px 0;">
-        
-        <table class="report-table" id="outItemsTable">
             <tbody></tbody>
         </table>
     </div>
@@ -305,8 +318,11 @@
     ];
 
     let vehicleDatabase = [];
+    
+    // 初始化一組：第一列開工、第二列完工
     let records = [
-        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
+        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' },
+        { date: '', start: '', end: '', reason: '完工', code: '', name: '', stdHours: '', tech: '' }
     ];
 
     function getCurrentDateTime() {
@@ -456,21 +472,88 @@
         if (!start || !end) return 0;
         const [h1, m1] = start.split(':').map(Number);
         const [h2, m2] = end.split(':').map(Number);
+        if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
         let diffMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
         if (diffMinutes < 0) diffMinutes += 24 * 60;
-        return Math.round((diffMinutes / 60) * 10) / 10;
+        return diffMinutes / 60;
     }
 
-    function addRow() {
+    // 格式化輸出：不強制四捨五入
+    function formatHours(val) {
+        if (val === '' || val === null || val === undefined) return '';
+        const num = parseFloat(val);
+        if (isNaN(num)) return val;
+        return parseFloat(num.toFixed(4)).toString();
+    }
+
+    function onMechanicChange() {
         const defaultTech = document.getElementById('mechanic').value || '';
-        records.push({ date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: defaultTech });
+        records.forEach(r => {
+            if (!r.tech) r.tech = defaultTech;
+        });
         renderInputs();
         render();
     }
 
+    // 新增工作組：第一項開工，第二項完工
+    function addNewPair() {
+        const defaultTech = document.getElementById('mechanic').value || '';
+        const lastRow = records[records.length - 1];
+        const lastDate = lastRow ? lastRow.date : '';
+
+        // 開工行
+        records.push({
+            date: lastDate,
+            start: '',
+            end: '',
+            reason: '開工',
+            code: '',
+            name: '',
+            stdHours: '',
+            tech: defaultTech
+        });
+
+        // 完工行（等待接收第一行的資料）
+        records.push({
+            date: lastDate,
+            start: '',
+            end: '',
+            reason: '完工',
+            code: '',
+            name: '',
+            stdHours: '', // 完工行不顯示標準工時
+            tech: defaultTech
+        });
+
+        renderInputs();
+        render();
+    }
+
+    // 單列刪除
     function deleteRow(idx) {
         records.splice(idx, 1);
         renderInputs();
+        render();
+    }
+
+    // 核心連動：第一項開工打完時，自動同步代碼、名稱、日期、技師到第二欄完工
+    function updateField(idx, field, val) {
+        records[idx][field] = val;
+
+        // 若修改的是「開工」行，且緊接著下一行是「完工」
+        if (records[idx].reason === '開工' && records[idx + 1] && records[idx + 1].reason === '完工') {
+            // 同步代碼、項目、日期、技師（標準工時完工行不帶）
+            if (field === 'code' || field === 'name' || field === 'date' || field === 'tech') {
+                records[idx + 1][field] = val;
+                
+                // 動態更新完工行對應欄位
+                const rowNext = document.getElementById(`row-${idx + 1}`);
+                if (rowNext) {
+                    const inputTarget = rowNext.querySelector(`[data-field="${field}"]`);
+                    if (inputTarget) inputTarget.value = val;
+                }
+            }
+        }
         render();
     }
 
@@ -489,27 +572,72 @@
             }
         });
 
-        records = [{ date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }];
+        records = [
+            { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' },
+            { date: '', start: '', end: '', reason: '完工', code: '', name: '', stdHours: '', tech: '' }
+        ];
         renderInputs();
         render();
     }
 
-    // 每一行輸入格皆加入灰字範例 (Placeholder)
     function renderInputs() {
         const tbody = document.getElementById('itemsBody');
         tbody.innerHTML = '';
+
         records.forEach((row, i) => {
+            const isFinish = row.reason === '完工';
             const tr = document.createElement('tr');
+            tr.id = `row-${i}`;
+
             tr.innerHTML = `
-                <td><input type="text" value="${row.date || ''}" placeholder="26-07-28" oninput="records[${i}].date=this.value; render();"></td>
-                <td><input type="text" value="${row.start || ''}" placeholder="10:00" oninput="records[${i}].start=this.value; render();"></td>
-                <td><input type="text" value="${row.end || ''}" placeholder="12:00" oninput="records[${i}].end=this.value; render();"></td>
-                <td><input type="text" value="${row.reason || ''}" placeholder="開工" oninput="records[${i}].reason=this.value; render();"></td>
-                <td><input type="text" value="${row.code || ''}" placeholder="1820099J" oninput="records[${i}].code=this.value; render();"></td>
-                <td><input type="text" value="${row.name || ''}" placeholder="預防性操作:檢查及更新" oninput="records[${i}].name=this.value; render();"></td>
-                <td><input type="text" value="${row.stdHours || ''}" placeholder="2.0" oninput="records[${i}].stdHours=this.value; render();"></td>
-                <td><input type="text" value="${row.tech || ''}" placeholder="張智榮" oninput="records[${i}].tech=this.value; render();"></td>
-                <td style="text-align: center;"><button class="btn-del" onclick="deleteRow(${i})">刪除</button></td>
+                <td>
+                    <input type="text" data-field="date" value="${row.date || ''}" placeholder="26-07-28" 
+                           oninput="updateField(${i}, 'date', this.value)">
+                </td>
+                <td>
+                    <!-- 開工填起始時間；完工行若是成對結構則鎖定或不填 -->
+                    <input type="text" data-field="start" value="${row.start || ''}" 
+                           placeholder="${isFinish ? '-' : '10:00'}" 
+                           ${isFinish ? 'class="readonly-cell"' : ''}
+                           oninput="updateField(${i}, 'start', this.value)">
+                </td>
+                <td>
+                    <!-- 完工行填結束時間，保留給技師自己打 -->
+                    <input type="text" data-field="end" value="${row.end || ''}" 
+                           placeholder="${isFinish ? '12:00' : '-'}" 
+                           ${!isFinish ? 'class="readonly-cell"' : ''}
+                           oninput="updateField(${i}, 'end', this.value)">
+                </td>
+                <td>
+                    <select onchange="updateField(${i}, 'reason', this.value)">
+                        <option value="開工" ${row.reason === '開工' ? 'selected' : ''}>開工</option>
+                        <option value="完工" ${row.reason === '完工' ? 'selected' : ''}>完工</option>
+                        <option value="中斷" ${row.reason === '中斷' ? 'selected' : ''}>中斷</option>
+                        <option value="復工" ${row.reason === '復工' ? 'selected' : ''}>復工</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" data-field="code" value="${row.code || ''}" placeholder="1820099J" 
+                           oninput="updateField(${i}, 'code', this.value)">
+                </td>
+                <td>
+                    <input type="text" data-field="name" value="${row.name || ''}" placeholder="預防性操作:檢查及更新" 
+                           oninput="updateField(${i}, 'name', this.value)">
+                </td>
+                <td>
+                    <!-- 只有開工行記錄標準工時；完工行不顯示 -->
+                    <input type="text" data-field="stdHours" value="${isFinish ? '' : (row.stdHours || '')}" 
+                           placeholder="${isFinish ? '-' : '0.67'}" 
+                           ${isFinish ? 'disabled class="readonly-cell"' : ''}
+                           oninput="updateField(${i}, 'stdHours', this.value)">
+                </td>
+                <td>
+                    <input type="text" data-field="tech" value="${row.tech || ''}" placeholder="張智榮" 
+                           oninput="updateField(${i}, 'tech', this.value)">
+                </td>
+                <td style="text-align: center;">
+                    <button class="btn-del" onclick="deleteRow(${i})">刪除</button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
@@ -532,7 +660,8 @@
         document.getElementById('outBodyNo').innerText = document.getElementById('bodyNo').value;
 
         document.getElementById('outOwner').innerText = document.getElementById('owner').value;
-        document.getElementById('outDriver').innerText = document.getElementById('driver').value;
+        document.getElementById('driver').placeholder = document.getElementById('owner').value;
+        document.getElementById('outDriver').innerText = document.getElementById('driver').value || document.getElementById('owner').value;
         document.getElementById('outMechanic').innerText = document.getElementById('mechanic').value;
         document.getElementById('outAdvisor').innerText = document.getElementById('advisor').value;
         document.getElementById('outPrintTime').innerText = document.getElementById('printTime').value;
@@ -542,14 +671,32 @@
         outTbody.innerHTML = '';
         let cumulative = 0;
 
-        records.forEach((row, i) => {
-            const hasTime = row.start && row.end;
-            const workHours = hasTime ? calculateHours(row.start, row.end) : 0;
-            cumulative += workHours;
-            
-            const stdVal = row.stdHours ? parseFloat(row.stdHours).toFixed(1) : '';
-            const workVal = hasTime ? workHours.toFixed(1) : '';
-            const cumVal = hasTime ? cumulative.toFixed(1) : '';
+        for (let i = 0; i < records.length; i++) {
+            const row = records[i];
+            let workHours = 0;
+            let hasWork = false;
+
+            // 模式1：當列自帶起始與結束
+            if (row.start && row.end) {
+                workHours = calculateHours(row.start, row.end);
+                hasWork = true;
+            } 
+            // 模式2：開工記起始、完工記結束（成對帶出）
+            else if (row.reason === '完工' && row.end && i > 0 && records[i - 1].reason === '開工' && records[i - 1].start) {
+                workHours = calculateHours(records[i - 1].start, row.end);
+                hasWork = true;
+            }
+
+            if (hasWork) cumulative += workHours;
+
+            // 標準工時只取開工那一行，完工行留空；數值保持原始文字（不進位、不四捨五入）
+            let stdVal = '';
+            if (row.reason === '開工') {
+                stdVal = row.stdHours ? row.stdHours : '';
+            }
+
+            const workVal = hasWork ? formatHours(workHours) : '';
+            const cumVal = hasWork ? formatHours(cumulative) : '';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -566,7 +713,7 @@
                 <td class="text-right" style="width: 5%;">${cumVal}</td>
             `;
             outTbody.appendChild(tr);
-        });
+        }
     }
 
     function exportData() {
