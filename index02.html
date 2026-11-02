@@ -13,7 +13,7 @@
             color: #333;
         }
         .container {
-            max-width: 960px;
+            max-width: 1000px;
             margin: 0 auto;
         }
         /* 控制面板樣式 */
@@ -85,10 +85,6 @@
             font-size: 0.85rem; 
             border-radius: 3px;
         }
-        .readonly-cell {
-            background: #f4f6f8;
-            color: #666;
-        }
         
         .btn-group { 
             display: flex; 
@@ -115,13 +111,13 @@
         .btn-sync { background: #0288d1; color: #fff; padding: 6px 12px; }
         .btn-print { background: #2b5797; color: #fff; font-size: 1rem; margin-left: auto; }
 
-        /* 列印預覽區域 */
+        /* 列印預覽區域：固定以標準列印紙張比例進行渲染 */
         .print-preview {
             background: #ffffff;
             padding: 30px 40px;
             border-radius: 4px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-family: "Courier New", "Consolas", monospace, "Microsoft JhengHei";
+            font-family: "Courier New", "Consolas", "Microsoft JhengHei", monospace;
             color: #000;
         }
         .doc-title {
@@ -129,33 +125,36 @@
             font-size: 1.25rem;
             font-weight: bold;
             letter-spacing: 1px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .meta-grid {
             display: grid;
             grid-template-columns: 1.2fr 1.5fr 1.1fr;
             gap: 10px;
             font-size: 0.85rem;
-            line-height: 1.5;
+            line-height: 1.45;
         }
         .meta-col { display: flex; flex-direction: column; }
         .separator {
             border: none;
             border-top: 1px dashed #000;
-            margin: 12px 0 6px 0;
+            margin: 10px 0 4px 0;
         }
 
-        /* 統一合併為單一報表表格，對齊表頭與欄位 */
+        /* 核心表格排版：拿掉所有造成「...」與擠壓變形的樣式 */
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            table-layout: fixed;
+            font-size: 0.82rem;
         }
         .report-table th, .report-table td {
-            padding: 4px 2px;
+            padding: 4px 3px;
             text-align: left;
-            word-break: break-word;
+            vertical-align: middle;
+            white-space: nowrap; /* 嚴禁任何字元折行 */
+        }
+        .report-table th {
+            font-weight: bold;
         }
         .report-table thead tr th {
             border-top: 1px dashed #000;
@@ -169,18 +168,23 @@
         @media print {
             body { 
                 background: #fff; 
-                padding: 1.5cm 1cm; 
+                padding: 0;
+                margin: 0;
             }
             .controls { display: none !important; }
             .print-preview { 
                 box-shadow: none; 
-                padding: 0; 
-                margin: 0; 
+                padding: 10mm 10mm; 
+                margin: 0 auto; 
                 width: 100%;
             }
+            .report-table th, .report-table td {
+                font-size: 0.82rem;
+                padding: 4px 2px;
+            }
             @page { 
-                size: auto;
-                margin: 0; 
+                size: A4 portrait;
+                margin: 5mm; 
             }
         }
     </style>
@@ -220,7 +224,7 @@
             <div class="form-group"><label>車身#</label><input type="text" id="bodyNo" placeholder="例: VR3KAHPY1SS..." oninput="render()"></div>
             <div class="form-group"><label>車主</label><input type="text" id="owner" placeholder="例: 王修芬 / 租賃公司" oninput="render()"></div>
             <div class="form-group"><label>駕駛</label><input type="text" id="driver" placeholder="例: 王大明" oninput="render()"></div>
-            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" placeholder="例: 張智榮" oninput="onMechanicChange()"></div>
+            <div class="form-group"><label>承修技師</label><input type="text" id="mechanic" placeholder="例: 謝或翰" oninput="onMechanicChange()"></div>
             <div class="form-group"><label>服務專員</label><input type="text" id="advisor" placeholder="例: 徐漢威 / 周永盛" oninput="render()"></div>
             <div class="form-group"><label>列印時間</label><input type="text" id="printTime" placeholder="例: 2026-09-10 11:30:00" oninput="render()"></div>
             <div class="form-group"><label>頁次</label><input type="text" id="pageIndex" value="1 / 1" placeholder="例: 1 / 1" oninput="render()"></div>
@@ -229,9 +233,9 @@
         <table class="table-input" id="itemsTable">
             <thead>
                 <tr>
-                    <th style="width: 100px;">打卡日期</th>
+                    <th style="width: 105px;">打卡日期</th>
                     <th style="width: 75px;">起始</th>
-                    <th style="width: 75px;">結束</th>
+                    <th style="width: 75px;">結束 (+5%)</th>
                     <th style="width: 80px;">打卡原因</th>
                     <th style="width: 105px;">工作代號</th>
                     <th>工作項目</th>
@@ -244,7 +248,7 @@
         </table>
 
         <div class="btn-group">
-            <button class="btn-add" onclick="addNewPair()">+ 新增工作代號 (開工/完工組)</button>
+            <button class="btn-add" onclick="addRow()">+ 新增工作行</button>
             <button class="btn-clear" onclick="clearAllData()">🧹 一鍵清空</button>
             <button class="btn-export" onclick="exportData()">💾 匯出存檔 (JSON)</button>
             <label class="file-label-btn btn-import">
@@ -288,20 +292,21 @@
 
         <hr class="separator">
 
+        <!-- 寬度比例配置：保證文字自然伸展，完全與預覽吻合 -->
         <table class="report-table" id="outItemsTable">
             <thead>
                 <tr>
                     <th style="width: 4%;">序</th>
-                    <th style="width: 11%;">打卡日期</th>
-                    <th style="width: 7%;">起始<br>時間</th>
-                    <th style="width: 7%;">結束<br>時間</th>
-                    <th style="width: 9%;">打卡原因</th>
-                    <th style="width: 13%;">工作代號</th>
-                    <th style="width: 27%;">工作項目</th>
-                    <th class="text-right" style="width: 6%;">標準<br>工時</th>
-                    <th class="text-center" style="width: 6%;">技師</th>
-                    <th class="text-right" style="width: 5%;">打卡<br>工時</th>
-                    <th class="text-right" style="width: 5%;">累計<br>工時</th>
+                    <th style="width: 13%;">打卡日期</th>
+                    <th style="width: 7%;">起始時間</th>
+                    <th style="width: 7%;">結束時間</th>
+                    <th style="width: 8%;">打卡原因</th>
+                    <th style="width: 12%;">工作代號</th>
+                    <th>工作項目</th>
+                    <th class="text-right" style="width: 8%;">標準工時</th>
+                    <th class="text-center" style="width: 8%;">技師</th>
+                    <th class="text-right" style="width: 7%;">打卡工時</th>
+                    <th class="text-right" style="width: 7%;">累計工時</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -319,10 +324,8 @@
 
     let vehicleDatabase = [];
     
-    // 初始化一組：第一列開工、第二列完工
     let records = [
-        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' },
-        { date: '', start: '', end: '', reason: '完工', code: '', name: '', stdHours: '', tech: '' }
+        { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
     ];
 
     function getCurrentDateTime() {
@@ -478,12 +481,38 @@
         return diffMinutes / 60;
     }
 
-    // 格式化輸出：不強制四捨五入
+    // 格式化工時：精確輸出為小數點後 2 位，絕不產生多餘位數或省略號
     function formatHours(val) {
         if (val === '' || val === null || val === undefined) return '';
         const num = parseFloat(val);
         if (isNaN(num)) return val;
-        return parseFloat(num.toFixed(4)).toString();
+        // 固定保留小數兩位，如 0.11 或 0.50 -> 0.5
+        return (Math.round(num * 100) / 100).toString();
+    }
+
+    // 依起始時間與工時自動推算結束時間（控制在超過 5%，不超過 20%）
+    function autoCalcEndTime(startTime, stdHoursStr) {
+        if (!startTime || !stdHoursStr) return '';
+        const parts = startTime.split(':').map(Number);
+        if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return '';
+
+        const hours = parseFloat(stdHoursStr);
+        if (isNaN(hours) || hours <= 0) return '';
+
+        // 計算工作時數轉分鐘：精準增加 5%（取整數），確保完全壓在 5%~10% 安全範圍內
+        const baseMinutes = hours * 60;
+        let addMinutes = Math.round(baseMinutes * 0.05);
+        if (addMinutes < 1) addMinutes = 1; // 至少多 1 分鐘
+
+        const totalAddMinutes = Math.round(baseMinutes) + addMinutes;
+
+        let totalMinutes = (parts[0] * 60 + parts[1]) + totalAddMinutes;
+        totalMinutes = totalMinutes % (24 * 60);
+
+        const endH = Math.floor(totalMinutes / 60);
+        const endM = totalMinutes % 60;
+
+        return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     }
 
     function onMechanicChange() {
@@ -495,13 +524,11 @@
         render();
     }
 
-    // 新增工作組：第一項開工，第二項完工
-    function addNewPair() {
+    function addRow() {
         const defaultTech = document.getElementById('mechanic').value || '';
         const lastRow = records[records.length - 1];
         const lastDate = lastRow ? lastRow.date : '';
 
-        // 開工行
         records.push({
             date: lastDate,
             start: '',
@@ -513,44 +540,28 @@
             tech: defaultTech
         });
 
-        // 完工行（等待接收第一行的資料）
-        records.push({
-            date: lastDate,
-            start: '',
-            end: '',
-            reason: '完工',
-            code: '',
-            name: '',
-            stdHours: '', // 完工行不顯示標準工時
-            tech: defaultTech
-        });
-
         renderInputs();
         render();
     }
 
-    // 單列刪除
     function deleteRow(idx) {
         records.splice(idx, 1);
         renderInputs();
         render();
     }
 
-    // 核心連動：第一項開工打完時，自動同步代碼、名稱、日期、技師到第二欄完工
     function updateField(idx, field, val) {
         records[idx][field] = val;
 
-        // 若修改的是「開工」行，且緊接著下一行是「完工」
-        if (records[idx].reason === '開工' && records[idx + 1] && records[idx + 1].reason === '完工') {
-            // 同步代碼、項目、日期、技師（標準工時完工行不帶）
-            if (field === 'code' || field === 'name' || field === 'date' || field === 'tech') {
-                records[idx + 1][field] = val;
-                
-                // 動態更新完工行對應欄位
-                const rowNext = document.getElementById(`row-${idx + 1}`);
-                if (rowNext) {
-                    const inputTarget = rowNext.querySelector(`[data-field="${field}"]`);
-                    if (inputTarget) inputTarget.value = val;
+        // 當輸入起始時間或標準工時，自動換算本行的結束時間 (+5%)
+        if (field === 'start' || field === 'stdHours') {
+            const calculatedEnd = autoCalcEndTime(records[idx].start, records[idx].stdHours);
+            if (calculatedEnd) {
+                records[idx].end = calculatedEnd;
+                const rowTr = document.getElementById(`row-${idx}`);
+                if (rowTr) {
+                    const endInput = rowTr.querySelector('[data-field="end"]');
+                    if (endInput) endInput.value = calculatedEnd;
                 }
             }
         }
@@ -573,8 +584,7 @@
         });
 
         records = [
-            { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' },
-            { date: '', start: '', end: '', reason: '完工', code: '', name: '', stdHours: '', tech: '' }
+            { date: '', start: '', end: '', reason: '開工', code: '', name: '', stdHours: '', tech: '' }
         ];
         renderInputs();
         render();
@@ -585,7 +595,6 @@
         tbody.innerHTML = '';
 
         records.forEach((row, i) => {
-            const isFinish = row.reason === '完工';
             const tr = document.createElement('tr');
             tr.id = `row-${i}`;
 
@@ -595,17 +604,11 @@
                            oninput="updateField(${i}, 'date', this.value)">
                 </td>
                 <td>
-                    <!-- 開工填起始時間；完工行若是成對結構則鎖定或不填 -->
-                    <input type="text" data-field="start" value="${row.start || ''}" 
-                           placeholder="${isFinish ? '-' : '10:00'}" 
-                           ${isFinish ? 'class="readonly-cell"' : ''}
+                    <input type="text" data-field="start" value="${row.start || ''}" placeholder="10:00" 
                            oninput="updateField(${i}, 'start', this.value)">
                 </td>
                 <td>
-                    <!-- 完工行填結束時間，保留給技師自己打 -->
-                    <input type="text" data-field="end" value="${row.end || ''}" 
-                           placeholder="${isFinish ? '12:00' : '-'}" 
-                           ${!isFinish ? 'class="readonly-cell"' : ''}
+                    <input type="text" data-field="end" value="${row.end || ''}" placeholder="自動推算" 
                            oninput="updateField(${i}, 'end', this.value)">
                 </td>
                 <td>
@@ -625,14 +628,11 @@
                            oninput="updateField(${i}, 'name', this.value)">
                 </td>
                 <td>
-                    <!-- 只有開工行記錄標準工時；完工行不顯示 -->
-                    <input type="text" data-field="stdHours" value="${isFinish ? '' : (row.stdHours || '')}" 
-                           placeholder="${isFinish ? '-' : '0.67'}" 
-                           ${isFinish ? 'disabled class="readonly-cell"' : ''}
+                    <input type="text" data-field="stdHours" value="${row.stdHours || ''}" placeholder="0.67" 
                            oninput="updateField(${i}, 'stdHours', this.value)">
                 </td>
                 <td>
-                    <input type="text" data-field="tech" value="${row.tech || ''}" placeholder="張智榮" 
+                    <input type="text" data-field="tech" value="${row.tech || ''}" placeholder="謝或翰" 
                            oninput="updateField(${i}, 'tech', this.value)">
                 </td>
                 <td style="text-align: center;">
@@ -673,44 +673,28 @@
 
         for (let i = 0; i < records.length; i++) {
             const row = records[i];
-            let workHours = 0;
-            let hasWork = false;
+            const hasTime = row.start && row.end;
+            const workHours = hasTime ? calculateHours(row.start, row.end) : 0;
+            if (hasTime) cumulative += workHours;
 
-            // 模式1：當列自帶起始與結束
-            if (row.start && row.end) {
-                workHours = calculateHours(row.start, row.end);
-                hasWork = true;
-            } 
-            // 模式2：開工記起始、完工記結束（成對帶出）
-            else if (row.reason === '完工' && row.end && i > 0 && records[i - 1].reason === '開工' && records[i - 1].start) {
-                workHours = calculateHours(records[i - 1].start, row.end);
-                hasWork = true;
-            }
-
-            if (hasWork) cumulative += workHours;
-
-            // 標準工時只取開工那一行，完工行留空；數值保持原始文字（不進位、不四捨五入）
-            let stdVal = '';
-            if (row.reason === '開工') {
-                stdVal = row.stdHours ? row.stdHours : '';
-            }
-
-            const workVal = hasWork ? formatHours(workHours) : '';
-            const cumVal = hasWork ? formatHours(cumulative) : '';
+            // 標準工時照原本輸入字串呈現；打卡工時直接乾淨格式化到兩位小數
+            const stdVal = row.stdHours ? row.stdHours : '';
+            const workVal = hasTime ? formatHours(workHours) : '';
+            const cumVal = hasTime ? formatHours(cumulative) : '';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="width: 4%;">${i + 1}</td>
-                <td style="width: 11%;">${row.date || ''}</td>
+                <td style="width: 13%;">${row.date || ''}</td>
                 <td style="width: 7%;">${row.start || ''}</td>
                 <td style="width: 7%;">${row.end || ''}</td>
-                <td style="width: 9%;">${row.reason || ''}</td>
-                <td style="width: 13%;">${row.code || ''}</td>
-                <td style="width: 27%;">${row.name || ''}</td>
-                <td class="text-right" style="width: 6%;">${stdVal}</td>
-                <td class="text-center" style="width: 6%;">${row.tech || ''}</td>
-                <td class="text-right" style="width: 5%;">${workVal}</td>
-                <td class="text-right" style="width: 5%;">${cumVal}</td>
+                <td style="width: 8%;">${row.reason || ''}</td>
+                <td style="width: 12%;">${row.code || ''}</td>
+                <td>${row.name || ''}</td>
+                <td class="text-right" style="width: 8%;">${stdVal}</td>
+                <td class="text-center" style="width: 8%;">${row.tech || ''}</td>
+                <td class="text-right" style="width: 7%;">${workVal}</td>
+                <td class="text-right" style="width: 7%;">${cumVal}</td>
             `;
             outTbody.appendChild(tr);
         }
